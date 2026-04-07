@@ -1,0 +1,103 @@
+.events{
+    display:grid;
+    gap:10px;
+}
+
+.event__info{
+    display: flex;
+    gap:10px;
+}
+
+.event__type{
+   margin: 7px 0;
+   background-color: #200f07;
+   padding: 4px 6px;
+   display: inline;
+   color: #fff9eb;
+   font-weight: 500;
+   border-radius: 7px;
+}
+
+
+.event__item{
+    position: relative;
+    font-family: 'Montserrat';
+    border-radius: 7px;
+    padding: 15px 10px;
+    background-color: #fff9eb;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+    
+}
+
+.event__item:hover{
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    transform: translateY(-5px);
+}
+
+.event__item:hover .event__knowMore{
+    visibility: visible;
+}
+
+.event__title{
+    font-family: 'Montserrat';
+    font-size: 16px;
+    margin: 7px 0;
+    font-weight: 700;
+    
+}
+
+.event__date{
+    background-color: #dbe6c1;
+    display: inline-flex;
+    align-items: center;
+    gap:5px;
+    padding: 2px 4px;
+    border-radius: 7px;
+    position: relative;
+}
+
+.event__tags{
+    margin: 7px 0;
+    border-bottom: 1px solid #200f07; 
+    padding-bottom: 12px;            
+    margin-bottom: 12px; 
+}
+
+.event__tag{
+    padding: 2px 3px;
+    margin: 2px;
+    font-weight: 500;
+}
+
+.event__city,
+.event__price{
+    display: inline-flex;
+    align-items: center;
+    gap:6px
+}
+
+.event__knowMore{
+    visibility: hidden;
+    position: absolute;
+    right:15px;
+    bottom:25px;
+}
+
+.btn{
+    padding: 7px 9px;
+    font-family: 'Montserrat';
+    font-weight: 700;
+    color:#200f07;
+    /* background-color: #200f07; */
+    border-radius: 7px;
+    border:1px #200f07 solid;
+    
+
+}
+
+.event__footer{
+    display: flex;
+    flex-direction: column;
+    gap:7px;
+}
