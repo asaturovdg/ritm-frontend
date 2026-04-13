@@ -5,17 +5,21 @@
   background: none;
 }
 
+a{
+  text-decoration: none;
+  color:black;
+}
+
 html{
   font-family: 'Montserrat', 'sans-serif';
   box-sizing: border-box;
   display: block;
   max-width: 420px;
   margin-inline: auto;
-  /* border:1px red solid; */
   padding: 5px;
-  background-color: #c5e285;
-  color: #200f07
-;
+  background-color: #ffffff;
+  color: #200f07;
+  border:1px green solid;
 }
 
 .tabbar{
@@ -23,3 +27,18 @@ html{
   max-width: 400px;
   margin-inline: auto;
 }
+/* Адаптация иконок под тему */
+:root {
+    --icon-filter: none;
+}
+
+/* В тёмной теме иконки становятся светлыми */
+@media (prefers-color-scheme: dark) {
+    .event__city img,
+    .event__price img,
+    .event__date img {
+        filter: brightness(0) invert(1);
+    }
+}
+
+/* Или через JavaScript — более надёжный способ */
