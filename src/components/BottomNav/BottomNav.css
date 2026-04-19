@@ -1,0 +1,22 @@
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--tg-theme-bg-color, #ffffff);
+  border-top: 1px solid var(--tg-theme-hint-color, #e0e0e0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  z-index: 100;
+}
+
+.bottom-nav .tgui-tabbar {
+  background: var(--tg-theme-bg-color);
+}
+
+.bottom-nav .tgui-tabbar__item {
+  color: var(--tg-theme-hint-color);
+}
+
+.bottom-nav .tgui-tabbar__item--selected {
+  color: var(--tg-theme-button-color, #2481cc);
+}

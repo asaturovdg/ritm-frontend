@@ -94,7 +94,7 @@
     font-weight: 500;
 }
 
-.event__button{
+.event-register--btn, .event-addToCalendar--btn{
     margin: 20px auto 0;
     padding: 8px 10px;
     background-color: #1032A1;
@@ -105,7 +105,8 @@
     align-self: center;
     display: block;      
     width: fit-content; 
-    
+    margin-bottom: 40px;
+    cursor: pointer;
 }
 
 
@@ -140,7 +141,6 @@
     display: flex;
     align-items: center;
     gap:5px;
-    /* margin-bottom: 10px; */
 }
 
 .event__organizers {
@@ -183,4 +183,24 @@
 
 a.organizer-chip:active {
     background-color: #d0d7ee;
+}
+
+.calendar-dropdown{
+    position: absolute;
+    bottom: 110%;
+    right: 0;
+    background-color: var(--tg-theme-bg-color, #fff);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    border-radius: 12px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 100;
+    min-width: 160px;
+    border: 1px solid var(--tg-theme-hint-color, #ccc);
+}
+
+.calendar-dropdown button{
+    margin-block: 3px;
 }

@@ -7,6 +7,12 @@ import { AppRoot } from '@telegram-apps/telegram-ui'
 import '@telegram-apps/telegram-ui/dist/styles.css';
 
 
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready();      
+  tg.expand();     
+}
+
 createRoot(document.getElementById('root')).render(
   <BrowserRouter basename="/IT-digest_tg">
     <StrictMode>
@@ -15,5 +21,4 @@ createRoot(document.getElementById('root')).render(
       </AppRoot>
     </StrictMode>
   </BrowserRouter>
-  ,
-)
+);

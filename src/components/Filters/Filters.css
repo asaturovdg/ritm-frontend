@@ -1,0 +1,193 @@
+
+button{
+  font-family: 'Montserrat';
+}
+
+.filters-open__button {
+  width: calc(100% - 32px);
+  margin: 16px;
+  padding: 14px;
+  background-color: #0088cc; 
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  transition: background-color 0.2s ease;
+}
+
+.filters-open__button:hover {
+  background-color: #0077b3;
+}
+
+
+.filters-drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: flex-end; 
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(2px);
+}
+
+
+.filters-drawer {
+  width: 100%;
+  max-height: 85vh;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  padding: 20px;
+  padding-bottom: 40px;
+  box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+  overflow-y: auto;
+  position: relative;
+  animation: slideUp 0.3s ease-out;
+}
+
+
+.filters-drawer::before {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 4px;
+  background: #E0E0E0;
+  border-radius: 2px;
+  margin: -10px auto 15px auto;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+
+.filters__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.filters__header h1 {
+  font-size: 20px;
+  color: #1032A1;
+  margin: 0;
+  position: sticky;
+}
+
+.filter-section {
+  margin-bottom: 20px;
+}
+
+.filter-section__title {
+  font-size: 16px;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.chips-container {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 8px 16px;
+  background: #f0f2f8;
+  color: #1032A1;
+  border-radius: 10px;
+  font-size: 14px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Montserrat';
+}
+
+.chip-active {
+  background: #e1e7f5;
+  border-color: #1032A1;
+}
+
+.cities-list, .participateType-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.checkbox-item input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.checkbox-item input[type="checkbox"]:checked {
+  background-color: #1032A1;
+  border-color: #1032A1;
+}
+
+.checkbox-item input[type="checkbox"]:checked::after {
+  content: '✓';
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.filter-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.apply-filters__btn {
+  padding: 14px;
+  background: #1032A1;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.reset-filters__btn {
+  padding: 12px;
+  background: #f0f2f8;
+  color: #1032A1;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.close-filter-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
