@@ -12,12 +12,70 @@ import placeIcon from "../../assets/icons/Place.svg";
 
 export default function EventsDigest({ filters, setFilters }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const activeCount = Object.values(filters).flat().length;
   const isFilterApplied = activeCount > 0;
 
+
+
+  useEffect(()=>{
+    const handleAuth = async () => {
+      const tg = window.Telegram?.WebApp;
+      const initData = tg?.initData;
+      const telegramId = tg?.initDataUnsafe?.user?.id;
+
+      try {
+        const response = await fetch('https://sunyodrive.ru', {
+          method: 'POST',
+          headers:{
+            'Content-Type':  'application/json',
+          },
+          body: JSON.stringify({init_data:initData}),
+        });
+        if(response.ok){
+          const data = await response.json();
+          localStorage.setItem('access_token', data.access_token);
+          localStorage.setItem('refresh_token', data.refresh_token);
+
+          setIsLoggedIn(true);
+          if (telegramId) {
+            const userRes = await fetch(`https://sunyodrive.ru{telegramId}`, {
+              headers: { 'Authorization': `Bearer ${data.access_token}` }
+            });
+
+            if (userRes.ok) {
+              const userData = await userRes.json();
+               setFilters({
+                cities: userData.city ? [userData.city] : [],
+                categories: userData.track ? [userData.track] : [],
+                eventTypes: userData.preferred_event_types ? [userData.preferred_event_types] : [],
+                participationTypes: userData.preferred_participation_types ? [userData.preferred_participation_types] : []
+              });
+              
+              setIsDrawerOpen(false);
+            }
+        }}
+        else{
+          setIsLoggedIn(false);
+          setIsDrawerOpen(true);
+        }
+
+      } catch (error) {
+        console.log('ошибка: ', error);
+        setIsDrawerOpen(true);
+       
+      }finally{
+        setIsCheckingAuth(false);
+      }
+    }
+    handleAuth();
+  },[]);
+
+
   const filteredEvents = useMemo(() => {
-    if (!isFilterApplied) return [];
+    if (!isLoggedIn && !isFilterApplied) return [];
     
     return eventsData.filter(event => {
       if (filters.cities.length > 0 && !event.city?.some(c => filters.cities.includes(c))) return false;
@@ -26,7 +84,7 @@ export default function EventsDigest({ filters, setFilters }) {
       if (filters.participationTypes.length > 0 && !filters.participationTypes.includes(event.participation_type)) return false;
       return true;
     });
-  }, [filters, isFilterApplied]);
+  }, [filters, isFilterApplied, isLoggedIn]);
 
   useEffect(() => {
     if (window.Telegram?.WebApp) {
@@ -57,7 +115,7 @@ export default function EventsDigest({ filters, setFilters }) {
       />
 
       <div className="digest-list">
-        {!isFilterApplied ? (
+        {!isLoggedIn && !isFilterApplied ? (
           <Placeholder 
             className="placeholder"
             header="Выберите параметры" 
