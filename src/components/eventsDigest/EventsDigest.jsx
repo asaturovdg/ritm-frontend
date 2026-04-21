@@ -50,8 +50,8 @@ export default function EventsDigest({ filters, setFilters }) {
     });
 }, [filters, hasFilters]);
 
-  const saveFiltersToServer = useCallback(async (newFilters, authToken, uid) => {
-    if (!authToken || !uid) return false;
+  const saveFiltersToServer = useCallback(async (newFilters, authToken, userId) => {
+    if (!authToken || !userId) return false;
 
     try {
       const payload = {
@@ -61,7 +61,7 @@ export default function EventsDigest({ filters, setFilters }) {
         preferred_participation_types: newFilters.participationTypes.join(',')
       };
 
-      const response = await fetch(`https://ritmevents.ru/api/v1/users/${uid}/filters`, {
+      const response = await fetch(`https://ritmevents.ru/api/v1/users/${userId}/filters`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -82,12 +82,21 @@ export default function EventsDigest({ filters, setFilters }) {
   
   }, []);
 
-  const handleFilterChange = useCallback(async (newFilters) => {
-    setFilters(newFilters);
-    if (token && uid ){
-      saveFiltersToServer(newFilters, token, userId);
-    }
-  }, [token, userId, setFilters, saveFiltersToServer])
+const handleFilterChange = useCallback(async (newFilters) => {
+  console.log(' handleFilterChange в EventsDigest, новые фильтры:', newFilters);
+  console.log(' Токен:', token ? 'есть' : 'нет');
+  console.log(' UserId:', userId);
+  
+  setFilters(newFilters);
+  
+  if (token && userId) {
+    console.log(' Начинаем сохранение на сервер...');
+    const result = await saveFiltersToServer(newFilters, token, userId);
+    console.log(' Результат сохранения:', result ? 'успех' : 'неудача');
+  } else {
+    console.log(' Невозможно сохранить: нет токена или userId');
+  }
+}, [token, userId, setFilters, saveFiltersToServer]);
 
   const resetFilters = useCallback(async () => {
     const emptyFilters = {

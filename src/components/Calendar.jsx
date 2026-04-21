@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { ReactHorizontalDates } from "react-horizontal-date";
 // import "./Calendar.css";
 
-export default function Calendar() {  // ← export default здесь
+export default function Calendar() {  
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   return (

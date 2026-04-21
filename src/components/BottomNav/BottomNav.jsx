@@ -19,9 +19,6 @@ export default function BottomNav() {
       case 'events':
         navigate('/');
         break;
-      case 'favorites':
-        navigate('/favorites');
-        break;
       case 'profile':
         navigate('/profile');
         break;

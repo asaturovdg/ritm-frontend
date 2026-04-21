@@ -3,13 +3,10 @@ import { Tabbar } from '@telegram-apps/telegram-ui';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import EventsDigest from './components/eventsDigest/EventsDigest';
 import Event from './pages/eventPage/Event';
+import { Profile } from './pages/Profile/Profile';
 import './App.css';
 
-const Profile = () => (
-  <div style={{ padding: '20px', textAlign: 'center' }}>
-    <h2>Профиль</h2>
-  </div>
-);
+
 
 export default function App() {
   const navigate = useNavigate();
