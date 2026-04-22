@@ -96,23 +96,23 @@
 }
 
 .profile-tag-city {
-  background-color: #e3f2fd;
-  color: #1976d2;
+  background-color: #adffc6;
+  color: #000000;
 }
 
 .profile-tag-track {
-  background-color: #e8f5e9;
-  color: #388e3c;
+   background-color: #adffc6;
+ color: #000000;
 }
 
 .profile-tag-event {
-  background-color: #fce4ec;
-  color: #c2185b;
+   background-color: #adffc6;
+  color: #000000;
 }
 
 .profile-tag-participation {
-  background-color: #fff3e0;
-  color: #f57c00;
+   background-color: #adffc6;
+  color: #000000;;
 }
 
 /* Для темной темы */

@@ -90,7 +90,7 @@
 
 
 .digest__knowMore {
-    display: none; 
+    
     align-self: flex-end;
     margin-top: 12px; 
     font-size: 12px;
@@ -110,9 +110,6 @@
     box-shadow: 0 5px 15px rgba(79, 119, 241, 0.2);
 }
 
-.digest__item:hover .digest__knowMore {
-    display: block; 
-}
 
 
 .events .filters-open-btn {
