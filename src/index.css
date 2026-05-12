@@ -1,5 +1,7 @@
 :root {
   color-scheme: light !important;
+   --tg-theme-text-color: #000000 !important;
+   --tg-theme-button-color:#000000 !important;
 }
 
 body {
@@ -11,7 +13,6 @@ body {
   margin: 0;
   padding: 0;
   border:none;
-  background: none;
 }
 
 a{
@@ -48,4 +49,25 @@ html{
         filter: brightness(0) invert(1);
     }
 }
+
+
+
+
+:root {
+  --tg-theme-accent-text-color: #000000 !important;
+  --tg-theme-button-color: #000000 !important;
+  --tg-theme-link-color: #000000 !important;
+  --tg-theme-section-header-text-color: #000000 !important;
+}
+
+
+.tgui-6a12827a138e8827 {
+  --tgui--accent_text_color: #000000 !important;
+  --tgui--link_color: #000000 !important;
+  --tgui--button_color: #000000 !important;
+}
+
+
+
+
 

@@ -4,17 +4,21 @@ import currency from "../../assets/icons/currency.svg";
 import date from "../../assets/icons/DateRange.svg";
 import place from "../../assets/icons/Place.svg";
 import time from "../../assets/icons/time.svg";
+import partType from "../../assets/icons/partType.svg";
+import webIcon from "../../assets/icons/web.svg";
+import blueCalendar from "../../assets/icons/calendarBlue.svg";
+
 import './Event.css';
 
-export default function Event({ embeddedId }) {
+export default function Event({ embeddedId, isPreview = false, status }) {
   const location = useLocation();
   const { id: paramId } = useParams();
   const id = embeddedId || paramId;
-  
-  
-const token = location.state?.token || localStorage.getItem('access_token');
-const userId = location.state?.userId || localStorage.getItem('user_id');
-  
+
+  const fromProfileEvents = location.state?.from === 'profile-events';
+  const token = location.state?.token || localStorage.getItem('access_token');
+  const userId = location.state?.userId || localStorage.getItem('user_id');
+
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,13 +26,31 @@ const userId = location.state?.userId || localStorage.getItem('user_id');
   const [addToCalendar, setAddToCalendar] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Функция для форматирования строки времени
+  const formatTime = (timeStr) => {
+    if (!timeStr) return '';
+    return timeStr.substring(0, 5);
+  };
 
-  // функиця для форматирования строки времени
-  const formatTime = (timeStr) =>{
-    if(!timeStr) return '';
-    return timeStr.substring(0,5);
-  }
-  
+  // Функция для получения статуса на русском
+  const getStatusText = (statusValue) => {
+    switch (statusValue) {
+      case 'pending': return 'На модерации';
+      case 'approved': return 'Одобрено';
+      case 'rejected': return 'Отклонено';
+      default: return statusValue;
+    }
+  };
+
+  const getStatusClass = (statusValue) => {
+    switch (statusValue) {
+      case 'pending': return 'status-pending';
+      case 'approved': return 'status-approved';
+      case 'rejected': return 'status-rejected';
+      default: return '';
+    }
+  };
+
   useEffect(() => {
     const fetchEvent = async () => {
       if (!id) {
@@ -36,37 +58,39 @@ const userId = location.state?.userId || localStorage.getItem('user_id');
         setLoading(false);
         return;
       }
-      
+
       setLoading(true);
       setError(null);
-      
+
       try {
         const headers = {};
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
-        
+
         const eventId = Number(id);
         if (isNaN(eventId)) {
           setError('Некорректный ID события');
           setLoading(false);
           return;
         }
-        
+
         const url = `https://ritmevents.ru/api/v1/events/${eventId}`;
         console.log('Fetching event from:', url);
-        
-        const response = await fetch(url, { 
+
+        const response = await fetch(url, {
           headers: headers,
           method: 'GET'
         });
-        
+
         console.log('Response status:', response.status);
-        
+
         if (response.ok) {
           const data = await response.json();
           console.log('Event data loaded');
           setEvent(data);
+          if (activeTab === 'speakers' && !data.speakers?.length) setActiveTab('description');
+          if (activeTab === 'organizers' && !data.organizers?.length) setActiveTab('description');
         } else if (response.status === 403 || response.status === 401) {
           setError('Необходима авторизация для просмотра события');
         } else if (response.status === 404) {
@@ -83,7 +107,7 @@ const userId = location.state?.userId || localStorage.getItem('user_id');
         setLoading(false);
       }
     };
-    
+
     fetchEvent();
   }, [id, token]);
 
@@ -99,12 +123,12 @@ const userId = location.state?.userId || localStorage.getItem('user_id');
   const waitForCalendarConnection = async (provider, maxAttempts = 30) => {
     for (let i = 0; i < maxAttempts; i++) {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       try {
         const response = await fetch(`https://ritmevents.ru/api/v1/users/${userId}/calendars`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        
+
         if (response.ok) {
           const calendars = await response.json();
           const isConnected = calendars.some(cal => cal.provider === provider && cal.is_active === true);
@@ -192,7 +216,7 @@ const userId = location.state?.userId || localStorage.getItem('user_id');
 
     try {
       const isConnected = await checkCalendarConnected(provider);
-      
+
       if (isConnected) {
         await addEventToCalendar(provider);
         const tg = window.Telegram?.WebApp;
@@ -201,11 +225,11 @@ const userId = location.state?.userId || localStorage.getItem('user_id');
       } else {
         const oauthUrl = await connectCalendar(provider);
         openLink(oauthUrl);
-        
+
         const tg = window.Telegram?.WebApp;
-        
+
         const connected = await waitForCalendarConnection(provider);
-        
+
         if (connected) {
           await addEventToCalendar(provider);
           tg?.showAlert(`Событие добавлено в ${provider === 'google' ? 'Google' : 'Яндекс'} Календарь`);
@@ -214,7 +238,6 @@ const userId = location.state?.userId || localStorage.getItem('user_id');
           tg?.showAlert('Не удалось подключить календарь. Попробуйте позже.');
         }
       }
-      
     } catch (error) {
       console.error('Ошибка:', error);
       const tg = window.Telegram?.WebApp;
@@ -241,7 +264,7 @@ const userId = location.state?.userId || localStorage.getItem('user_id');
 
   if (loading) {
     return (
-      <div className="event">
+      <div className={`event ${isPreview ? 'event-preview' : ''}`}>
         <div className="loading-container">
           <div className="spinner"></div>
           <p>Загрузка события...</p>
@@ -252,7 +275,7 @@ const userId = location.state?.userId || localStorage.getItem('user_id');
 
   if (error) {
     return (
-      <div className="event">
+      <div className={`event ${isPreview ? 'event-preview' : ''}`}>
         <div className="event__not-found">
           <p>{error}</p>
         </div>
@@ -262,14 +285,23 @@ const userId = location.state?.userId || localStorage.getItem('user_id');
 
   if (!event) {
     return (
-      <div className="event">
+      <div className={`event ${isPreview ? 'event-preview' : ''}`}>
         <div className="event__not-found">Событие не найдено</div>
       </div>
     );
   }
 
   return (
-    <div className="event">
+    <div className={`event ${isPreview ? 'event-preview' : ''}`}>
+      {/* Блок статуса для режима предпросмотра (заявки) */}
+      {isPreview && status && (
+        <div className="event-status-banner">
+          <span className={`status-badge ${getStatusClass(status)}`}>
+            {getStatusText(status)}
+          </span>
+        </div>
+      )}
+
       <div className="event__header">
         <p className="event__type">{event.event_type?.join(', ')}</p>
         <h1 className="event__title">{event.title}</h1>
@@ -318,6 +350,13 @@ const userId = location.state?.userId || localStorage.getItem('user_id');
             </div>
           )}
 
+          {event.participation_type && (
+            <div className="event__partType">
+              <img src={partType} alt="person speaking icon" />
+              {event.participation_type}
+            </div>
+          )}
+
           <div className="event__location">
             <img src={place} alt="place icon" />
             <span className="location__text">
@@ -325,6 +364,19 @@ const userId = location.state?.userId || localStorage.getItem('user_id');
               {event.address && <span className="event__address">, {event.address}</span>}
             </span>
           </div>
+
+          {event.event_url && (
+            <div className="event__eventUrl">
+              <img src={webIcon} alt="site icon" className="icon" />
+              <a
+                href={event.event_url}
+                onClick={(e) => handleOpenLink(e, event.event_url)}
+                className="event-link"
+              >
+                Сайт мероприятия
+              </a>
+            </div>
+          )}
 
           <div className="event__tags">
             {event.tags?.map((tag, index) => (
@@ -335,23 +387,67 @@ const userId = location.state?.userId || localStorage.getItem('user_id');
 
         <div className="event__extraInfo">
           <div className="event__tabs">
-            {['description', 'speakers', 'organizers'].map((tab) => (
+            {[
+              { key: 'description', label: 'Описание', show: true },
+              { key: 'speakers', label: 'Спикеры', show: event.speakers?.length > 0 },
+              { key: 'organizers', label: 'Организаторы', show: event.organizers?.length > 0 },
+            ].filter(tab => tab.show).map((tab) => (
               <button
-                key={tab}
-                className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab)}
+                key={tab.key}
+                className={`tab-btn ${activeTab === tab.key ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.key)}
               >
-                {tab === 'description' ? 'Описание' : tab === 'speakers' ? 'Спикеры' : 'Организаторы'}
+                {tab.label}
               </button>
             ))}
           </div>
 
           <div className="tab__content">
             {activeTab === 'description' && (
-              <div className="event__description-tab">
-                <p className="description-text">{event.description}</p>
+              <div>
+                <div className="event__description-tab">
+                  <p className="description-text">{event.description}</p>
+                </div>
+
+                <div className="event__action" style={{ position: 'relative' }}>
+                  {event.registration_url && (
+                    <a
+                      href={event.registration_url}
+                      className="event-register--btn"
+                      onClick={(e) => handleOpenLink(e, event.registration_url)}
+                    >
+                      Регистрация
+                    </a>
+                  )}
+
+                  {/* Кнопка "В календарь" - НЕ показываем в режиме предпросмотра и в заявках из профиля */}
+                  {!isPreview && !fromProfileEvents && event.start_date && (
+                    <>
+                      <button
+                        onClick={() => setAddToCalendar(!addToCalendar)}
+                        className="event-addToCalendar--btn"
+                        disabled={isProcessing}
+                      >
+                        <img src={blueCalendar} alt='blue calendar icon' className="icon" />
+                        {isProcessing ? 'Обработка...' : 'В календарь'}
+                      </button>
+
+                      {addToCalendar && (
+                        <div className="calendar-dropdown">
+                          <button onClick={() => handleAddToCalendar('google')} disabled={isProcessing}>
+                            Google Календарь
+                          </button>
+                          <button onClick={() => handleAddToCalendar('yandex')} disabled={isProcessing}>
+                            Яндекс Календарь
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             )}
+
             {activeTab === 'speakers' && (
               <div className="event__speakers-tab">
                 {event.speakers?.map((speaker, index) => {
@@ -370,6 +466,7 @@ const userId = location.state?.userId || localStorage.getItem('user_id');
                 })}
               </div>
             )}
+
             {activeTab === 'organizers' && (
               <div className="event__organizers">
                 <div className="organizers-list">
@@ -389,48 +486,6 @@ const userId = location.state?.userId || localStorage.getItem('user_id');
             )}
           </div>
         </div>
-      </div>
-
-      <div className="event__action" style={{ position: 'relative' }}>
-        {event.registration_url && (
-          <a
-            href={event.registration_url}
-            className="event-register--btn"
-            onClick={(e) => handleOpenLink(e, event.registration_url)}
-          >
-            Зарегистрироваться
-          </a>
-        )}
-        
-        <a
-          href={event.event_url}
-          className="event-url--btn"
-          onClick={(e) => handleOpenLink(e, event.event_url)}
-        >
-          Ссылка на сайт
-        </a>
-        {event.start_date && (
-          <>
-            <button
-              onClick={() => setAddToCalendar(!addToCalendar)}
-              className="event-addToCalendar--btn"
-              disabled={isProcessing}
-            >
-              {isProcessing ? 'Обработка...' : 'Добавить в календарь'}
-            </button>
-
-            {addToCalendar && (
-              <div className="calendar-dropdown">
-                <button onClick={() => handleAddToCalendar('google')} disabled={isProcessing}>
-                  Google Календарь
-                </button>
-                <button onClick={() => handleAddToCalendar('yandex')} disabled={isProcessing}>
-                  Яндекс Календарь
-                </button>
-              </div>
-            )}
-          </>
-        )}
       </div>
     </div>
   );

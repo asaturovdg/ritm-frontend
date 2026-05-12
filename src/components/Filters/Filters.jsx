@@ -99,11 +99,11 @@ export default function Filters({ filters, onFilterChange, isOpen, setIsOpen, on
               {isAllCategoriesSelected ? 'Очистить все' : 'Выбрать все'}
             </button>
           </div>
-          <div className="chips-container">
+          <div className="chips_filter-container">
             {CATEGORIES.map((category, index) => (
               <button 
                 key={index} 
-                className={`chip ${tempFilters.categories.includes(category) ? 'chip-active' : ''}`}  
+                className={`chip_filter ${tempFilters.categories.includes(category) ? 'chip_filter-active' : ''}`}  
                 onClick={() => handleFilterChange('categories', category)}
               >
                 {category}
@@ -122,11 +122,11 @@ export default function Filters({ filters, onFilterChange, isOpen, setIsOpen, on
               {isAllCitiesSelected ? 'Очистить все' : 'Выбрать все'}
             </button>
           </div>
-          <div className="chips-container">
+          <div className="chips_filter-container">
             {CITIES.map((city, index) => (
               <button 
                 key={index} 
-                className={`chip ${tempFilters.cities.includes(city) ? 'chip-active' : ''}`}  
+                className={`chip_filter ${tempFilters.cities.includes(city) ? 'chip_filter-active' : ''}`}  
                 onClick={() => handleFilterChange('cities', city)}
               >
                 {city}
@@ -145,12 +145,12 @@ export default function Filters({ filters, onFilterChange, isOpen, setIsOpen, on
               {isAllEventTypesSelected ? 'Очистить все' : 'Выбрать все'}
             </button>
           </div>
-          <div className="chips-container">
+          <div className="chips_filter-container">
             {EVENT_TYPES.map((type, index) => (
               <button 
                 key={index} 
                 onClick={() => handleFilterChange('eventTypes', type)}
-                className={`chip ${tempFilters.eventTypes.includes(type) ? 'chip-active' : ''}`}  
+                className={`chip_filter ${tempFilters.eventTypes.includes(type) ? 'chip_filter-active' : ''}`}  
               >
                 {type}
               </button>
@@ -168,11 +168,11 @@ export default function Filters({ filters, onFilterChange, isOpen, setIsOpen, on
               {isAllParticipationTypesSelected ? 'Очистить все' : 'Выбрать все'}
             </button>
           </div>
-          <div className='chips-container'>
+          <div className='chips_filter-container'>
             {PARTICIPATION_TYPES.map((partType, index) => (
               <button 
                 key={index} 
-                className={`chip ${tempFilters.participationTypes.includes(partType) ? 'chip-active' : ''}`}  
+                className={`chip_filter ${tempFilters.participationTypes.includes(partType) ? 'chip_filter-active' : ''}`}  
                 onClick={() => handleFilterChange('participationTypes', partType)}
               >
                 {partType}

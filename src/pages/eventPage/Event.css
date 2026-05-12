@@ -34,12 +34,26 @@
     align-items: center;
 }
 
+.event-link{
+    color:black;
+    text-decoration: underline;
+    text-underline-offset:4px;
+}
+
+
+
 .event__day, 
 .event__price,
-.event__time{
+.event__time,
+.event__partType,
+.event__eventUrl{
     display: flex;
     align-items: center;
     gap:5px;
+}
+
+.icon{
+    width: 24px;
 }
 
 .event__date > .event__day{
@@ -89,25 +103,38 @@
     
 }
 
+.event__action{
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
 .tab-btn.active{
     border-bottom: 3px #56FF71 solid;
     font-weight: 500;
 }
 
-.event-register--btn, 
-.event-addToCalendar--btn,
-.event-url--btn{
-    margin: 20px auto 0;
-    padding: 8px 10px;
+.event-addToCalendar--btn{
+    border:1px #1032A1 solid;
+    color:#1032a1;
+    font-weight: 400;
+    font-size: 16px;
+    border-radius:10px;
+    padding: 6px 8px;
+    display: flex;
+    align-items: center;
+    gap:8px; 
+
+}
+
+.event-register--btn{
+    padding: 6px 8px;
     background-color: #1032A1;
     color: white;
-    font-weight: 600;
+    font-weight: 400;
     font-size: 16px;
     border-radius:10px;
     align-self: center;
-    display: block;      
-    width: fit-content; 
-    margin-bottom: 40px;
     cursor: pointer;
 }
 
@@ -205,4 +232,41 @@ a.organizer-chip:active {
 
 .calendar-dropdown button{
     margin-block: 3px;
+}
+
+/* Баннер статуса для предпросмотра заявок */
+.event-status-banner {
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 16px;
+}
+
+.event-preview {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-pending {
+  background: #fff3e0;
+  color: #ff9800;
+}
+
+.status-approved {
+  background: #e8f5e9;
+  color: #4caf50;
+}
+
+.status-rejected {
+  background: #ffebee;
+  color: #f44336;
 }

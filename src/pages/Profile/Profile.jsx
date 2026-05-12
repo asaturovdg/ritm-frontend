@@ -1,20 +1,31 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import './Profile.css';
-
+import Filters from "../../components/Filters/Filters.jsx";
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js";
 
 import dateIcon from "../../assets/icons/DateRange.svg";
 import timeIcon from "../../assets/icons/time.svg";
 import priceIcon from "../../assets/icons/currency.svg";
 import placeIcon from "../../assets/icons/Place.svg";
+import partType from "../../assets/icons/partType.svg"
 
 export function Profile() {
+  // Только нужные состояния для помощников
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteLink, setInviteLink] = useState(null);
+  const [isCreatingInvite, setIsCreatingInvite] = useState(false);
+  
+  // Остальные состояния
+  const [isSaving, setIsSaving] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [token, setToken] = useState(null);
   const [userData, setUserData] = useState(null);
   const [activeTab, setActiveTab] = useState('myFilters');
+  const [isConnectingCalendar, setIsConnectingCalendar] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filters, setFilters] = useState({
     cities: [],
     categories: [],
@@ -28,6 +39,11 @@ export function Profile() {
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]); 
   
+  const availableCalendars = [
+    { id: 'google', name: 'Google Календарь' },
+    { id: 'yandex', name: 'Яндекс Календарь' }
+  ];
+  
   const [loadingExtra, setLoadingExtra] = useState({
     assistants: true,
     submissions: true,
@@ -35,19 +51,16 @@ export function Profile() {
     calendarEvents: true
   });
 
-  
   const formatDate = (dateString) => {
     if (!dateString) return '';
     return dateString.split('-').reverse().join('.');
   };
 
-  
   const formatTime = (timeString) => {
     if (!timeString) return '';
     return timeString.substring(0, 5);
   };
 
-  
   const isUpcomingEvent = (eventDate) => {
     if (!eventDate) return false;
     const today = new Date();
@@ -55,6 +68,73 @@ export function Profile() {
     const eventDateObj = new Date(eventDate);
     eventDateObj.setHours(0, 0, 0, 0);
     return eventDateObj >= today;
+  };
+
+  const openLink = (url) => {
+    const tg = window.Telegram?.WebApp;
+    if (tg && tg.openLink) {
+      tg.openLink(url);
+    } else {
+      window.open(url, '_blank');
+    }
+  };
+
+  // функция для подключения календарей
+  const connectCalendar = async (provider) => {
+    if (!token) {
+      setError('Необходима авторизация');
+      return;
+    }
+
+    setIsConnectingCalendar(true);
+    setError(null);
+
+    try {
+      const response = await fetch('https://ritmevents.ru/api/v1/calendars/connect', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ provider })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Ошибка подключения: ${response.status} ${errorText}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.oauth_url) {
+        openLink(data.oauth_url);
+        
+        setTimeout(() => {
+          if (userData) {
+            fetchAllExtraData(userData.id);
+          }
+        }, 5000);
+      }
+    } catch (err) {
+      console.error('Ошибка:', err);
+      setError(err.message);
+    } finally {
+      setIsConnectingCalendar(false);
+    }
+  };
+
+  const applyFilters = async () => {
+    if (!token || !userData) return;
+    
+    try {
+      await saveFiltersToServer(filters);
+      setShowModal(true);
+      setTimeout(() => setShowModal(false), 1500);
+    } catch (error) {
+      console.error('Ошибка:', error);
+      setError('Не удалось сохранить фильтры');
+      setTimeout(() => setError(null), 3000);
+    }
   };
 
   useEffect(() => {
@@ -109,6 +189,12 @@ export function Profile() {
     fetchUserData();
   }, [token]);
 
+
+
+
+
+
+
   const saveFiltersToServer = async (newFilters) => {
     if (!token || !userData) return;
     try {
@@ -152,6 +238,131 @@ export function Profile() {
     saveFiltersToServer(updated);
   };
 
+  // Удаление помощника
+  const deleteHelper = async (assistantId) => {
+    if (!token || !userData) return;
+
+    try {
+      const response = await fetch(
+        `https://ritmevents.ru/api/v1/users/${userData.id}/assistants/${assistantId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.status === 204 || response.ok) {
+        setAssistants(prev => prev.filter(assistant => assistant.id !== assistantId));
+        setShowModal(true);
+        setTimeout(() => setShowModal(false), 1500);
+      } else if (response.status === 404) {
+        setError("Помощник не найден");
+        setTimeout(() => setError(null), 3000);
+      } else {
+        throw new Error("Ошибка при удалении");
+      }
+    } catch (err) {
+      console.error('Ошибка:', err);
+      setError("Не удалось удалить помощника");
+      setTimeout(() => setError(null), 3000);
+    }
+  };
+
+
+// Создание инвайт-ссылки
+const createInviteLink = async () => {
+  console.log('[createInviteLink] Starting...');
+  if (!token) {
+    console.log('[createInviteLink] No token');
+    setError("Необходима авторизация");
+    return;
+  }
+
+  setIsCreatingInvite(true);
+  setError(null);
+
+  try {
+    console.log('[createInviteLink] Sending POST to /api/v1/assistants/invite');
+    const response = await fetch('https://ritmevents.ru/api/v1/assistants/invite', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    console.log('[createInviteLink] Response status:', response.status);
+    
+    const responseText = await response.text();
+    console.log('[createInviteLink] Response body:', responseText);
+
+    if (response.ok) {
+      const data = JSON.parse(responseText);
+      
+      
+      
+      const inviteUrl = `${window.location.origin}/IT-digest_tg/invite/assistant/${data.token}`;
+      
+      
+      console.log('[createInviteLink] Invite URL (GitHub Pages):', inviteUrl);
+      
+      setInviteLink({
+        ...data,
+        invite_url: inviteUrl
+      });
+      setShowInviteModal(true);
+    } else {
+      console.log('[createInviteLink] Error:', response.status);
+      setError("Ошибка создания приглашения");
+      setTimeout(() => setError(null), 3000);
+    }
+  } catch (err) {
+    console.error('[createInviteLink] Network error:', err);
+    setError("Не удалось создать приглашение");
+    setTimeout(() => setError(null), 3000);
+  } finally {
+    setIsCreatingInvite(false);
+  }
+};
+
+  // Копирование ссылки в буфер обмена
+  const copyInviteLink = () => {
+    if (inviteLink?.invite_url) {
+      navigator.clipboard.writeText(inviteLink.invite_url);
+      setShowModal(true);
+      setTimeout(() => setShowModal(false), 1500);
+    }
+  };
+
+  // Отзыв инвайт-ссылки
+  const revokeInviteLink = async () => {
+    if (!inviteLink?.token) return;
+
+    try {
+      const response = await fetch(`https://ritmevents.ru/api/v1/assistants/invite/${inviteLink.token}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status === 204 || response.ok) {
+        setInviteLink(null);
+        setShowInviteModal(false);
+        setShowModal(true);
+        setTimeout(() => setShowModal(false), 1500);
+      }
+    } catch (err) {
+      console.error('Ошибка:', err);
+      setError("Не удалось отозвать приглашение");
+      setTimeout(() => setError(null), 3000);
+    }
+  };
+
   const fetchAllExtraData = async (userId) => {
     const fetchOne = async (url, dataType, setState) => {
       try {
@@ -186,7 +397,6 @@ export function Profile() {
 
           const futureEventsList = [];
           
-          
           await Promise.all(
             data.map(async (item) => {
               try {
@@ -199,7 +409,6 @@ export function Profile() {
                 );
                 if (res.ok) {
                   const eventData = await res.json();
-                  
                   
                   if (eventData.start_date && isUpcomingEvent(eventData.start_date)) {
                     futureEventsList.push({
@@ -218,7 +427,6 @@ export function Profile() {
               }
             })
           );
-          
           
           futureEventsList.sort((a, b) => {
             const dateA = new Date(a.eventDetails.start_date);
@@ -248,54 +456,49 @@ export function Profile() {
     ]);
   };
 
-
   const deleteCalendar = async (provider) => {
-  if (!token) return;
-  
-  const calendarExists = calendars.some(cal => cal.provider === provider);
-  if (!calendarExists) {
-    console.log(`Календарь ${provider} не найден в списке`);
+    if (!token) return;
     
-    await fetchAllExtraData(userData.id);
-    return;
-  }
-  
-  const providerName = provider === 'google' ? 'google' : 
-                       provider === 'yandex' ? 'yandex' : provider;
-  
-  
-  try {
-    const response = await fetch(
-      `https://ritmevents.ru/api/v1/calendars/${providerName}`,
-      {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    
-    if (response.status === 204 || response.ok) {
-      
-      setCalendars(prev => prev.filter(cal => cal.provider !== provider));
-      setCalendarEvents(prev => prev.filter(event => event.provider !== provider));
-      setUpcomingEvents(prev => prev.filter(event => event.provider !== provider));
-      console.log(`Календарь ${providerName} успешно удалён`);
-    } else if (response.status === 404) {
-      
-      console.log(`Календарь ${providerName} не найден на сервере`);
+    const calendarExists = calendars.some(cal => cal.provider === provider);
+    if (!calendarExists) {
+      console.log(`Календарь ${provider} не найден в списке`);
       await fetchAllExtraData(userData.id);
-    } else if (response.status === 401) {
-      localStorage.removeItem('access_token');
-      setError('Сессия истекла. Пожалуйста, войдите снова');
-    } else {
-      console.error('Ошибка удаления календаря:', response.status);
+      return;
     }
-  } catch (err) {
-    console.error('Ошибка при удалении календаря:', err);
-  }
-};
+    
+    const providerName = provider === 'google' ? 'google' : 
+                         provider === 'yandex' ? 'yandex' : provider;
+    
+    try {
+      const response = await fetch(
+        `https://ritmevents.ru/api/v1/calendars/${providerName}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      if (response.status === 204 || response.ok) {
+        setCalendars(prev => prev.filter(cal => cal.provider !== provider));
+        setCalendarEvents(prev => prev.filter(event => event.provider !== provider));
+        setUpcomingEvents(prev => prev.filter(event => event.provider !== provider));
+        console.log(`Календарь ${providerName} успешно удалён`);
+      } else if (response.status === 404) {
+        console.log(`Календарь ${providerName} не найден на сервере`);
+        await fetchAllExtraData(userData.id);
+      } else if (response.status === 401) {
+        localStorage.removeItem('access_token');
+        setError('Сессия истекла. Пожалуйста, войдите снова');
+      } else {
+        console.error('Ошибка удаления календаря:', response.status);
+      }
+    } catch (err) {
+      console.error('Ошибка при удалении календаря:', err);
+    }
+  };
   
   if (isLoading) {
     return (
@@ -308,32 +511,19 @@ export function Profile() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="profile-container">
-        <div className="profile-error">
-          <p>{error}</p>
-          <button onClick={() => window.location.reload()} className="profile-retry-btn">
-            Попробовать снова
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   if (!userData) {
     return <div className="profile-container"><div className="profile-empty"></div></div>;
   }
 
   return (
     <div className="profile-container">
-
       <div className="profileTabs">
         {['myFilters', 'myCalendars', 'myEvents', 'myHelpers'].map((tab) => (
           <button
             key={tab}
             className={`profile-tab ${activeTab === tab ? 'active' : ''}`}
             onClick={() => setActiveTab(tab)}
+            style={{color: '#000000'}}
           >
             {tab === 'myFilters' ? 'Мои фильтры'
               : tab === 'myCalendars' ? 'Календари'
@@ -344,7 +534,14 @@ export function Profile() {
       </div>
 
       <div className="profile__tabs-content">
-
+        {showModal && (
+          <div className="filter-success-modal">
+            <div className="filter-success-content">
+              <p>Фильтры сохранены!</p>
+            </div>
+          </div>
+        )}
+        
         {/* фильтры */}
         {activeTab === 'myFilters' && (
           <div className="profile__filters-section">
@@ -355,9 +552,9 @@ export function Profile() {
                   {filters.categories.length === CATEGORIES.length ? 'Очистить все' : 'Выбрать все'}
                 </button>
               </div>
-              <div className="chips-container">
+              <div className="profile_chips-container">
                 {CATEGORIES.map((item, i) => (
-                  <button key={i} className={`chip ${filters.categories.includes(item) ? 'chip-active' : ''}`} onClick={() => toggleChip('categories', item)}>
+                  <button key={i} className={`profile_chip ${filters.categories.includes(item) ? 'profile_chip-active' : ''}`} onClick={() => toggleChip('categories', item)}>
                     {item}
                   </button>
                 ))}
@@ -371,9 +568,9 @@ export function Profile() {
                   {filters.cities.length === CITIES.length ? 'Очистить все' : 'Выбрать все'}
                 </button>
               </div>
-              <div className="chips-container">
+              <div className="profile_chips-container">
                 {CITIES.map((item, i) => (
-                  <button key={i} className={`chip ${filters.cities.includes(item) ? 'chip-active' : ''}`} onClick={() => toggleChip('cities', item)}>
+                  <button key={i} className={`profile_chip ${filters.cities.includes(item) ? 'profile_chip-active' : ''}`} onClick={() => toggleChip('cities', item)}>
                     {item}
                   </button>
                 ))}
@@ -387,9 +584,9 @@ export function Profile() {
                   {filters.eventTypes.length === EVENT_TYPES.length ? 'Очистить все' : 'Выбрать все'}
                 </button>
               </div>
-              <div className="chips-container">
+              <div className="profile_chips-container">
                 {EVENT_TYPES.map((item, i) => (
-                  <button key={i} className={`chip ${filters.eventTypes.includes(item) ? 'chip-active' : ''}`} onClick={() => toggleChip('eventTypes', item)}>
+                  <button key={i} className={`profile_chip ${filters.eventTypes.includes(item) ? 'profile_chip-active' : ''}`} onClick={() => toggleChip('eventTypes', item)}>
                     {item}
                   </button>
                 ))}
@@ -403,15 +600,21 @@ export function Profile() {
                   {filters.participationTypes.length === PARTICIPATION_TYPES.length ? 'Очистить все' : 'Выбрать все'}
                 </button>
               </div>
-              <div className="chips-container">
+              <div className="profile_chips-container">
                 {PARTICIPATION_TYPES.map((item, i) => (
-                  <button key={i} className={`chip ${filters.participationTypes.includes(item) ? 'chip-active' : ''}`} onClick={() => toggleChip('participationTypes', item)}>
+                  <button key={i} className={`profile_chip ${filters.participationTypes.includes(item) ? 'profile_chip-active' : ''}`} onClick={() => toggleChip('participationTypes', item)}>
                     {item}
                   </button>
                 ))}
               </div>
             </div>
-
+            <button
+              className={`apply-filters__btn ${isSaving ? 'saving' : ''}`}
+              onClick={applyFilters}
+              disabled={isSaving}
+            >
+              {isSaving ? 'Сохранение...' : 'Сохранить фильтры'}
+            </button>
             <button
               className="reset-filters__btn"
               onClick={() => {
@@ -428,38 +631,50 @@ export function Profile() {
         {/* календари */}
         {activeTab === 'myCalendars' && (
           <div className="profile__calendars-section">
-            <h3 className="profile-section-title">Подключённые календари</h3>
-            {loadingExtra.calendars ? (
-              <div className="profile-loading-small">
-                <div className="spinner-small"></div>
-                <p>Загрузка...</p>
-              </div>
-            ) : calendars.length > 0 ? (
-              <div className="profile-calendars-list">
-                {calendars.map((calendar) => (
-                  <div key={calendar.id} className="profile-calendar-item">
-                    <span className="calendar-provider">
-                      {calendar.provider === 'google' ? 'Google Календарь' : 'Яндекс Календарь'}
-                    </span>
-                    <button 
-                      className="calendar-delete-btn"
-                      onClick={() => deleteCalendar(calendar.provider)}
-                    >
-                      Удалить
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="profile-empty-value">Нет подключенных календарей</p>
-            )}
+            <div className="calendar-subsection">
+              {loadingExtra.calendars ? (
+                <div className="profile-loading-small">
+                  <div className="spinner-small"></div>
+                  <p>Загрузка...</p>
+                </div>
+              ) : (
+                <div className="all-calendars-list">
+                  {availableCalendars.map((calendar) => {
+                    const isConnected = calendars.some(cal => cal.provider === calendar.id);
+                    
+                    return (
+                      <div key={calendar.id} className="calendar-item">
+                        <div className="calendar-info">
+                          <span className="calendar-name">{calendar.name}</span>
+                        </div>
+                        {isConnected ? (
+                          <button 
+                            className="calendar-delete-btn"
+                            onClick={() => deleteCalendar(calendar.id)}
+                          >
+                            Удалить
+                          </button>
+                        ) : (
+                          <button 
+                            className="calendar-connect-btn"
+                            onClick={() => connectCalendar(calendar.id)}
+                            disabled={isConnectingCalendar}
+                          >
+                            {isConnectingCalendar ? 'Подключение...' : 'Подключить'}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
-        
+        {/* мои события */}
         {activeTab === 'myEvents' && (
           <div className="profile__events-section">
-            <h3 className="profile-section-title">Мои события</h3>
             {loadingExtra.calendarEvents ? (
               <div className="profile-loading-small">
                 <div className="spinner-small"></div>
@@ -499,6 +714,12 @@ export function Profile() {
                             {event.price === 0 ? "Бесплатно" : event.price}
                           </div>
                         )}
+                        {event.participation_type && (
+                          <div className="event__partType">
+                            <img src={partType} alt="person speaking icon"/> 
+                            {event.participation_type}
+                          </div>
+                        )}
                         <div className="digest__location">
                           <img src={placeIcon} alt="icon" />
                           {event.city?.join(', ') || event.address || 'Онлайн'}
@@ -511,7 +732,15 @@ export function Profile() {
                           ))}
                         </div>
                       )}
-                      <Link to={`/events/${event.id}`} className="digest__link">
+                      <Link 
+                        to={`/events/${event.id}`} 
+                        className="digest__link"
+                        state={{ 
+                          token: token, 
+                          userId: userData?.id, 
+                          from: 'profile-events'  
+                        }}
+                      >
                         <button className="btn digest__knowMore">ПОДРОБНЕЕ</button>
                       </Link>
                     </div>
@@ -520,35 +749,95 @@ export function Profile() {
               </div>
             ) : (
               <div className="profile-empty-events">
-                <p className="profile-empty-value">Нет предстоящих событий в календаре</p>
+                {/* <p className="profile-empty-value">Нет предстоящих событий в календаре</p> */}
                 <p className="profile-empty-hint">
-                  События, которые вы добавили в календарь и которые ещё не прошли, появятся здесь
+                  События, которые вы добавили в календарь появятся здесь
                 </p>
               </div>
             )}
           </div>
         )}
 
-        
+        {/* Помощники */}
         {activeTab === 'myHelpers' && (
           <div className="profile__helpers-section">
-            <h3 className="profile-section-title">Помощники</h3>
+            <p className="helpers-description">
+              Помощники могут самостоятельно добавлять события в твой календарь
+            </p>
+            
+            <button 
+              className="create-invite-btn"
+              onClick={createInviteLink}
+              disabled={isCreatingInvite}
+            >
+              {isCreatingInvite ? "Создание..." : "+ Создать ссылку-приглашение"}
+            </button>
+            
             {loadingExtra.assistants ? (
-              <div className="profile-loading-small"><div className="spinner-small"></div><p>Загрузка...</p></div>
-            ) : assistants.length > 0 ? (
-              <div className="profile-assistants-list">
-                {assistants.map((assistant, idx) => (
-                  <div key={idx} className="profile-assistant-item">
-                    <span className="assistant-name">{assistant.username}</span>
-                  </div>
-                ))}
+              <div className="profile-loading-small">
+                <div className="spinner-small"></div>
+                <p>Загрузка...</p>
               </div>
             ) : (
-              <p className="profile-empty-value">Нет добавленных помощников</p>
+              <>
+                {assistants.length > 0 ? (
+                  <div className="profile-assistants-list">
+                    {assistants.map((assistant) => (
+                      <div key={assistant.id} className="profile-assistant-item">
+                        <div className="assistant-info">
+                          <span className="assistant-name">{assistant.username || `Помощник ${assistant.id}`}</span>
+                          {assistant.telegram_id && (
+                            <span className="assistant-telegram-id">TG ID: {assistant.telegram_id}</span>
+                          )}
+                        </div>
+                        <button 
+                          className="assistant-delete-btn"
+                          onClick={() => deleteHelper(assistant.id)}
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="profile-empty-value"></p>
+                )}
+              </>
+            )}
+            
+            {/* Модальное окно с инвайт-ссылкой */}
+            {showInviteModal && inviteLink && (
+              <div className="modal-overlay" onClick={() => setShowInviteModal(false)}>
+                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                  <h3>Приглашение помощника</h3>
+                  <p>Отправьте эту ссылку человеку, которого хотите добавить как помощника:</p>
+                  <div className="invite-link-container">
+                    <input 
+                      type="text" 
+                      readOnly 
+                      value={inviteLink.invite_url} 
+                      className="invite-link-input"
+                    />
+                    <button className="copy-link-btn" onClick={copyInviteLink}>
+                      Копировать
+                    </button>
+                  </div>
+                  <p className="invite-expires">
+                    Ссылка действительна до: {new Date(inviteLink.expires_at).toLocaleString()}
+                  </p>
+                  <div className="modal-actions">
+                    <button className="modal-cancel-btn" onClick={() => setShowInviteModal(false)}>
+                      Закрыть
+                    </button>
+                    <button className="modal-confirm-btn" onClick={revokeInviteLink}>
+                      Отозвать ссылку
+                    </button>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         )}
-
       </div>
     </div>
   );

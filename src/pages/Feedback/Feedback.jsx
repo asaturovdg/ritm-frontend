@@ -28,8 +28,13 @@ export default function Feedback() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleRatingChange = (questionId, value) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
+    const handleRatingChange = (questionId, value, currentValue) => {
+   
+    if (currentValue === value) {
+      setAnswers(prev => ({ ...prev, [questionId]: 0 }));
+    } else {
+      setAnswers(prev => ({ ...prev, [questionId]: value }));
+    }
   };
 
   const handleBooleanChange = (value) => {
@@ -45,77 +50,92 @@ export default function Feedback() {
   };
 
   const validateAnswers = () => {
-    for (let i = 1; i <= 9; i++) {
-      if (answers[`q${i}`] === 0) {
-        setError(`Пожалуйста, ответьте на вопрос ${i}`);
-        return false;
-      }
-    }
-    
-    if (answers.q10 === null) {
-      setError('Пожалуйста, ответьте на вопрос 10');
+  for (let i = 1; i <= 9; i++) {
+    if (answers[`q${i}`] === 0) {
+      setError('Пожалуйста, заполните все поля формы');
       return false;
     }
-    
-    if (answers.q10 === true && answers.q10_sub === null) {
-      setError('Пожалуйста, ответьте на дополнительный вопрос');
-      return false;
-    }
-    
-    return true;
-  };
+  }
+  
+  // Проверка вопроса 10
+  if (answers.q10 === null) {
+    setError('Пожалуйста, заполните все поля формы');
+    return false;
+  }
+  
+  // Проверка дополнительного вопроса, если ответили Да на вопрос 10
+  if (answers.q10 === true && answers.q10_sub === null) {
+    setError('Пожалуйста, заполните все поля формы');
+    return false;
+  }
+  
+  
+  if (!answers.q11 || answers.q11.trim() === '') {
+    setError('Пожалуйста, заполните все поля формы');
+    return false;
+  }
+  
+  return true;
+};
 
   const submitFeedback = async () => {
-    if (!token) {
-      setError('Необходима авторизация. Пожалуйста, войдите в аккаунт.');
-      return;
+  if (!token) {
+    setError('Необходима авторизация. Пожалуйста, войдите в аккаунт.');
+    return;
+  }
+
+  if (!validateAnswers()) {
+    return;
+  }
+
+  setIsSubmitting(true);
+  setError(null);
+
+  try {
+    const source = 'miniapp';
+    
+    
+    const requestBody = {
+      source,
+      q1: answers.q1,
+      q2: answers.q2,
+      q3: answers.q3,
+      q4: answers.q4,
+      q5: answers.q5,
+      q6: answers.q6,
+      q7: answers.q7,
+      q8: answers.q8,
+      q9: answers.q9,
+      q10: answers.q10,
+      q11: answers.q11
+    };
+    
+    
+    if (answers.q10 === true) {
+      requestBody.q10_sub = answers.q10_sub;
     }
 
-    if (!validateAnswers()) {
-      return;
+    const response = await fetch('https://ritmevents.ru/api/v1/feedback', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (response.ok) {
+      setIsCompleted(true);
+    } else {
+      const errorData = await response.text();
+      throw new Error(errorData || 'Ошибка при отправке отзыва');
     }
-
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const source = 'event_feedback';
-
-      const response = await fetch('https://ritmevents.ru/api/v1/feedback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          source,
-          q1: answers.q1,
-          q2: answers.q2,
-          q3: answers.q3,
-          q4: answers.q4,
-          q5: answers.q5,
-          q6: answers.q6,
-          q7: answers.q7,
-          q8: answers.q8,
-          q9: answers.q9,
-          q10: answers.q10,
-          q10_sub: answers.q10_sub === true ? "Да" : answers.q10_sub === false ? "Нет" : '',
-          q11: answers.q11
-        })
-      });
-
-      if (response.ok) {
-        setIsCompleted(true);
-      } else {
-        const errorData = await response.text();
-        throw new Error(errorData || 'Ошибка при отправке отзыва');
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const resetFeedback = () => {
     setAnswers({
@@ -138,7 +158,7 @@ export default function Feedback() {
             src={currentValue >= star ? filledStar : emptyStar}
             alt={currentValue >= star ? "filled star" : "empty star"}
             className="star"
-            onClick={() => handleRatingChange(questionId, star)}
+            onClick={() => handleRatingChange(questionId, star, currentValue)}
           />
         ))}
       </div>
@@ -151,7 +171,7 @@ export default function Feedback() {
         <div className="completion-card">
           <div className="completion-icon"></div>
           <h2>Спасибо за ваш отзыв!</h2>
-          <p>Вы помогаете нам стать лучше </p>
+          <p>Ты помогаешь нам стать лучше </p>
           <button onClick={resetFeedback} className="feedback-button">
             Пройти опрос заново
           </button>
@@ -172,7 +192,7 @@ export default function Feedback() {
         {/* Вопрос 1 */}
         <div className="question-block">
           <label className="question-label">
-            1. Насколько легко тебе было вносить ответы?
+            <span className="required-star">*</span>1. Насколько легко тебе было вносить ответы?
           </label>
           {renderStars('q1', answers.q1)}
         </div>
@@ -180,7 +200,7 @@ export default function Feedback() {
         {/* Вопрос 2 */}
         <div className="question-block">
           <label className="question-label">
-            2. Удобно ли настраивать фильтры (что ищешь)?
+           <span className="required-star">*</span>2. Удобно ли настраивать фильтры (что ищешь)?
           </label>
           {renderStars('q2', answers.q2)}
         </div>
@@ -188,7 +208,7 @@ export default function Feedback() {
         {/* Вопрос 3 */}
         <div className="question-block">
           <label className="question-label">
-            3. Понятно ли, как двигаться по сценарию (что за чем происходит)?
+            <span className="required-star">*</span>3. Понятно ли, как двигаться по сценарию (что за чем происходит)?
           </label>
           {renderStars('q3', answers.q3)}
         </div>
@@ -196,7 +216,7 @@ export default function Feedback() {
         {/* Вопрос 4 */}
         <div className="question-block">
           <label className="question-label">
-            4. Все ли было понятно в рассылке (дайджесте)?
+            <span className="required-star">*</span>4. Все ли было понятно в рассылке (дайджесте)?
           </label>
           {renderStars('q4', answers.q4)}
         </div>
@@ -204,7 +224,7 @@ export default function Feedback() {
         {/* Вопрос 5 */}
         <div className="question-block">
           <label className="question-label">
-            5. Понятно ли бот пишет? Нет ощущения, что общаешься с роботом?
+            <span className="required-star">*</span>5. Понятно ли бот пишет? Нет ощущения, что общаешься с роботом?
           </label>
           {renderStars('q5', answers.q5)}
         </div>
@@ -212,7 +232,7 @@ export default function Feedback() {
         {/* Вопрос 6 */}
         <div className="question-block">
           <label className="question-label">
-            6. Достаточно ли подробно описаны события?
+            <span className="required-star">*</span>6. Достаточно ли подробно описаны события?
           </label>
           {renderStars('q6', answers.q6)}
         </div>
@@ -220,7 +240,7 @@ export default function Feedback() {
         {/* Вопрос 7 */}
         <div className="question-block">
           <label className="question-label">
-            7. Как быстро бот отвечает? Не было ли зависаний?
+            <span className="required-star">*</span>7. Как быстро бот отвечает? Не было ли зависаний?
           </label>
           {renderStars('q7', answers.q7)}
         </div>
@@ -228,7 +248,7 @@ export default function Feedback() {
         {/* Вопрос 8 */}
         <div className="question-block">
           <label className="question-label">
-            8. Решил ли бот твою задачу? Нашел(ла) ли ты то, что искал(а)?
+            <span className="required-star">*</span>8. Решил ли бот твою задачу? Нашел(ла) ли ты то, что искал(а)?
           </label>
           {renderStars('q8', answers.q8)}
         </div>
@@ -236,7 +256,7 @@ export default function Feedback() {
         {/* Вопрос 9 */}
         <div className="question-block">
           <label className="question-label">
-            9. Понятно ли, как предложить своё событие (создать заявку)?
+            <span className="required-star">*</span>9. Понятно ли, как предложить своё событие (создать заявку)?
           </label>
           {renderStars('q9', answers.q9)}
         </div>
@@ -244,7 +264,7 @@ export default function Feedback() {
         {/* Вопрос 10 */}
         <div className="question-block">
           <label className="question-label">
-            10. Пользовался(лась) ли ты функцией «Предложить мероприятие»?
+            <span className="required-star">*</span>10. Пользовался(лась) ли ты функцией «Предложить мероприятие»?
           </label>
           <div className="boolean-section">
             <button 
@@ -266,7 +286,7 @@ export default function Feedback() {
         {answers.q10 === true && (
           <div className="question-block slide-down">
             <label className="question-label">
-              Было ли понятно, для чего это нужно и кто его увидит?
+              <span className="required-star">*</span>Было ли понятно, для чего это нужно и кто его увидит?
             </label>
             <div className="boolean-section">
               <button 
@@ -288,13 +308,12 @@ export default function Feedback() {
         {/* Вопрос 11 */}
         <div className="question-block">
           <label className="question-label">
-            11. Что хочется улучшить? Напиши свои идеи и замечания. (до 2000 символов)
+            <span className="required-star">*</span>11. Что хочется улучшить? Напиши свои идеи и замечания. 
           </label>
           <textarea
             className="feedback-textarea"
             rows={5}
             maxLength={2000}
-            placeholder="Поделитесь вашими мыслями..."
             value={answers.q11}
             onChange={(e) => handleTextChange('q11', e.target.value)}
           />
@@ -310,7 +329,7 @@ export default function Feedback() {
             onClick={submitFeedback}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Отправка...' : 'Отправить отзыв'}
+            {isSubmitting ? 'Отправка...' : 'Отправить'}
           </button>
         </div>
       </div>

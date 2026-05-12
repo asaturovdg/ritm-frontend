@@ -1,19 +1,85 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Button, Placeholder } from '@telegram-apps/telegram-ui';
 import './EventsDigest.css';
 import { Link } from "react-router-dom";
 import Filters from "../Filters/Filters";
+import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js"
 
 import dateIcon from "../../assets/icons/DateRange.svg";
 import timeIcon from "../../assets/icons/time.svg";
 import priceIcon from "../../assets/icons/currency.svg";
 import placeIcon from "../../assets/icons/Place.svg";
-import arrowDown from "../../assets/icons/arrowDown.svg"
-import closeIcon from "../../assets/icons/close.svg"
+import partType from "../../assets/icons/partType.svg";
+import webIcon from "../../assets/icons/web.svg"
+
+const ITEMS_PER_PAGE = 20;
+
+const formatTime = (t) => t ? t.substring(0, 5) : '';
+const formatDate = (d) => d ? d.split('-').reverse().join('.') : '';
+
+const isEventPassed = (eventDate, eventTime) => {
+  if (!eventDate) return true; 
+  
+  const eventDateTime = new Date(eventDate);
+  const now = new Date();
+  
+  
+  if (eventTime && eventTime.trim() !== '') {
+    let hours = 0, minutes = 0;
+    if (eventTime.includes(':')) {
+      const timeParts = eventTime.split(':');
+      hours = parseInt(timeParts[0], 10);
+      minutes = parseInt(timeParts[1], 10);
+    }
+    eventDateTime.setHours(hours, minutes, 0, 0);
+    
+    
+    return eventDateTime < now;
+  }
+  
+  
+  const eventDateOnly = new Date(eventDate);
+  eventDateOnly.setHours(0, 0, 0, 0);
+  
+  const todayDateOnly = new Date();
+  todayDateOnly.setHours(0, 0, 0, 0);
+  
+  
+  return eventDateOnly < todayDateOnly;
+};
+
+const getWeekRange = (offset = 0) => {
+  const today = new Date();
+  
+  const startDate = new Date(today);
+  startDate.setDate(today.getDate() + (offset * 7));
+  
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + 6);
+  
+  const formatDateStr = (date) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${day}.${month}`;
+  };
+  
+  const formatISO = (date) => date.toISOString().split('T')[0];
+  console.log('Диапазон дат:', formatISO(startDate), '-', formatISO(endDate)); 
+  return {
+    start: formatDateStr(startDate),
+    end: formatDateStr(endDate),
+    startISO: formatISO(startDate),
+    endISO: formatISO(endDate)
+  };
+};
+
+
+
 
 export default function EventsDigest({ filters, setFilters }) {
+  const [currentWeekOffset, setCurrentWeekOffset] = useState(0); 
+  const [weekRange, setWeekRange] = useState({ start: '', end: '' });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [token, setToken] = useState(null);
@@ -23,33 +89,32 @@ export default function EventsDigest({ filters, setFilters }) {
   const [code, setCode] = useState('');
   const [showInputCode, setShowInputCode] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalEvents, setTotalEvents] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchDebounceRef = useRef(null);
 
   const activeCount = Object.values(filters).flat().length;
   const hasFilters = activeCount > 0;
-
-  const formatTime = (timeString) => {
-    if (!timeString) return '';
-    return timeString.substring(0, 5);
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    return dateString.split('-').reverse().join('.');
-  };
+  const isSearchMode = searchQuery.trim().length > 0;
 
   
+
   const handleInvalidToken = useCallback(() => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_id');
     setToken(null);
-    setIsLoggedIn(false);
     setIsAuthReady(false);
     setUserId(null);
     setShowInputCode(true);
   }, []);
 
-  const saveFiltersToServer = useCallback(async (newFilters, authToken, userId) => {
-    if (!authToken || !userId) return false;
+  // Сохранение фильтров на сервер 
+
+  const saveFiltersToServer = useCallback(async (newFilters, authToken, uid) => {
+    if (!authToken || !uid) return;
     try {
       const payload = {
         city: newFilters.cities.join(','),
@@ -57,7 +122,7 @@ export default function EventsDigest({ filters, setFilters }) {
         preferred_event_types: newFilters.eventTypes.join(','),
         preferred_participation_types: newFilters.participationTypes.join(',')
       };
-      const response = await fetch(`https://ritmevents.ru/api/v1/users/${userId}/filters`, {
+      const res = await fetch(`https://ritmevents.ru/api/v1/users/${uid}/filters`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -65,127 +130,292 @@ export default function EventsDigest({ filters, setFilters }) {
         },
         body: JSON.stringify(payload)
       });
-      if (response.ok) return true;
-      if (response.status === 401) {
-        handleInvalidToken();
-      }
-      return false;
-    } catch (error) {
-      console.log('error while saving filters: ', error);
-      return false;
+      if (res.status === 401) handleInvalidToken();
+    } catch (e) {
+      console.error('Ошибка сохранения фильтров:', e);
     }
   }, [handleInvalidToken]);
 
-  const fetchEvents = useCallback(async () => {
+  //Основной fetch событий 
+
+  const fetchEvents = useCallback(async (page = currentPage) => {
     if (!hasFilters || !isAuthReady) {
       setEvents([]);
+      setTotalEvents(0);
+      setTotalPages(0);
       return;
     }
-    
+
     setIsLoadingEvents(true);
     try {
-      const url = new URL('https://ritmevents.ru/api/v1/events');
-      filters.cities.forEach(city => url.searchParams.append('city', city));
-      filters.categories.forEach(category => url.searchParams.append('track', category));
-      filters.eventTypes.forEach(type => url.searchParams.append('event_type', type));
+      const { startISO, endISO } = getWeekRange(currentWeekOffset);
+    const url = new URL('https://ritmevents.ru/api/v1/events');
 
-      const today = new Date();
-      const todayStr = today.toISOString().split('T')[0];
-      const nextWeek = new Date(today);
-      nextWeek.setDate(today.getDate() + 7);
-      const nextWeekStr = nextWeek.toISOString().split('T')[0];
+    filters.cities.forEach(c => url.searchParams.append('city', c));
+    filters.categories.forEach(c => url.searchParams.append('track', c));
+    filters.eventTypes.forEach(t => url.searchParams.append('event_type', t));
+    filters.participationTypes.forEach(t => url.searchParams.append('participation_type', t));
+    url.searchParams.append('date_from', startISO);  
+    url.searchParams.append('date_to', endISO);      
+    url.searchParams.append('limit', ITEMS_PER_PAGE);
+    url.searchParams.append('offset', page * ITEMS_PER_PAGE);
 
-      url.searchParams.append('date_from', todayStr);
-      url.searchParams.append('date_to', nextWeekStr);
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const res = await fetch(url.toString(), { headers });
 
-      const headers = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+      if (res.ok) {
+        const data = await res.json();
+        const sortedAndFilteredEvents = (data.items || [])
+          .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+          .filter((event) => !isEventPassed(event.start_date, event.start_time));
+        
+        setEvents(sortedAndFilteredEvents);
+        setTotalEvents(data.total || 0);
+        setTotalPages(Math.ceil((data.total || 0) / ITEMS_PER_PAGE));
       }
-
-      const response = await fetch(url.toString(), { headers });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setEvents(data.items || []);
-      } else if (response.status === 401) {
-        console.error("Токен недействителен при запросе событий");
+      else if (res.status === 401) {
         handleInvalidToken();
       } else {
         setEvents([]);
       }
-    } catch (error) {
-      console.error('Ошибка при запросе событий:', error);
+
+    } catch (e) {
+      console.error('Ошибка загрузки событий:', e);
       setEvents([]);
     } finally {
       setIsLoadingEvents(false);
     }
-  }, [filters, token, hasFilters, isAuthReady, handleInvalidToken]);
+  }, [filters, token, hasFilters, isAuthReady, handleInvalidToken, currentPage, currentWeekOffset]);
+
+  // 
+
+  const fetchAndSetEventsByIds = useCallback(async (ids, page) => {
+    if (!ids || ids.length === 0) {
+      setEvents([]);
+      setTotalEvents(0);
+      setTotalPages(0);
+      return;
+    }
+    const start = page * ITEMS_PER_PAGE;
+    const pageIds = ids.slice(start, start + ITEMS_PER_PAGE);
+
+    setIsLoadingEvents(true);
+    try {
+      const results = await Promise.all(
+        pageIds.map(async (id) => {
+          const res = await fetch(`https://ritmevents.ru/api/v1/events/${id}`, {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+          });
+          return res.ok ? res.json() : null;
+        })
+      );
+      const validEvents = results.filter(event => 
+  event && !isEventPassed(event.start_date, event.start_time)
+);
+setEvents(validEvents);
+    } catch (e) {
+      console.error('Ошибка загрузки событий по ID:', e);
+      setEvents([]);
+    } finally {
+      setIsLoadingEvents(false);
+    }
+  }, [token]);
+
+
+
+
+
+
+// Переключение на следующую неделю 
+const nextWeek = () => {
+  setCurrentWeekOffset(prev => prev + 1);
+  setCurrentPage(0);
+};
+
+// Переключение на предыдущую неделю 
+const prevWeek = () => {
+  if (currentWeekOffset > 0) {
+    setCurrentWeekOffset(prev => prev - 1);
+    setCurrentPage(0);
+  }
+};
+
+
+useEffect(() => {
+  const range = getWeekRange(currentWeekOffset);
+  setWeekRange({ start: range.start, end: range.end });
+}, [currentWeekOffset]);
+
+  const runSearch = useCallback(async (query, page = 0) => {
+  console.log('runSearch запущен, query:', query);
+  setEvents([]);
+  setIsLoadingEvents(true);
+  try {
+    const { startISO, endISO } = getWeekRange(currentWeekOffset);
+    
+    
+    const body = {
+      query: query,
+      limit: ITEMS_PER_PAGE,
+      offset: page * ITEMS_PER_PAGE,
+      date_from: startISO,
+      date_to: endISO
+    };
+
+    
+    
+    console.log('Отправляемый body:', JSON.stringify(body, null, 2));
+
+    const res = await fetch('https://ritmevents.ru/api/v1/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      },
+      body: JSON.stringify(body)
+    });
+
+    console.log('Статус ответа:', res.status);
+
+    if (res.ok) {
+      const data = await res.json();
+      console.log('Полученные данные:', data);
+      
+      const ids = data.event_ids || [];
+      console.log('Найдено ID событий:', ids.length);
+      
+      setTotalEvents(ids.length);
+      setTotalPages(Math.ceil(ids.length / ITEMS_PER_PAGE));
+      
+      if (ids.length > 0) {
+        await fetchAndSetEventsByIds(ids, page);
+      } else {
+        setEvents([]);
+      }
+    } else {
+      const errorText = await res.text();
+      console.error('Ошибка API:', res.status, errorText);
+      setEvents([]);
+      setTotalEvents(0);
+      setTotalPages(0);
+    }
+  } catch (e) {
+    console.error('Ошибка в runSearch:', e);
+    setEvents([]);
+  } finally {
+    setIsLoadingEvents(false);
+  }
+}, [filters, token, fetchAndSetEventsByIds, currentWeekOffset, ITEMS_PER_PAGE]); 
+
+  
+
+  
+  useEffect(() => {
+  if (!isAuthReady) return;
+
+  if (searchQuery.trim()) {
+    runSearch(searchQuery.trim(), currentPage);
+    return;
+  }
+
+  if (hasFilters) {
+    fetchEvents(currentPage);
+  } else {
+    setEvents([]);
+    setTotalEvents(0);
+    setTotalPages(0);
+  }
+}, [
+  isAuthReady,
+  filters,
+  currentPage,
+  searchQuery,
+  hasFilters,
+  runSearch,
+  fetchEvents,
+  currentWeekOffset
+]);
+  
+ const handleSearchChange = (e) => {
+  const val = e.target.value;
+
+  setSearchQuery(val);
+  setCurrentPage(0);
+};
 
   const handleFilterChange = useCallback(async (newFilters) => {
-    setFilters(newFilters);
-    if (token && userId && isAuthReady) {
-      await saveFiltersToServer(newFilters, token, userId);
-    }
-  }, [token, userId, setFilters, saveFiltersToServer, isAuthReady]);
+  setFilters(newFilters);
+  setCurrentPage(0);
+  if (token && userId && isAuthReady) {
+    await saveFiltersToServer(newFilters, token, userId);
+  }
+  if (searchQuery.trim()) {
+    runSearch(searchQuery.trim(), 0);
+  }
+}, [token, userId, setFilters, saveFiltersToServer, isAuthReady, searchQuery, runSearch]);
+
+  
+
+  
 
   const resetFilters = useCallback(async () => {
-    const emptyFilters = {
-      cities: [],
-      categories: [],
-      eventTypes: [],
-      participationTypes: []
-    };
-    
-    setFilters(emptyFilters);
-    if (token && userId && isAuthReady) {
-      await saveFiltersToServer(emptyFilters, token, userId);
-    }
-  }, [token, userId, setFilters, saveFiltersToServer, isAuthReady]);
+  const empty = { cities: [], categories: [], eventTypes: [], participationTypes: [] };
+  setFilters(empty);
+  setCurrentPage(0);
+  if (token && userId && isAuthReady) {
+    await saveFiltersToServer(empty, token, userId);
+  }
+ 
+  if (searchQuery.trim()) {
+    runSearch(searchQuery.trim(), 0);
+  }
+}, [token, userId, setFilters, saveFiltersToServer, isAuthReady, searchQuery, runSearch]);
+
+  //Пагинация 
+
+  const goToPage = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  //Загрузка данных пользователя
 
   const fetchUserData = useCallback(async (accessToken) => {
     try {
-      const userRes = await fetch('https://ritmevents.ru/api/v1/users/me', {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
+      const res = await fetch('https://ritmevents.ru/api/v1/users/me', {
+        headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' }
       });
 
-      if (userRes.ok) {
-        const userData = await userRes.json();
+      if (res.ok) {
+        const userData = await res.json();
         setUserId(userData.id);
-        localStorage.setItem('user_id', String(userData.id)); 
+        localStorage.setItem('user_id', String(userData.id));
 
         const newFilters = {
-          cities: userData.city ? userData.city.split(',').map(c => c.trim()) : [],
-          categories: userData.track ? userData.track.split(',').map(t => t.trim()) : [],
+          cities: userData.city ? userData.city.split(',').map(c => c.trim()).filter(Boolean) : [],
+          categories: userData.track ? userData.track.split(',').map(t => t.trim()).filter(Boolean) : [],
           eventTypes: userData.preferred_event_types
-            ? userData.preferred_event_types.split(',').map(e => e.trim())
-            : [],
+            ? userData.preferred_event_types.split(',').map(e => e.trim()).filter(Boolean) : [],
           participationTypes: userData.preferred_participation_types
-            ? userData.preferred_participation_types.split(',').map(p => p.trim())
-            : []
+            ? userData.preferred_participation_types.split(',').map(p => p.trim()).filter(Boolean) : []
         };
 
         setFilters(newFilters);
-        const hasUserFilters = Object.values(newFilters).flat().length > 0;
-        setIsDrawerOpen(!hasUserFilters);
+        setIsDrawerOpen(Object.values(newFilters).flat().length === 0);
         setIsAuthReady(true);
-      } else if (userRes.status === 401) {
-        console.error("Токен недействителен при загрузке пользователя");
+      } else if (res.status === 401) {
         handleInvalidToken();
       } else {
         setIsDrawerOpen(true);
-        setIsAuthReady(false);
         handleInvalidToken();
       }
-    } catch (error) {
-      console.error("Ошибка загрузки данных пользователя:", error);
-      setIsAuthReady(false);
+    } catch (e) {
+      console.error('Ошибка загрузки пользователя:', e);
       handleInvalidToken();
     }
   }, [setFilters, handleInvalidToken]);
+
+  //Авторизация 
 
   useEffect(() => {
     const tryAuth = async () => {
@@ -194,40 +424,33 @@ export default function EventsDigest({ filters, setFilters }) {
 
       if (initData) {
         try {
-          const response = await fetch('https://ritmevents.ru/api/v1/auth/telegram', {
+          const res = await fetch('https://ritmevents.ru/api/v1/auth/telegram', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ init_data: initData }),
+            body: JSON.stringify({ init_data: initData })
           });
-
-          if (response.ok) {
-            const data = await response.json();
+          if (res.ok) {
+            const data = await res.json();
             localStorage.setItem('access_token', data.access_token);
             localStorage.setItem('refresh_token', data.refresh_token);
             setToken(data.access_token);
-            setIsLoggedIn(true);
             await fetchUserData(data.access_token);
             setIsCheckingAuth(false);
             return;
           }
-
-          console.log('tg auth недоступен, статус:', response.status);
-        } catch (error) {
-          console.log('Ошибка tg auth:', error);
+        } catch (e) {
+          console.error('Ошибка tg auth:', e);
         }
       }
 
-      
-      const savedToken = localStorage.getItem('access_token');
-      if (savedToken) {
-        setToken(savedToken);
-        setIsLoggedIn(true);
-        await fetchUserData(savedToken);
+      const saved = localStorage.getItem('access_token');
+      if (saved) {
+        setToken(saved);
+        await fetchUserData(saved);
         setIsCheckingAuth(false);
         return;
       }
 
-      
       setShowInputCode(true);
       setIsCheckingAuth(false);
     };
@@ -235,46 +458,36 @@ export default function EventsDigest({ filters, setFilters }) {
     tryAuth();
   }, [fetchUserData]);
 
+  useEffect(() => {
+    window.Telegram?.WebApp?.ready();
+    window.Telegram?.WebApp?.expand();
+  }, []);
+
   const handleLogin = async () => {
     if (!code.trim()) return;
     setLoginError('');
-
     try {
-      const response = await fetch('https://ritmevents.ru/api/v1/auth/token', {
+      const res = await fetch('https://ritmevents.ru/api/v1/auth/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code })
       });
-
-      if (response.ok) {
-        const data = await response.json();
+      if (res.ok) {
+        const data = await res.json();
         localStorage.setItem('access_token', data.access_token);
         localStorage.setItem('refresh_token', data.refresh_token);
         setToken(data.access_token);
-        setIsLoggedIn(true);
         setShowInputCode(false);
         await fetchUserData(data.access_token);
       } else {
         setLoginError('Неверный или истёкший код. Попробуйте ещё раз.');
       }
-    } catch (error) {
-      console.log('ошибка:', error);
+    } catch (e) {
       setLoginError('Ошибка соединения. Попробуйте позже.');
     }
   };
 
-  useEffect(() => {
-    if (isAuthReady) {
-      fetchEvents();
-    }
-  }, [fetchEvents, isAuthReady]);
-
-  useEffect(() => {
-    if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.ready();
-      window.Telegram.WebApp.expand();
-    }
-  }, []);
+  
 
   if (isCheckingAuth) {
     return (
@@ -313,31 +526,25 @@ export default function EventsDigest({ filters, setFilters }) {
   return (
     <div className="events">
       <div className="filters-header-sticky">
-        <Button
-          mode="outline"
-          stretched
-          size="m"
-          onClick={() => setIsDrawerOpen(true)}
-          className="filters-open-btn"
-        >
-          Фильтры {hasFilters ? (
-          <button 
-            className="filter__icon"
-            onClick={(e) =>{
-              e.stopPropagation();
-              resetFilters()
-            }}
-            >
-            
-              <img src={closeIcon}/>
-            </button>
-            
-          ) : (
-            <img src={arrowDown} className="filter__icon"/>
-          )}
-        </Button>
+        <div className="search-and-filters">
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Поиск мероприятий..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+          <Button
+            mode={hasFilters ? "filled" : "outline"}
+            size="m"
+            onClick={() => setIsDrawerOpen(true)}
+            className="filters-open-btn"
+          >
+            Фильтры
+          </Button>
+        </div>
       </div>
-      
+
       <Filters
         filters={filters}
         onFilterChange={handleFilterChange}
@@ -346,18 +553,41 @@ export default function EventsDigest({ filters, setFilters }) {
         onReset={resetFilters}
       />
 
-
-      {hasFilters && (
+      {(hasFilters || isSearchMode) && !isLoadingEvents && (
+        <>
         <div className="events__found">
-          Нашёл для тебя события ({events.length}) на ближайшей неделе, которые подходят под твои интересы. 
+          {isSearchMode
+            ? `Результаты поиска «${searchQuery}»:`
+            : `Нашёл (${totalEvents}) мероприятий на ближайшей неделе`}
         </div>
+        <div className="week-navigation">
+  <button 
+    className="week-nav-btn prev"
+    onClick={prevWeek}
+    disabled={currentWeekOffset === 0}
+  >
+    Предыдущая неделя
+  </button>
+  <span className="week-range">
+    {weekRange.start} - {weekRange.end}
+  </span>
+  <button 
+    className="week-nav-btn next"
+    onClick={nextWeek}
+  >
+    Следующая неделя
+  </button>
+</div>
+        </>
+        
       )}
+
       <div className="digest-list">
-        {!hasFilters ? (
+        {!hasFilters && !isSearchMode ? (
           <Placeholder
             className="placeholder"
-            header="Выберите фильтры"
-            description="Нажмите на кнопку «Фильтры» и выберите интересующие вас параметры, чтобы увидеть мероприятия"
+            header="Выберите фильтры или введите поиск"
+            description="Нажмите «Фильтры» или введите запрос, чтобы найти мероприятия"
           />
         ) : isLoadingEvents ? (
           <div className="loading-container">
@@ -387,39 +617,82 @@ export default function EventsDigest({ filters, setFilters }) {
                 {typeof event.price === 'number' && (
                   <div className="digest__price">
                     <img src={priceIcon} alt="ruble icon" />
-                    {event.price === 0 ? "Бесплатно" : event.price}
+                    {event.price === 0 ? 'Бесплатно' : `${event.price}`}
+                  </div>
+                )}
+                {event.participation_type && (
+                  <div className="digest__partType">
+                    <img src={partType} alt="person speaking icon"/> 
+                    {event.participation_type}
                   </div>
                 )}
                 <div className="digest__location">
                   <img src={placeIcon} alt="icon" />
                   {event.city?.join(', ') || event.address || 'Онлайн'}
                 </div>
+
+                {event.event_url && (
+                  <div className="digest__eventUrl">
+                    <img src={webIcon} alt="site icon" className="icon"/>
+                      <a 
+                        href={event.event_url}
+                        onClick={(e) => handleOpenLink(e, event.event_url)}
+                        className="digest-link"
+                      >
+                        Сайт мероприятия
+                      </a>
+                  </div>
+                  )}
+
+
+
               </div>
-              {event.tags && event.tags.length > 0 && (
+              {event.tags?.length > 0 && (
                 <div className="digest__tags">
-                  {event.tags.map((tag, index) => (
-                    <span key={index} className="digest__tag">#{tag}</span>
+                  {event.tags.map((tag, i) => (
+                    <span key={i} className="digest__tag">#{tag}</span>
                   ))}
                 </div>
               )}
-              
-              <Link 
-                    to={`/events/${event.id}`} 
-                    state={{ token: token, userId: userId }}
-                    className="digest__link"
-                  >
-                    <button className="btn digest__knowMore">ПОДРОБНЕЕ</button>
-            </Link>
+              <Link
+                to={`/events/${event.id}`}
+                state={{ token, userId }}
+                className="digest__link"
+              >
+                <button className="btn digest__knowMore">ПОДРОБНЕЕ</button>
+              </Link>
             </div>
           ))
         ) : (
           <Placeholder
             className="placeholder"
-            header="Нет предстоящих мероприятий"
-            description="Попробуйте изменить параметры фильтрации"
+            header="Нет мероприятий"
+            description="Попробуйте изменить поисковый запрос или фильтры"
           />
         )}
       </div>
+
+      {!isLoadingEvents && events.length > 0 && totalPages > 1 && (
+        <div className="pagination">
+          <button
+            className="pagination-btn"
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 0}
+          >
+            Назад
+          </button>
+          <span className="pagination-info">
+            {currentPage + 1} / {totalPages}
+          </span>
+          <button
+            className="pagination-btn"
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages - 1}
+          >
+            Далее
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -5,6 +5,7 @@
   margin-bottom: 16px;
 }
 
+
 .edit-filters-btn {
   padding: 6px 12px;
   background-color: #1032A1;
@@ -84,15 +85,25 @@
   gap: 8px;
 }
 
-.profile-calendar-item,
-.profile-event-item,
-.profile-assistant-item {
-  padding: 10px 12px;
-  background-color: #f5f5f5;
-  border-radius: 10px;
+.all-calendars-list{
+  display: flex;
+  flex-direction: column;
+  gap:10px;
+}
+
+.calendar-item,
+.profile-assistant-item{
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-radius: 12px;
+  padding: 10 15px;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.09);
+}
+
+.apply-filters__btn{
+  width: 100%;
 }
 
 .calendar-provider {
@@ -193,8 +204,15 @@
   display: flex;
   overflow-x: auto;
   gap:7px;
-  margin-block: 9px;
+  margin-block: 20px;
   
+}
+
+.profile__filters-section{
+  border-radius: 20px;
+  padding: 30 15px;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .profile__filters-section,
@@ -206,6 +224,7 @@
 
 .profile-tab{
   font-size: 14px;
+  
 }
 
 .profile-tab.active{
@@ -232,27 +251,26 @@
   margin-bottom: 10px;
 }
 
-.chips-container {
+.profile_chips-container {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.chip {
+.profile_chip {
   padding: 8px 16px;
   background: #f0f2f8;
-  color: #1032A1;
+  color: black;
   border-radius: 10px;
   font-size: 14px;
-  border: 1px solid transparent;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: 'Montserrat';
 }
 
-.chip-active {
-  background: #e1e7f5;
-  border-color: #1032A1;
+.profile_chip-active {
+  background: linear-gradient(135deg, #56ff71 0%, #adffc6 100%);
+  border:none;
 }
 
 .reset-filters__btn {
@@ -386,4 +404,327 @@
   background: #f5f5f5;
   border-radius: 8px;
   margin-bottom: 8px;
+}
+
+
+/* стили для нового блока календарей */
+
+.calendar-subsection {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.calendar-subsection:last-child {
+  border-bottom: none;
+}
+
+.profile-calendars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-calendar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #f5f5f5;
+  border-radius: 12px;
+}
+
+.calendar-icon {
+  font-size: 24px;
+}
+
+.calendar-provider {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+}
+
+.calendar-delete-btn,
+.assistant-delete-btn {
+  padding: 6px 16px;
+  background: #fee2e2;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.calendar-delete-btn:hover {
+  background: #fecaca;
+}
+
+.external-calendars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.external-calendar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.calendar-name {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+}
+
+.calendar-connect-btn {
+  padding: 6px 20px;
+  background: linear-gradient(135deg, #1032a1, #0882ff);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+
+
+.calendar-connect-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* Модалка уведомления */
+.filter-success-modal {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  animation: slideUpFade 0.3s ease;
+}
+
+.filter-success-content {
+  
+  color: black;
+  padding: 12px 24px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* .success-icon {
+  background: white;
+  color: #2e7d32;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+} */
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+
+/* Помощники */
+.helpers-description {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.profile-assistants-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.profile-assistant-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.assistant-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.assistant-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.assistant-telegram-id {
+  font-size: 12px;
+  color: #666;
+}
+
+.assistant-delete-btn {
+  background: #ff4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.assistant-delete-btn:hover {
+  background: #cc0000;
+}
+
+.add-helper-btn {
+  width: 100%;
+  padding: 12px;
+  background: #56ff71;
+  color: #1032a1;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.add-helper-btn:hover {
+  background: #45a049;
+}
+
+/* Модальное окно */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.modal-content h3 {
+  margin: 0 0 12px 0;
+  color: #333;
+}
+
+.modal-content p {
+  margin: 0 0 16px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.helper-id-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.helper-id-input:focus {
+  outline: none;
+  border-color: #56ff71;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.modal-cancel-btn,
+.modal-confirm-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.modal-cancel-btn {
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  color: #666;
+}
+
+.modal-cancel-btn:hover {
+  background: #e0e0e0;
+}
+
+.modal-confirm-btn {
+  background: #56ff71;
+  border: none;
+  color: #1032a1;
+  font-weight: 600;
+}
+
+.modal-confirm-btn:hover {
+  background: #45a049;
+}
+
+.modal-confirm-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Уведомление */
+.filter-success-modal {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }

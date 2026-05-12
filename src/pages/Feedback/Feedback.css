@@ -15,3 +15,288 @@
 .star:hover {
   transform: scale(1.15);
 }
+
+
+.required-star {
+  color: #7d7d7d;
+  font-size: 16px;
+  margin-right: 4px;
+}
+
+/* Основной контейнер */
+.feedback-container {
+
+  min-height: 100vh;
+  background: var(--white, #ffffff);
+  padding: 40px 20px;
+}
+
+/* Заголовок */
+.feedback-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.feedback-header h1 {
+  font-size: 28px;
+  color: var(--blue-dark, #1032a1);
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Форма */
+.feedback-form {
+  max-width: 700px;
+  margin: 0 auto;
+  background: var(--white, #ffffff);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--gray-border, #e0e0e0);
+}
+
+/* Блок вопроса */
+.question-block {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--gray-border, #e0e0e0);
+}
+
+.question-block:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Текст вопроса */
+.question-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--black, #000000);
+  display: block;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+/* Контейнер звезд */
+.stars-container {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+/* Звездочки */
+.star {
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.star:hover {
+  transform: scale(1.15);
+}
+
+/* Секция с кнопками Да/Нет */
+.boolean-section {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* Кнопки Да/Нет */
+.boolean-btn {
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: 500;
+  border: 2px solid var(--gray-border, #e0e0e0);
+  background: var(--white, #ffffff);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Montserrat', sans-serif;
+  color: var(--gray-text, #666666);
+}
+
+.boolean-btn.active {
+  background: linear-gradient(135deg, var(--green-primary, #56ff71) 0%, var(--green-light, #adffc6) 100%);
+  border-color: transparent;
+  color: var(--black, #000000);
+}
+
+.boolean-btn:hover:not(.active) {
+  border-color: var(--blue-primary, #0882ff);
+  color: var(--blue-primary, #0882ff);
+}
+
+/* Textarea */
+.feedback-textarea {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid var(--gray-border, #e0e0e0);
+  border-radius: 12px;
+  font-size: 15px;
+  font-family: 'Montserrat', sans-serif;
+  resize: vertical;
+  transition: border-color 0.2s;
+  background: var(--white, #ffffff);
+  color: var(--black, #000000);
+}
+
+.feedback-textarea:focus {
+  outline: none;
+  border-color: var(--blue-primary, #0882ff);
+}
+
+/* Счетчик символов */
+.char-counter {
+  text-align: right;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--gray-text, #666666);
+}
+
+/* Кнопка отправки */
+.submit-section {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.submit-btn {
+  padding: 14px 32px;
+  background: linear-gradient(135deg, var(--blue-dark, #1032a1) 0%, var(--blue-primary, #0882ff) 100%);
+  color: var(--white, #ffffff);
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 50, 161, 0.3);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Сообщение об ошибке */
+.error-message {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Страница благодарности */
+.feedback-completed {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white, #ffffff);
+  padding: 20px;
+}
+
+.completion-card {
+  background: var(--white, #ffffff);
+  border-radius: 24px;
+  padding: 40px;
+  text-align: center;
+  max-width: 400px;
+  border: 1px solid var(--gray-border, #e0e0e0);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.completion-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.completion-card h2 {
+  font-size: 24px;
+  color: var(--black, #000000);
+  margin-bottom: 12px;
+}
+
+.completion-card p {
+  color: var(--gray-text, #666666);
+  margin-bottom: 30px;
+}
+
+.feedback-button {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--green-primary, #56ff71) 0%, var(--green-light, #adffc6) 100%);
+  color: var(--black, #000000);
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.feedback-button:hover {
+  transform: translateY(-2px);
+}
+
+/* Анимация появления для q10_sub */
+.slide-down {
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 600px) {
+  .feedback-container {
+    padding: 20px 15px;
+  }
+  
+  .feedback-form {
+    padding: 20px;
+  }
+  
+  .question-label {
+    font-size: 15px;
+  }
+  
+  .star {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .boolean-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+  
+  .submit-btn {
+    padding: 12px 24px;
+    width: 100%;
+  }
+  
+  .completion-card {
+    padding: 30px;
+    margin: 20px;
+  }
+}

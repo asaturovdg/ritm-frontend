@@ -1,0 +1,58 @@
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content {
+  flex: 1;
+  padding-bottom: 80px;
+}
+
+/* нижнее меню */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  display: flex;
+  justify-content: space-around;
+
+  background: #fff;
+  border-top: 1px solid #e0e0e0;
+
+  padding: 8px;
+  z-index: 100;
+}
+
+/* кнопки */
+.nav-btn {
+  flex: 1;
+
+  border: none;
+  background: transparent;
+
+  padding: 10px 6px;
+  border-radius: 12px;
+
+  font-size: 12px;
+  font-family: 'Montserrat', sans-serif;
+
+  color: #666;
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+/* hover */
+.nav-btn:hover {
+  background: #f5f5f5;
+}
+
+/* активная */
+.nav-btn.active {
+  background: linear-gradient(135deg, #56ff71 20%, #adffc6 100%);
+  color: #000;
+  font-weight: 600;
+}

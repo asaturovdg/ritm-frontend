@@ -92,35 +92,41 @@ button{
   font-weight: 600;
 }
 
+.filter-section-header{
+  margin-block: 10px;
+}
+
 .filter-section--chooseAll{
   background-color: #0882ff;
   color:white;
-  padding: 5px 10px;
-  border-radius: 10px;
-  margin-bottom: 10px;
+  padding:10px;
+  border-radius: 7px;
+  /* margin-bottom: 10px; */
 }
 
-.chips-container {
+.chips_filter-container {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.chip {
+.chip_filter {
   padding: 8px 16px;
   background: #f0f2f8;
-  color: #1032A1;
+  color: black;
   border-radius: 10px;
   font-size: 14px;
-  border: 1px solid transparent;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: 'Montserrat';
 }
 
-.chip-active {
-  background: #e1e7f5;
-  border-color: #1032A1;
+.chip_filter-active {
+   
+  background-image: linear-gradient(135deg, #56ff71 0%, #adffc6 100%) !important;
+  background-color: transparent !important;
+  border: none !important;
+
 }
 
 .cities-list, .participateType-list {
@@ -163,5 +169,4 @@ button{
   background: none;
   border: none;
   cursor: pointer;
-  padding: 5px;
 }
