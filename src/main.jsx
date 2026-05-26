@@ -20,7 +20,7 @@ meta.content = 'light only';
 document.head.appendChild(meta);
 
 createRoot(document.getElementById('root')).render(
-  <BrowserRouter basename="/IT-digest_tg">
+  <BrowserRouter basename="/">
     <StrictMode>
       <AppRoot platform="base">
         <App />
