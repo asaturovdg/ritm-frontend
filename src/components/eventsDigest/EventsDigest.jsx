@@ -121,8 +121,10 @@ export default function EventsDigest({ filters, setFilters }) {
   const [totalPages, setTotalPages] = useState(0);
   const searchDebounceRef = useRef(null);
 
-  const activeCount = Object.values(filters).flat().length;
-  const hasFilters = activeCount > 0;
+  const hasFilters = filters.cities.length > 0 &&
+                     filters.categories.length > 0 &&
+                     filters.eventTypes.length > 0 &&
+                     filters.participationTypes.length > 0;
   const isSearchMode = searchQuery.trim().length > 0;
 
   
