@@ -165,9 +165,13 @@ export const useAuth = () => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Небольшая задержка для инициализации WebApp в Max
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
+        // Ждём инициализации SDK (async-скрипты могут грузиться после React)
+        const start = Date.now();
+        while (Date.now() - start < 3000) {
+          if (window.WebApp?.initData || window.Telegram?.WebApp?.initData) break;
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+
         console.log('Initializing auth...');
         console.log('window.WebApp:', window.WebApp ? 'exists' : 'not found');
         console.log('window.Telegram:', window.Telegram ? 'exists' : 'not found');
