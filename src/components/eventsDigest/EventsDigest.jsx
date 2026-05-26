@@ -183,7 +183,7 @@ export default function EventsDigest({ filters, setFilters }) {
 
   // Основной fetch событий 
   const fetchEvents = useCallback(async (page = currentPage) => {
-    if (!hasFilters || !isAuthReady) {
+    if (!hasFilters || !isAuthReady || !token) {
       setEvents([]);
       setTotalEvents(0);
       setTotalPages(0);
@@ -231,7 +231,7 @@ export default function EventsDigest({ filters, setFilters }) {
   }, [filters, token, hasFilters, isAuthReady, handleInvalidToken, currentPage, currentWeekOffset]);
 
   const fetchAndSetEventsByIds = useCallback(async (ids, page) => {
-    if (!ids || ids.length === 0) {
+    if (!ids || ids.length === 0 || !token) {
       setEvents([]);
       setTotalEvents(0);
       setTotalPages(0);
