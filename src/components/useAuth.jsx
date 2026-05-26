@@ -193,6 +193,7 @@ export const useAuth = () => {
           const userData = await fetchUserData(savedToken);
           if (userData) {
             console.log('Saved token works');
+            setToken(savedToken);
             setIsAuthReady(true);
             setIsCheckingAuth(false);
             return;
