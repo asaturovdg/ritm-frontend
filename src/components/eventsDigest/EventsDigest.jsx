@@ -409,7 +409,6 @@ export default function EventsDigest({ filters, setFilters }) {
         const data = await res.json();
         localStorage.setItem('access_token', data.access_token);
         localStorage.setItem('refresh_token', data.refresh_token);
-        setToken(data.access_token);
         setShowInputCode(false);
         window.location.reload();
       } else {
