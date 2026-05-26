@@ -134,10 +134,10 @@ export default function EventsDigest({ filters, setFilters }) {
   useEffect(() => {
     if (userData) {
       const newFilters = {
-        cities: userData.city ? userData.city.split(',').map(c => c.trim()).filter(Boolean) : [],
-        categories: userData.track ? userData.track.split(',').map(t => t.trim()).filter(Boolean) : [],
-        eventTypes: userData.preferred_event_types ? userData.preferred_event_types.split(',').map(e => e.trim()).filter(Boolean) : [],
-        participationTypes: userData.preferred_participation_types ? userData.preferred_participation_types.split(',').map(p => p.trim()).filter(Boolean) : []
+        cities: userData.city ? userData.city.split(',').map(c => c.trim()).filter(c => c && c !== 'string') : [],
+        categories: userData.track ? userData.track.split(',').map(t => t.trim()).filter(t => t && t !== 'string') : [],
+        eventTypes: userData.preferred_event_types ? userData.preferred_event_types.split(',').map(e => e.trim()).filter(e => e && e !== 'string') : [],
+        participationTypes: userData.preferred_participation_types ? userData.preferred_participation_types.split(',').map(p => p.trim()).filter(p => p && p !== 'string') : []
       };
       setFilters(newFilters);
     }

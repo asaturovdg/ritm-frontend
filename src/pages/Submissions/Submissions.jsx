@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../components/useAuth.jsx";
 import "./Submissions.css";
 import { CITIES, EVENT_TYPES, PARTICIPATION_TYPES, CATEGORIES } from "../../data/filters.js";
 import backArr from "../../assets/icons/backArrow.svg";
@@ -14,8 +15,7 @@ const formatTime = (t) => t ? t.substring(0, 5) : '';
 const formatDate = (d) => d ? d.split('-').reverse().join('.') : '';
 
 export default function Submissions() {
-  const location = useLocation();
-  const token = location.state?.token || localStorage.getItem('access_token');
+  const { token, userId } = useAuth();
   const [activeMainTab, setActiveMainTab] = useState('create');
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -31,7 +31,6 @@ export default function Submissions() {
   // Состояния для заявок
   const [submissions, setSubmissions] = useState([]);
   const [isLoadingSubmissions, setIsLoadingSubmissions] = useState(false);
-  const [userId, setUserId] = useState(null);
   
   const [formData, setFormData] = useState({
     event_type: [],
@@ -81,34 +80,13 @@ export default function Submissions() {
   const currentQuestion = questions[step];
   const [tempInput, setTempInput] = useState("");
 
-  // Получение ID пользователя
-  const fetchUserId = async () => {
-    if (!token) return null;
-    try {
-      const response = await fetch('https://ritmevents.ru/api/v1/users/me', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUserId(data.id);
-        return data.id;
-      }
-    } catch (err) {
-      console.error('Ошибка получения пользователя:', err);
-    }
-    return null;
-  };
-
   // Загрузка заявок пользователя
   const fetchUserSubmissions = async () => {
-    if (!token) return;
-    
+    if (!token || !userId) return;
+
     setIsLoadingSubmissions(true);
     try {
-      let uid = userId;
-      if (!uid) {
-        uid = await fetchUserId();
-      }
+      const uid = userId;
       if (!uid) return;
       
       const response = await fetch(`https://ritmevents.ru/api/v1/users/${uid}/submissions`, {

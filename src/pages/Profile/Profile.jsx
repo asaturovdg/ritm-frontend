@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import './Profile.css';
+import { useAuth } from "../../components/useAuth.jsx";
 import Filters from "../../components/Filters/Filters.jsx";
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js";
 
@@ -11,6 +12,8 @@ import placeIcon from "../../assets/icons/Place.svg";
 import partType from "../../assets/icons/partType.svg"
 
 export function Profile() {
+  const { token, userData, isCheckingAuth } = useAuth();
+
   // Только нужные состояния для помощников
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteLink, setInviteLink] = useState(null);
@@ -21,11 +24,8 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   // Остальные состояния
   const [isSaving, setIsSaving] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [token, setToken] = useState(null);
-  const [userData, setUserData] = useState(null);
   const [activeTab, setActiveTab] = useState('myFilters');
   const [isConnectingCalendar, setIsConnectingCalendar] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [filters, setFilters] = useState({
@@ -140,56 +140,17 @@ const applyFilters = async () => {
 };
 
   useEffect(() => {
-    const accessToken = localStorage.getItem('access_token');
-    if (accessToken) {
-      setToken(accessToken);
-    } else {
-      setIsLoading(false);
-      setError('Не найден токен авторизации');
-    }
-  }, []);
+    if (!userData) return;
 
-  useEffect(() => {
-    if (!token) return;
-
-    const fetchUserData = async () => {
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        const response = await fetch('https://ritmevents.ru/api/v1/users/me', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUserData(data);
-          
-          const newFilters = {
-            cities: data.city ? data.city.split(',').map(c => c.trim()).filter(c => c && c !== 'string') : [],
-            categories: data.track ? data.track.split(',').map(t => t.trim()).filter(t => t && t !== 'string') : [],
-            eventTypes: data.preferred_event_types ? data.preferred_event_types.split(',').map(e => e.trim()).filter(e => e && e !== 'string') : [],
-            participationTypes: data.preferred_participation_types ? data.preferred_participation_types.split(',').map(p => p.trim()).filter(p => p && p !== 'string') : []
-          };
-          setFilters(newFilters);
-          await fetchAllExtraData(data.id);
-        } else if (response.status === 401) {
-          localStorage.removeItem('access_token');
-          setError('Сессия истекла. Пожалуйста, войдите снова');
-        }
-      } catch (err) {
-        console.error('Ошибка при запросе:', err);
-        setError('Не удалось подключиться к серверу');
-      } finally {
-        setIsLoading(false);
-      }
+    const newFilters = {
+      cities: userData.city ? userData.city.split(',').map(c => c.trim()).filter(c => c && c !== 'string') : [],
+      categories: userData.track ? userData.track.split(',').map(t => t.trim()).filter(t => t && t !== 'string') : [],
+      eventTypes: userData.preferred_event_types ? userData.preferred_event_types.split(',').map(e => e.trim()).filter(e => e && e !== 'string') : [],
+      participationTypes: userData.preferred_participation_types ? userData.preferred_participation_types.split(',').map(p => p.trim()).filter(p => p && p !== 'string') : []
     };
-
-    fetchUserData();
-  }, [token]);
+    setFilters(newFilters);
+    fetchAllExtraData(userData.id);
+  }, [userData]);
 
 
 
@@ -502,7 +463,7 @@ const copyInviteLink = () => {
     }
   };
   
-  if (isLoading) {
+  if (isCheckingAuth) {
     return (
       <div className="profile-container">
         <div className="profile-loading">

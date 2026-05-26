@@ -12,16 +12,16 @@ import google from "../../assets/icons/Google.svg"
 import backIcon from "../../assets/icons/backArrow.svg"; 
 
 import './Event.css';
+import { useAuth } from "../../components/useAuth.jsx";
 
 export default function Event({ embeddedId, isPreview = false, status }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { id: paramId } = useParams();
   const id = embeddedId || paramId;
+  const { token, userId, isCheckingAuth } = useAuth();
 
   const fromProfileEvents = location.state?.from === 'profile-events';
-  const token = location.state?.token || localStorage.getItem('access_token');
-  const userId = location.state?.userId || localStorage.getItem('user_id');
   
   // Получаем сохраненное состояние для возврата
   const returnState = {
@@ -80,6 +80,8 @@ export default function Event({ embeddedId, isPreview = false, status }) {
   };
 
   useEffect(() => {
+    if (isCheckingAuth) return;
+
     const fetchEvent = async () => {
       if (!id) {
         setError('ID события не указан');
@@ -140,7 +142,7 @@ export default function Event({ embeddedId, isPreview = false, status }) {
     };
 
     fetchEvent();
-  }, [id, token]);
+  }, [id, token, isCheckingAuth]);
 
   const openLink = (url) => {
     const tg = window.Telegram?.WebApp;

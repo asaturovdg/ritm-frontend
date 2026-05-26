@@ -1,13 +1,11 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
 import "./Feedback.css";
 import emptyStar from "../../assets/icons/star_empty.svg";
 import filledStar from "../../assets/icons/star_filled.svg";
+import { useAuth } from "../../components/useAuth.jsx";
 
 export default function Feedback() {
-  const location = useLocation();
-  const token = location.state?.token || localStorage.getItem('access_token');
-  const userId = location.state?.userId || localStorage.getItem('user_id');
+  const { token } = useAuth();
 
   const [answers, setAnswers] = useState({
     q1: 0,
