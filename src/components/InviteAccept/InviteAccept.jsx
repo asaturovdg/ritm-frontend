@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import './InviteAccept.css'
+import { useAuth } from "../useAuth.jsx";
+
 export default function InviteAccept() {
   const { token } = useParams();
+  const { token: authToken } = useAuth();
   const [loading, setLoading] = useState(true);
   const [ownerInfo, setOwnerInfo] = useState(null);
   const [error, setError] = useState(null);
@@ -14,9 +17,8 @@ export default function InviteAccept() {
   useEffect(() => {
     const fetchPreview = async () => {
       try {
-        const accessToken = localStorage.getItem('access_token');
         const headers = { 'Content-Type': 'application/json' };
-        if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+        if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
 
         const response = await fetch(
           `https://ritmevents.ru/api/v1/assistants/invite/${token}`,
@@ -52,8 +54,7 @@ export default function InviteAccept() {
   const acceptInvite = async () => {
     setAccepting(true);
     try {
-      const accessToken = localStorage.getItem('access_token');
-      if (!accessToken) {
+      if (!authToken) {
         setError('Необходима авторизация');
         return;
       }
@@ -63,7 +64,7 @@ export default function InviteAccept() {
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
+            'Authorization': `Bearer ${authToken}`,
             'Content-Type': 'application/json'
           }
         }
