@@ -497,6 +497,38 @@
   cursor: not-allowed;
 }
 
+.calendar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-open-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #1032A1;
+  padding: 4px 6px;
+  border-radius: 6px;
+  line-height: 1;
+}
+
+.calendar-open-btn:hover {
+  background: #e8ecf8;
+}
+
+.calendar-badge-btn {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  font-size: 12px;
+  text-align: left;
+}
+
+.calendar-badge-btn:hover {
+  filter: brightness(0.93);
+}
 
 /* Модалка уведомления */
 .filter-success-modal {

@@ -81,6 +81,19 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
     }
   };
 
+  const calendarRootUrl = {
+    google: 'https://calendar.google.com/',
+    yandex: 'https://calendar.yandex.ru/'
+  };
+
+  const getCalendarOpenUrl = (provider, date) => {
+    if (provider === 'google') {
+      const [y, m, d] = date.split('-');
+      return `https://calendar.google.com/calendar/r/day/${y}/${m}/${d}`;
+    }
+    return `https://calendar.yandex.ru/?date=${date}`;
+  };
+
   // функция для подключения календарей
   const connectCalendar = async (provider) => {
     if (!token) {
@@ -626,14 +639,23 @@ const copyInviteLink = () => {
                           <span className="calendar-name">{calendar.name}</span>
                         </div>
                         {isConnected ? (
-                          <button 
-                            className="calendar-delete-btn"
-                            onClick={() => deleteCalendar(calendar.id)}
-                          >
-                            Удалить
-                          </button>
+                          <div className="calendar-actions">
+                            <button
+                              className="calendar-open-btn"
+                              onClick={() => openLink(calendarRootUrl[calendar.id])}
+                              title="Открыть календарь"
+                            >
+                              ↗
+                            </button>
+                            <button
+                              className="calendar-delete-btn"
+                              onClick={() => deleteCalendar(calendar.id)}
+                            >
+                              Удалить
+                            </button>
+                          </div>
                         ) : (
-                          <button 
+                          <button
                             className="calendar-connect-btn"
                             onClick={() => connectCalendar(calendar.id)}
                             disabled={isConnectingCalendar}
@@ -664,10 +686,15 @@ const copyInviteLink = () => {
                   const event = item.eventDetails;
                   return (
                     <div key={item.id} className="profile-event-card">
-                      {item.provider && (
-                        <div className="calendar-badge">
+                      {item.provider && item.eventDetails?.start_date && (
+                        <button
+                          className="calendar-badge calendar-badge-btn"
+                          onClick={() => openLink(getCalendarOpenUrl(item.provider, item.eventDetails.start_date))}
+                          title="Открыть в календаре"
+                        >
                           {item.provider === 'google' ? 'Google Календарь' : 'Яндекс Календарь'}
-                        </div>
+                          {' '}↗
+                        </button>
                       )}
                       <div className="digest__header">
                         <p className="digest__type">{event.event_type?.join(', ')}</p>
