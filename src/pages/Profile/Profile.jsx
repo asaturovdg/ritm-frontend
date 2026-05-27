@@ -686,10 +686,15 @@ const copyInviteLink = () => {
                   const event = item.eventDetails;
                   return (
                     <div key={item.id} className="profile-event-card">
-                      {item.provider && (
-                        <div className="calendar-badge">
+                      {item.provider && item.eventDetails?.start_date && (
+                        <button
+                          className="calendar-badge calendar-badge-btn"
+                          onClick={() => openLink(getCalendarOpenUrl(item.provider, item.eventDetails.start_date))}
+                          title="Открыть в календаре"
+                        >
                           {item.provider === 'google' ? 'Google Календарь' : 'Яндекс Календарь'}
-                        </div>
+                          {' '}↗
+                        </button>
                       )}
                       <div className="digest__header">
                         <p className="digest__type">{event.event_type?.join(', ')}</p>
