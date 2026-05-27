@@ -81,6 +81,19 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
     }
   };
 
+  const calendarRootUrl = {
+    google: 'https://calendar.google.com/',
+    yandex: 'https://calendar.yandex.ru/'
+  };
+
+  const getCalendarOpenUrl = (provider, date) => {
+    if (provider === 'google') {
+      const [y, m, d] = date.split('-');
+      return `https://calendar.google.com/calendar/r/day/${y}/${m}/${d}`;
+    }
+    return `https://calendar.yandex.ru/?date=${date}`;
+  };
+
   // функция для подключения календарей
   const connectCalendar = async (provider) => {
     if (!token) {
@@ -626,14 +639,23 @@ const copyInviteLink = () => {
                           <span className="calendar-name">{calendar.name}</span>
                         </div>
                         {isConnected ? (
-                          <button 
-                            className="calendar-delete-btn"
-                            onClick={() => deleteCalendar(calendar.id)}
-                          >
-                            Удалить
-                          </button>
+                          <div className="calendar-actions">
+                            <button
+                              className="calendar-open-btn"
+                              onClick={() => openLink(calendarRootUrl[calendar.id])}
+                              title="Открыть календарь"
+                            >
+                              ↗
+                            </button>
+                            <button
+                              className="calendar-delete-btn"
+                              onClick={() => deleteCalendar(calendar.id)}
+                            >
+                              Удалить
+                            </button>
+                          </div>
                         ) : (
-                          <button 
+                          <button
                             className="calendar-connect-btn"
                             onClick={() => connectCalendar(calendar.id)}
                             disabled={isConnectingCalendar}
