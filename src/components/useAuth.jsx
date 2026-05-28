@@ -168,7 +168,15 @@ export const useAuth = () => {
         // Ждём инициализации SDK (async-скрипты могут грузиться после React)
         const start = Date.now();
         while (Date.now() - start < 3000) {
-          if (window.WebApp?.initData || window.Telegram?.WebApp?.initData) break;
+          if (window.WebApp?.initData) {
+            window.WebApp.ready();
+            break;
+          }
+          if (window.Telegram?.WebApp?.initData) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+            break;
+          }
           await new Promise(resolve => setTimeout(resolve, 50));
         }
 
