@@ -168,11 +168,11 @@ export const useAuth = () => {
         // Ждём инициализации SDK (async-скрипты могут грузиться после React)
         const start = Date.now();
         while (Date.now() - start < 3000) {
-          if (window.WebApp?.initData) {
+          if (window.WebApp?.initData && detectPlatform() === PLATFORMS.MAX) {
             window.WebApp.ready();
             break;
           }
-          if (window.Telegram?.WebApp?.initData) {
+          if (window.Telegram?.WebApp?.initData && detectPlatform() === PLATFORMS.TELEGRAM) {
             window.Telegram.WebApp.ready();
             window.Telegram.WebApp.expand();
             break;
