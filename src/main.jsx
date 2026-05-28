@@ -7,12 +7,6 @@ import '@telegram-apps/telegram-ui/dist/styles.css';
 import './index.css'
 import App from './App/App'
 
-const tg = window.Telegram?.WebApp;
-if (tg) {
-  tg.ready();      
-  tg.expand();
-}
-
 
 const meta = document.createElement('meta');
 meta.name = 'color-scheme';
