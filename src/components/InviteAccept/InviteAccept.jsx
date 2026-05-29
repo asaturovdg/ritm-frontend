@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import './InviteAccept.css'
-import { useAuth } from "../useAuth.jsx";
+import { useAuth } from "../AuthContext.jsx";
 
 export default function InviteAccept() {
   const { token } = useParams();

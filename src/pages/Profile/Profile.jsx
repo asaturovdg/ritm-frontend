@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import './Profile.css';
-import { useAuth } from "../../components/useAuth.jsx";
+import { useAuth } from "../../components/AuthContext.jsx";
 import Filters from "../../components/Filters/Filters.jsx";
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js";
 

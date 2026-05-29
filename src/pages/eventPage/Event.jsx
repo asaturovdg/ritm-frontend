@@ -12,7 +12,7 @@ import google from "../../assets/icons/Google.svg"
 import backIcon from "../../assets/icons/backArrow.svg"; 
 
 import './Event.css';
-import { useAuth } from "../../components/useAuth.jsx";
+import { useAuth } from "../../components/AuthContext.jsx";
 
 export default function Event({ embeddedId, isPreview = false, status }) {
   const location = useLocation();
