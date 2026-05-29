@@ -35,6 +35,10 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
     participationTypes: []
   });
 
+  const [digestPeriod, setDigestPeriod] = useState('daily');
+  const [digestDay, setDigestDay] = useState(null);
+  const [weeklyDayError, setWeeklyDayError] = useState(false);
+
   const [assistants, setAssistants] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [calendars, setCalendars] = useState([]);
@@ -162,6 +166,8 @@ const applyFilters = async () => {
       participationTypes: userData.preferred_participation_types ? userData.preferred_participation_types.split(',').map(p => p.trim()).filter(p => p && p !== 'string') : []
     };
     setFilters(newFilters);
+    setDigestPeriod(userData.digest_period ?? 'daily');
+    setDigestDay(userData.digest_day_of_week ?? null);
     fetchAllExtraData(userData.id);
   }, [userData]);
 
@@ -190,6 +196,28 @@ const applyFilters = async () => {
       });
     } catch (error) {
       console.error('Ошибка сохранения фильтров:', error);
+    }
+  };
+
+  const saveDigestPeriod = async (period, day) => {
+    if (period === 'weekly' && day === null) {
+      setWeeklyDayError(true);
+      return;
+    }
+    setWeeklyDayError(false);
+    try {
+      await fetch(`https://ritmevents.ru/api/v1/users/${userData.id}/digest`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ period, day_of_week: day })
+      });
+      setShowFilterSuccessModal(true);
+      setTimeout(() => setShowFilterSuccessModal(false), 1500);
+    } catch (err) {
+      console.error('Ошибка сохранения периодичности:', err);
     }
   };
 
@@ -599,6 +627,57 @@ const copyInviteLink = () => {
                 ))}
               </div>
             </div>
+            <div className="filter-section">
+              <div className="filter-section-header">
+                <h3 className="filter-section__title">Периодичность дайджеста</h3>
+              </div>
+              <div className="profile_chips-container">
+                {[
+                  { value: 'daily', label: 'Каждый день' },
+                  { value: 'every_2_days', label: 'Раз в 2 дня' },
+                  { value: 'weekly', label: 'Раз в неделю' },
+                ].map(({ value, label }) => (
+                  <button
+                    key={value}
+                    className={`profile_chip ${digestPeriod === value ? 'profile_chip-active' : ''}`}
+                    onClick={() => {
+                      setDigestPeriod(value);
+                      if (value !== 'weekly') {
+                        setDigestDay(null);
+                        setWeeklyDayError(false);
+                        saveDigestPeriod(value, null);
+                      }
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {digestPeriod === 'weekly' && (
+                <div className="profile_chips-container" style={{ marginTop: '0.5rem' }}>
+                  {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((dayLabel, idx) => (
+                    <button
+                      key={idx}
+                      className={`profile_chip ${digestDay === idx ? 'profile_chip-active' : ''}`}
+                      onClick={() => {
+                        setDigestDay(idx);
+                        setWeeklyDayError(false);
+                        saveDigestPeriod('weekly', idx);
+                      }}
+                    >
+                      {dayLabel}
+                    </button>
+                  ))}
+                  {weeklyDayError && (
+                    <p style={{ color: '#e74c3c', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+                      Выберите день недели
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
             <button
               className={`apply-filters__btn ${isSaving ? 'saving' : ''}`}
               onClick={applyFilters}
