@@ -2,7 +2,7 @@ import { useState } from "react";
 import "./Feedback.css";
 import emptyStar from "../../assets/icons/star_empty.svg";
 import filledStar from "../../assets/icons/star_filled.svg";
-import { useAuth } from "../../components/useAuth.jsx";
+import { useAuth } from "../../components/AuthContext.jsx";
 
 export default function Feedback() {
   const { token } = useAuth();

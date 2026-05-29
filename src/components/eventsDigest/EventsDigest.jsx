@@ -4,7 +4,7 @@ import './EventsDigest.css';
 import { Link, useLocation } from "react-router-dom";
 import Filters from "../Filters/Filters";
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js"
-import { useAuth } from "../useAuth.jsx";
+import { useAuth } from "../AuthContext.jsx";
 import { openLink } from "../../data/platformService.js"
 
 import dateIcon from "../../assets/icons/DateRange.svg";

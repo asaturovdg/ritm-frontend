@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../components/useAuth.jsx";
+import { useAuth } from "../../components/AuthContext.jsx";
 import "./Submissions.css";
 import { CITIES, EVENT_TYPES, PARTICIPATION_TYPES, CATEGORIES } from "../../data/filters.js";
 import backArr from "../../assets/icons/backArrow.svg";
