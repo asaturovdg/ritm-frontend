@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../components/AuthContext.jsx";
+import { usePlatform } from "../../platform/usePlatform.js";
 import "./Submissions.css";
 import { CITIES, EVENT_TYPES, PARTICIPATION_TYPES, CATEGORIES } from "../../data/filters.js";
 import backArr from "../../assets/icons/backArrow.svg";
@@ -16,6 +17,7 @@ const formatDate = (d) => d ? d.split('-').reverse().join('.') : '';
 
 export default function Submissions() {
   const { token, userId } = useAuth();
+  const { openLink } = usePlatform();
   const [activeMainTab, setActiveMainTab] = useState('create');
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -465,15 +467,6 @@ export default function Submissions() {
       </div>
     );
   }
-
-  const openLink = (url) => {
-    const tg = window.Telegram?.WebApp;
-    if (tg && tg.openLink) {
-      tg.openLink(url);
-    } else {
-      window.open(url, '_blank');
-    }
-  };
 
   const handleOpenLink = (e, url) => {
     e.preventDefault();

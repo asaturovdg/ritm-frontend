@@ -1,13 +1,14 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useAuth } from "./AuthContext.jsx";
-import { openLink } from "../data/platformService.js";
+import { usePlatform } from "../platform/usePlatform.js";
 
 const API_URL = "https://ritmevents.ru/api/v1";
 
 const PROVIDER_LABEL = { google: 'Google', yandex: 'Яндекс' };
 
 export function useCalendar() {
-  const { token, userId, platform } = useAuth();
+  const { token, userId } = useAuth();
+  const { openLink } = usePlatform();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
   const mountedRef = useRef(true);
@@ -48,28 +49,48 @@ export function useCalendar() {
     return data.oauth_url;
   }, [token]);
 
-  // Polls GET /users/{userId}/calendars every second until connected.
-  // Stops early if component unmounts. Returns boolean.
-  const waitForCalendarConnection = useCallback(async (provider, maxAttempts = 30) => {
-    for (let i = 0; i < maxAttempts; i++) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      if (!mountedRef.current) return false;
-      try {
-        const res = await fetch(`${API_URL}/users/${userId}/calendars`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const calendars = await res.json();
-          if (calendars.some(cal => cal.provider === provider && cal.is_active === true)) {
-            return true;
-          }
+  // Waits for calendar connection: instant via localStorage storage event (set by
+  // App.jsx when OAuth redirect lands), with API polling as fallback.
+  const waitForCalendarConnection = useCallback((provider, maxAttempts = 5) => {
+    return new Promise((resolve) => {
+      let resolved = false;
+      let timeoutId = null;
+      let attempts = 0;
+
+      const finish = (result) => {
+        if (resolved) return;
+        resolved = true;
+        window.removeEventListener('storage', onStorage);
+        clearTimeout(timeoutId);
+        resolve(result);
+      };
+
+      const onStorage = (e) => {
+        if (e.key === 'calendar_connected') {
+          try {
+            const { provider: p } = JSON.parse(e.newValue);
+            if (p === provider) finish(true);
+          } catch {}
+        } else if (e.key === 'calendar_error') {
+          finish(false);
         }
-      } catch (err) {
-        console.error('Ошибка ожидания календаря:', err);
-      }
-    }
-    return false;
-  }, [token, userId]);
+      };
+      window.addEventListener('storage', onStorage);
+
+      const poll = async () => {
+        if (!mountedRef.current) { finish(false); return; }
+        if (attempts >= maxAttempts) { finish(false); return; }
+        attempts++;
+        try {
+          const connected = await checkCalendarConnected(provider);
+          if (connected) { finish(true); return; }
+        } catch {}
+        if (!resolved) timeoutId = setTimeout(poll, 2000);
+      };
+
+      timeoutId = setTimeout(poll, 2000);
+    });
+  }, [checkCalendarConnected]);
 
   // POST /events/{eventId}/add-to-calendar (throws on error)
   const addEventToCalendar = useCallback(async (eventId, provider) => {
@@ -99,7 +120,7 @@ export function useCalendar() {
 
       if (!isConnected) {
         const oauthUrl = await connectCalendar(provider);
-        openLink(oauthUrl, platform);
+        openLink(oauthUrl);
         const connected = await waitForCalendarConnection(provider);
         if (!connected) throw new Error('Не удалось подключить календарь. Попробуйте позже.');
       }
@@ -113,7 +134,7 @@ export function useCalendar() {
     } finally {
       if (mountedRef.current) setIsProcessing(false);
     }
-  }, [token, userId, platform, checkCalendarConnected, connectCalendar, waitForCalendarConnection, addEventToCalendar]);
+  }, [token, userId, openLink, checkCalendarConnected, connectCalendar, waitForCalendarConnection, addEventToCalendar]);
 
   return {
     isProcessing,

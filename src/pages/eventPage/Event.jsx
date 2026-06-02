@@ -13,6 +13,7 @@ import google from "../../assets/icons/Google.svg"
 import './Event.css';
 import { useAuth } from "../../components/AuthContext.jsx";
 import { useCalendar } from "../../components/useCalendar.jsx";
+import { usePlatform } from "../../platform/usePlatform.js";
 
 export default function Event({ embeddedId, isPreview = false, status }) {
   const location = useLocation();
@@ -21,6 +22,7 @@ export default function Event({ embeddedId, isPreview = false, status }) {
   const id = embeddedId || paramId;
   const { token, isCheckingAuth } = useAuth();
   const { isProcessing, handleAddToCalendar } = useCalendar();
+  const { openLink, showAlert } = usePlatform();
 
   const fromProfileEvents = location.state?.from === 'profile-events';
   
@@ -137,23 +139,13 @@ export default function Event({ embeddedId, isPreview = false, status }) {
     fetchEvent();
   }, [id, token, isCheckingAuth]);
 
-  const openLink = (url) => {
-    const tg = window.Telegram?.WebApp;
-    if (tg?.openLink) {
-      tg.openLink(url);
-    } else {
-      window.open(url, '_blank');
-    }
-  };
-
   const onAddToCalendar = (provider) => {
-    const tg = window.Telegram?.WebApp;
     handleAddToCalendar(event.id, provider, {
       onSuccess: (label) => {
-        tg?.showAlert(`Событие добавлено в ${label} Календарь`);
+        showAlert(`Событие добавлено в ${label} Календарь`);
         setAddToCalendar(false);
       },
-      onError: (msg) => tg?.showAlert(`Ошибка: ${msg}`)
+      onError: (msg) => showAlert(`Ошибка: ${msg}`)
     });
   };
 
