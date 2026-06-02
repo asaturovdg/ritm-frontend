@@ -16,7 +16,7 @@ import partType from "../../assets/icons/partType.svg"
 export function Profile() {
   const { token, userData, isCheckingAuth } = useAuth();
   const { connectCalendar, waitForCalendarConnection } = useCalendar();
-  const { filters, setFilters, saveFilters } = useUserFilters();
+  const { filters, setFilters, saveFilters, isSaving } = useUserFilters();
 
   // Только нужные состояния для помощников
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -26,7 +26,6 @@ export function Profile() {
 const [showCopySuccessModal, setShowCopySuccessModal] = useState(false);
 const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   // Остальные состояния
-  const [isSaving, setIsSaving] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState('myFilters');
   const [isConnectingCalendar, setIsConnectingCalendar] = useState(false);
@@ -171,7 +170,6 @@ const applyFilters = async () => {
         : [...current, value]
     };
     setFilters(updated);
-    saveFiltersToServer(updated);
   };
 
   const toggleAll = (section, allValues) => {
@@ -180,7 +178,6 @@ const applyFilters = async () => {
       [section]: filters[section].length === allValues.length ? [] : [...allValues]
     };
     setFilters(updated);
-    saveFiltersToServer(updated);
   };
 
   // Удаление помощника
@@ -614,7 +611,7 @@ const copyInviteLink = () => {
               onClick={() => {
                 const empty = { cities: [], categories: [], eventTypes: [], participationTypes: [] };
                 setFilters(empty);
-                saveFiltersToServer(empty);
+                saveFilters(empty);
               }}
             >
               Сбросить всё

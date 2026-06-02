@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import InviteAccept from '../components/InviteAccept/InviteAccept';
 import EventsDigest from '../components/eventsDigest/EventsDigest';
@@ -14,34 +14,14 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [filters, setFilters] = useState({
-    cities: [],
-    categories: [],
-    eventTypes: [],
-    participationTypes: []
-  });
-
-  
   useEffect(() => {
-  const tg = window.Telegram?.WebApp;
-  const initDataUnsafe = tg?.initDataUnsafe;
-  const startParam = initDataUnsafe?.start_param;
-  
-  console.log(' [App] Telegram WebApp:', tg);
-  console.log(' [App] initDataUnsafe:', initDataUnsafe);
-  console.log(' [App] startParam:', startParam);
-  
-  if (startParam) {
-    console.log(' [App] startParam exists, starts with invite_:', startParam.startsWith('invite_'));
-  }
-  
-  if (startParam && startParam.startsWith('invite_')) {
-  const inviteToken = startParam.replace('invite_', '');
-  navigate(`/invite/assistant/${inviteToken}`, { replace: true });
-} else {
-    console.log(' [App] No invite param found or invalid format');
-  }
-}, [navigate]);
+    const tg = window.Telegram?.WebApp;
+    const startParam = tg?.initDataUnsafe?.start_param;
+    if (startParam && startParam.startsWith('invite_')) {
+      const inviteToken = startParam.replace('invite_', '');
+      navigate(`/invite/assistant/${inviteToken}`, { replace: true });
+    }
+  }, [navigate]);
 
   // Обработка кнопки "Назад" в Telegram
   useEffect(() => {
@@ -102,9 +82,9 @@ useEffect(() => {
 
         <div className="app-content">
           <Routes>
-            <Route path='/' element={<EventsDigest filters={filters} setFilters={setFilters} />} />
+            <Route path='/' element={<EventsDigest />} />
             <Route path='/events/:id' element={<Event />} />
-            <Route path='/profile' element={<Profile filters={filters} setFilters={setFilters} />} />
+            <Route path='/profile' element={<Profile />} />
             <Route path='/feedback' element={<Feedback />} />
             <Route path='/submissions' element={<Submissions />} />
             
