@@ -22,8 +22,6 @@ export const getPlatform = () => {
 };
 
 export const openLink = (url, platform) => {
-  console.log(`Opening link on ${platform}:`, url);
-  
   if (platform === 'telegram' && window.Telegram?.WebApp?.openLink) {
     window.Telegram.WebApp.openLink(url);
   } 

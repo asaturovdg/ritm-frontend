@@ -9,17 +9,18 @@ import webIcon from "../../assets/icons/web.svg";
 import blueCalendar from "../../assets/icons/calendarBlue.svg";
 import yandex from "../../assets/icons/Yandex.svg"
 import google from "../../assets/icons/Google.svg"
-import backIcon from "../../assets/icons/backArrow.svg"; 
 
 import './Event.css';
 import { useAuth } from "../../components/AuthContext.jsx";
+import { useCalendar } from "../../components/useCalendar.jsx";
 
 export default function Event({ embeddedId, isPreview = false, status }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { id: paramId } = useParams();
   const id = embeddedId || paramId;
-  const { token, userId, isCheckingAuth } = useAuth();
+  const { token, isCheckingAuth } = useAuth();
+  const { isProcessing, handleAddToCalendar } = useCalendar();
 
   const fromProfileEvents = location.state?.from === 'profile-events';
   
@@ -35,7 +36,6 @@ export default function Event({ embeddedId, isPreview = false, status }) {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('description');
   const [addToCalendar, setAddToCalendar] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   // Функция для возврата на дайджест с сохранением состояния
   const handleBack = () => {
@@ -106,21 +106,14 @@ export default function Event({ embeddedId, isPreview = false, status }) {
         }
 
         const url = `https://ritmevents.ru/api/v1/events/${eventId}`;
-        console.log('Fetching event from:', url);
 
         const response = await fetch(url, {
           headers: headers,
           method: 'GET'
         });
 
-        console.log('Response status:', response.status);
-
         if (response.ok) {
           const data = await response.json();
-          console.log('Event data loaded');
-          console.log('   event_url:', data.event_url);
-          console.log('   registration_url:', data.registration_url);
-          
           setEvent(data);
           if (activeTab === 'speakers' && !data.speakers?.length) setActiveTab('description');
           if (activeTab === 'organizers' && !data.organizers?.length) setActiveTab('description');
@@ -146,138 +139,22 @@ export default function Event({ embeddedId, isPreview = false, status }) {
 
   const openLink = (url) => {
     const tg = window.Telegram?.WebApp;
-    if (tg && tg.openLink) {
+    if (tg?.openLink) {
       tg.openLink(url);
     } else {
       window.open(url, '_blank');
     }
   };
 
-  const waitForCalendarConnection = async (provider, maxAttempts = 30) => {
-    for (let i = 0; i < maxAttempts; i++) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      try {
-        const response = await fetch(`https://ritmevents.ru/api/v1/users/${userId}/calendars`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (response.ok) {
-          const calendars = await response.json();
-          const isConnected = calendars.some(cal => cal.provider === provider && cal.is_active === true);
-          if (isConnected) {
-            return true;
-          }
-        }
-      } catch (error) {
-        console.error('Ошибка проверки:', error);
-      }
-    }
-    return false;
-  };
-
-  const checkCalendarConnected = async (provider) => {
-    if (!token || !userId) return false;
-
-    try {
-      const response = await fetch(`https://ritmevents.ru/api/v1/users/${userId}/calendars`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (response.ok) {
-        const calendars = await response.json();
-        return calendars.some(cal => cal.provider === provider && cal.is_active === true);
-      }
-      return false;
-    } catch (error) {
-      console.error('Ошибка проверки календаря:', error);
-      return false;
-    }
-  };
-
-  const connectCalendar = async (provider) => {
-    const response = await fetch('https://ritmevents.ru/api/v1/calendars/connect', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ provider })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Ошибка подключения: ${response.status} ${errorText}`);
-    }
-
-    const data = await response.json();
-    return data.oauth_url;
-  };
-
-  const addEventToCalendar = async (provider) => {
-    const response = await fetch(`https://ritmevents.ru/api/v1/events/${event.id}/add-to-calendar`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ provider })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Ошибка добавления: ${response.status} ${errorText}`);
-    }
-
-    return await response.json();
-  };
-
-  const handleAddToCalendar = async (provider) => {
-    if (!token) {
-      const tg = window.Telegram?.WebApp;
-      tg?.showAlert('Необходимо авторизоваться');
-      return;
-    }
-
-    if (!userId) {
-      const tg = window.Telegram?.WebApp;
-      tg?.showAlert('Ошибка: не удалось определить пользователя');
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      const isConnected = await checkCalendarConnected(provider);
-
-      if (isConnected) {
-        await addEventToCalendar(provider);
-        const tg = window.Telegram?.WebApp;
-        tg?.showAlert(`Событие добавлено в ${provider === 'google' ? 'Google' : 'Яндекс'} Календарь`);
+  const onAddToCalendar = (provider) => {
+    const tg = window.Telegram?.WebApp;
+    handleAddToCalendar(event.id, provider, {
+      onSuccess: (label) => {
+        tg?.showAlert(`Событие добавлено в ${label} Календарь`);
         setAddToCalendar(false);
-      } else {
-        const oauthUrl = await connectCalendar(provider);
-        openLink(oauthUrl);
-
-        const tg = window.Telegram?.WebApp;
-
-        const connected = await waitForCalendarConnection(provider);
-
-        if (connected) {
-          await addEventToCalendar(provider);
-          tg?.showAlert(`Событие добавлено в ${provider === 'google' ? 'Google' : 'Яндекс'} Календарь`);
-          setAddToCalendar(false);
-        } else {
-          tg?.showAlert('Не удалось подключить календарь. Попробуйте позже.');
-        }
-      }
-    } catch (error) {
-      console.error('Ошибка:', error);
-      const tg = window.Telegram?.WebApp;
-      tg?.showAlert(`Ошибка: ${error.message}`);
-    } finally {
-      setIsProcessing(false);
-    }
+      },
+      onError: (msg) => tg?.showAlert(`Ошибка: ${msg}`)
+    });
   };
 
   const parseSpeakerName = (speaker) => {
@@ -488,11 +365,11 @@ export default function Event({ embeddedId, isPreview = false, status }) {
 
                       {addToCalendar && (
                         <div className="calendar-dropdown">
-                          <button onClick={() => handleAddToCalendar('google')} disabled={isProcessing} className="calendar--btn">
+                          <button onClick={() => onAddToCalendar('google')} disabled={isProcessing} className="calendar--btn">
                             <img src={google} alt='google icon'/>
                             Google Календарь
                           </button>
-                          <button onClick={() => handleAddToCalendar('yandex')} disabled={isProcessing} className="calendar--btn">
+                          <button onClick={() => onAddToCalendar('yandex')} disabled={isProcessing} className="calendar--btn">
                             <img src={yandex} alt='yandex icon'/>
                             Яндекс Календарь
                           </button>
