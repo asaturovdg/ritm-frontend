@@ -66,11 +66,14 @@ export function useCalendar() {
       };
 
       const onStorage = (e) => {
-        if (e.key !== 'calendar_connected') return;
-        try {
-          const { provider: p } = JSON.parse(e.newValue);
-          if (p === provider) finish(true);
-        } catch {}
+        if (e.key === 'calendar_connected') {
+          try {
+            const { provider: p } = JSON.parse(e.newValue);
+            if (p === provider) finish(true);
+          } catch {}
+        } else if (e.key === 'calendar_error') {
+          finish(false);
+        }
       };
       window.addEventListener('storage', onStorage);
 
