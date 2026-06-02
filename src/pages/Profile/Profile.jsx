@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import './Profile.css';
 import { useAuth } from "../../components/AuthContext.jsx";
 import { useCalendar } from "../../components/useCalendar.jsx";
+import { usePlatform } from "../../platform/usePlatform.js";
 import { useUserFilters } from "../../components/useUserFilters.jsx";
 import Filters from "../../components/Filters/Filters.jsx";
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js";
@@ -16,6 +17,7 @@ import partType from "../../assets/icons/partType.svg"
 export function Profile() {
   const { token, userData, isCheckingAuth } = useAuth();
   const { connectCalendar, waitForCalendarConnection } = useCalendar();
+  const { openLink } = usePlatform();
   const { filters, setFilters, saveFilters, isSaving } = useUserFilters();
 
   // Только нужные состояния для помощников
@@ -70,15 +72,6 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
     const eventDateObj = new Date(eventDate);
     eventDateObj.setHours(0, 0, 0, 0);
     return eventDateObj >= today;
-  };
-
-  const openLink = (url) => {
-    const tg = window.Telegram?.WebApp;
-    if (tg && tg.openLink) {
-      tg.openLink(url);
-    } else {
-      window.open(url, '_blank');
-    }
   };
 
   const calendarRootUrl = {
