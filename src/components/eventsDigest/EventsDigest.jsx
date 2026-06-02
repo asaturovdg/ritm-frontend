@@ -82,15 +82,8 @@ export default function EventsDigest({ filters, setFilters }) {
     isCheckingAuth,
     showInputCode,
     setShowInputCode,
-    authError
   } = useAuth();
   
-  useEffect(() => {
-  console.log('=== CURRENT PLATFORM ===', platform);
-  console.log('window.WebApp:', window.WebApp);
-  console.log('window.WebApp?.initData:', window.WebApp?.initData);
-}, [platform]);
-
   const location = useLocation();
   
   // Состояния для дайджеста
@@ -119,7 +112,7 @@ export default function EventsDigest({ filters, setFilters }) {
   const [loginError, setLoginError] = useState('');
   const [totalEvents, setTotalEvents] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const searchDebounceRef = useRef(null);
+  const searchIdRef = useRef(0);
 
   const hasFilters = filters.cities.length > 0 &&
                      filters.categories.length > 0 &&
@@ -232,35 +225,42 @@ export default function EventsDigest({ filters, setFilters }) {
     }
   }, [filters, token, hasFilters, isAuthReady, handleInvalidToken, currentPage, currentWeekOffset]);
 
-  const fetchAndSetEventsByIds = useCallback(async (ids, page) => {
+  const fetchAndSetEventsByIds = useCallback(async (ids, page, searchId) => {
     if (!ids || ids.length === 0 || !token) {
       setEvents([]);
       setTotalEvents(0);
       setTotalPages(0);
       return;
     }
-    const start = page * ITEMS_PER_PAGE;
-    const pageIds = ids.slice(start, start + ITEMS_PER_PAGE);
+    const pageIds = ids.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
 
     setIsLoadingEvents(true);
     try {
-      const results = await Promise.all(
-        pageIds.map(async (id) => {
-          const res = await fetch(`https://ritmevents.ru/api/v1/events/${id}`, {
-            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-          });
-          return res.ok ? res.json() : null;
-        })
-      );
-      const validEvents = results.filter(event => 
-        event && !isEventPassed(event.start_date, event.start_time)
-      );
-      setEvents(validEvents);
+      const res = await fetch('https://ritmevents.ru/api/v1/events/by-ids', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
+        body: JSON.stringify({ ids: pageIds })
+      });
+
+      if (searchId !== undefined && searchId !== searchIdRef.current) return;
+
+      if (res.ok) {
+        const data = await res.json();
+        const validEvents = (data.items || data || []).filter(
+          event => event && !isEventPassed(event.start_date, event.start_time)
+        );
+        setEvents(validEvents);
+      } else {
+        setEvents([]);
+      }
     } catch (e) {
       console.error('Ошибка загрузки событий по ID:', e);
       setEvents([]);
     } finally {
-      setIsLoadingEvents(false);
+      if (searchId === undefined || searchId === searchIdRef.current) setIsLoadingEvents(false);
     }
   }, [token]);
 
@@ -282,15 +282,14 @@ export default function EventsDigest({ filters, setFilters }) {
     setWeekRange({ start: range.start, end: range.end });
   }, [currentWeekOffset]);
 
-  const runSearch = useCallback(async (query, page = 0) => {
-    console.log('runSearch запущен, query:', query);
+  const runSearch = useCallback(async (query, page = 0, searchId) => {
     setEvents([]);
     setIsLoadingEvents(true);
     try {
       const { startISO, endISO } = getWeekRange(currentWeekOffset);
-      
+
       const body = {
-        query: query,
+        query,
         limit: ITEMS_PER_PAGE,
         offset: page * ITEMS_PER_PAGE,
         date_from: startISO,
@@ -306,15 +305,18 @@ export default function EventsDigest({ filters, setFilters }) {
         body: JSON.stringify(body)
       });
 
+      // Discard stale responses (another search was started after this one)
+      if (searchId !== searchIdRef.current) return;
+
       if (res.ok) {
         const data = await res.json();
         const ids = data.event_ids || [];
-        
+
         setTotalEvents(ids.length);
         setTotalPages(Math.ceil(ids.length / ITEMS_PER_PAGE));
-        
+
         if (ids.length > 0) {
-          await fetchAndSetEventsByIds(ids, page);
+          await fetchAndSetEventsByIds(ids, page, searchId);
         } else {
           setEvents([]);
         }
@@ -327,7 +329,7 @@ export default function EventsDigest({ filters, setFilters }) {
       console.error('Ошибка в runSearch:', e);
       setEvents([]);
     } finally {
-      setIsLoadingEvents(false);
+      if (searchId === searchIdRef.current) setIsLoadingEvents(false);
     }
   }, [token, fetchAndSetEventsByIds, currentWeekOffset]);
 
@@ -335,8 +337,11 @@ export default function EventsDigest({ filters, setFilters }) {
     if (!isAuthReady) return;
 
     if (searchQuery.trim()) {
-      runSearch(searchQuery.trim(), currentPage);
-      return;
+      const tid = setTimeout(() => {
+        searchIdRef.current += 1;
+        runSearch(searchQuery.trim(), currentPage, searchIdRef.current);
+      }, 300);
+      return () => clearTimeout(tid);
     }
 
     if (hasFilters) {
@@ -416,7 +421,7 @@ export default function EventsDigest({ filters, setFilters }) {
       } else {
         setLoginError('Неверный или истёкший код. Попробуйте ещё раз.');
       }
-    } catch (e) {
+    } catch {
       setLoginError('Ошибка соединения. Попробуйте позже.');
     }
   };
@@ -438,8 +443,9 @@ export default function EventsDigest({ filters, setFilters }) {
     );
   }
 
-  // Отображение ввода кода
+  // Отображение ввода кода (только в dev-режиме)
   if (showInputCode) {
+    if (import.meta.env.VITE_DEV_MODE !== 'true') return null;
     return (
       <div className="events">
         <div className="login-container">
