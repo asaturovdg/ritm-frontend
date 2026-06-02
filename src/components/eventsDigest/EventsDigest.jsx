@@ -6,7 +6,7 @@ import Filters from "../Filters/Filters";
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js"
 import { useAuth } from "../AuthContext.jsx";
 import { useUserFilters } from "../useUserFilters.jsx";
-import { openLink } from "../../data/platformService.js"
+import { usePlatform } from "../../platform/usePlatform.js"
 
 import dateIcon from "../../assets/icons/DateRange.svg";
 import timeIcon from "../../assets/icons/time.svg";
@@ -74,7 +74,6 @@ const getWeekRange = (offset = 0) => {
 
 export default function EventsDigest() {
   const {
-    platform,
     token,
     userId,
     isAuthReady,
@@ -82,6 +81,7 @@ export default function EventsDigest() {
     showInputCode,
     setShowInputCode,
   } = useAuth();
+  const { openLink, expandApp } = usePlatform();
   const { filters, setFilters, saveFilters } = useUserFilters();
   
   const location = useLocation();
@@ -122,10 +122,8 @@ export default function EventsDigest() {
 
   
   useEffect(() => {
-    if (platform === 'telegram' && window.Telegram?.WebApp?.expand) {
-      window.Telegram.WebApp.expand();
-    }
-  }, [platform]);
+    expandApp();
+  }, [expandApp]);
   // Сохраняем состояние в sessionStorage
   useEffect(() => {
     sessionStorage.setItem('events_week_offset', currentWeekOffset);
@@ -383,7 +381,7 @@ export default function EventsDigest() {
 
   const handleOpenLink = (e, url) => {
     e.preventDefault();
-    openLink(url, platform);
+    openLink(url);
   };
 
   // Отображение загрузки
