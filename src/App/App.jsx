@@ -49,12 +49,25 @@ export default function App() {
 useEffect(() => {
   const urlParams = new URLSearchParams(window.location.search);
   const redirectPath = urlParams.get('redirect');
-  
+
   if (redirectPath && redirectPath.startsWith('/invite/assistant/')) {
     const token = redirectPath.split('/').pop();
     navigate(`/invite/assistant/${token}`, { replace: true });
   }
 }, [navigate]);
+
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const connected = params.get('calendar_connected');
+  const provider = params.get('provider');
+  if (connected === 'true' && provider) {
+    localStorage.setItem(
+      'calendar_connected',
+      JSON.stringify({ provider, ts: Date.now() })
+    );
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+}, []);
 
   const getActiveTab = () => {
     if (location.pathname === '/' || location.pathname.includes('/events/')) return 'events';
