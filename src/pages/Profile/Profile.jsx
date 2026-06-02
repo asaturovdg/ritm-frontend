@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import './Profile.css';
 import { useAuth } from "../../components/AuthContext.jsx";
+import { useCalendar } from "../../components/useCalendar.jsx";
+import { useUserFilters } from "../../components/useUserFilters.jsx";
 import Filters from "../../components/Filters/Filters.jsx";
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js";
 
@@ -13,6 +15,8 @@ import partType from "../../assets/icons/partType.svg"
 
 export function Profile() {
   const { token, userData, isCheckingAuth } = useAuth();
+  const { connectCalendar, waitForCalendarConnection } = useCalendar();
+  const { filters, setFilters, saveFilters } = useUserFilters();
 
   // Только нужные состояния для помощников
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -28,13 +32,6 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   const [isConnectingCalendar, setIsConnectingCalendar] = useState(false);
   const [error, setError] = useState(null);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [filters, setFilters] = useState({
-    cities: [],
-    categories: [],
-    eventTypes: [],
-    participationTypes: []
-  });
-
   const [digestPeriod, setDigestPeriod] = useState('daily');
   const [digestDay, setDigestDay] = useState(null);
   const [weeklyDayError, setWeeklyDayError] = useState(false);
@@ -99,7 +96,7 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   };
 
   // функция для подключения календарей
-  const connectCalendar = async (provider) => {
+  const handleConnectCalendar = async (provider) => {
     if (!token) {
       setError('Необходима авторизация');
       return;
@@ -109,30 +106,11 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
     setError(null);
 
     try {
-      const response = await fetch('https://ritmevents.ru/api/v1/calendars/connect', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ provider })
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Ошибка подключения: ${response.status} ${errorText}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.oauth_url) {
-        openLink(data.oauth_url);
-        
-        setTimeout(() => {
-          if (userData) {
-            fetchAllExtraData(userData.id);
-          }
-        }, 5000);
+      const oauthUrl = await connectCalendar(provider);
+      openLink(oauthUrl);
+      const connected = await waitForCalendarConnection(provider);
+      if (connected && userData) {
+        await fetchAllExtraData(userData.id);
       }
     } catch (err) {
       console.error('Ошибка:', err);
@@ -144,28 +122,13 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
 
 const applyFilters = async () => {
   if (!token || !userData) return;
-  
-  try {
-    await saveFiltersToServer(filters);
-    setShowFilterSuccessModal(true);
-    setTimeout(() => setShowFilterSuccessModal(false), 1500);
-  } catch (error) {
-    console.error('Ошибка:', error);
-    setError('Не удалось сохранить фильтры');
-    setTimeout(() => setError(null), 3000);
-  }
+  await saveFilters(filters);
+  setShowFilterSuccessModal(true);
+  setTimeout(() => setShowFilterSuccessModal(false), 1500);
 };
 
   useEffect(() => {
     if (!userData) return;
-
-    const newFilters = {
-      cities: userData.city ? userData.city.split(',').map(c => c.trim()).filter(c => c && c !== 'string') : [],
-      categories: userData.track ? userData.track.split(',').map(t => t.trim()).filter(t => t && t !== 'string') : [],
-      eventTypes: userData.preferred_event_types ? userData.preferred_event_types.split(',').map(e => e.trim()).filter(e => e && e !== 'string') : [],
-      participationTypes: userData.preferred_participation_types ? userData.preferred_participation_types.split(',').map(p => p.trim()).filter(p => p && p !== 'string') : []
-    };
-    setFilters(newFilters);
     setDigestPeriod(userData.digest_period ?? 'daily');
     setDigestDay(userData.digest_day_of_week ?? null);
     fetchAllExtraData(userData.id);
@@ -176,28 +139,6 @@ const applyFilters = async () => {
 
 
 
-
-  const saveFiltersToServer = async (newFilters) => {
-    if (!token || !userData) return;
-    try {
-      const payload = {
-        city: newFilters.cities.join(','),
-        track: newFilters.categories.join(','),
-        preferred_event_types: newFilters.eventTypes.join(','),
-        preferred_participation_types: newFilters.participationTypes.join(',')
-      };
-      await fetch(`https://ritmevents.ru/api/v1/users/${userData.id}/filters`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-    } catch (error) {
-      console.error('Ошибка сохранения фильтров:', error);
-    }
-  };
 
   const saveDigestPeriod = async (period, day) => {
     if (period === 'weekly' && day === null) {
@@ -278,9 +219,7 @@ const deleteHelper = async (assistantId) => {
 
 // Создание инвайт-ссылки
 const createInviteLink = async () => {
-  console.log('[createInviteLink] Starting...');
   if (!token) {
-    console.log('[createInviteLink] No token');
     setError("Необходима авторизация");
     return;
   }
@@ -289,7 +228,6 @@ const createInviteLink = async () => {
   setError(null);
 
   try {
-    console.log('[createInviteLink] Sending POST to /api/v1/assistants/invite');
     const response = await fetch('https://ritmevents.ru/api/v1/assistants/invite', {
       method: 'POST',
       headers: {
@@ -297,29 +235,18 @@ const createInviteLink = async () => {
         'Content-Type': 'application/json'
       }
     });
-    
-    console.log('[createInviteLink] Response status:', response.status);
-    
+
     const responseText = await response.text();
-    console.log('[createInviteLink] Response body:', responseText);
 
     if (response.ok) {
       const data = JSON.parse(responseText);
-      
-      
-      
       const inviteUrl = `https://t.me/sber_events_agg_bot?startapp=invite_${data.token}`;
-      
-      
-      console.log('[createInviteLink] Invite URL (GitHub Pages):', inviteUrl);
-      
       setInviteLink({
         ...data,
         invite_url: inviteUrl
       });
       setShowInviteModal(true);
     } else {
-      console.log('[createInviteLink] Error:', response.status);
       setError("Ошибка создания приглашения");
       setTimeout(() => setError(null), 3000);
     }
@@ -465,7 +392,6 @@ const copyInviteLink = () => {
     
     const calendarExists = calendars.some(cal => cal.provider === provider);
     if (!calendarExists) {
-      console.log(`Календарь ${provider} не найден в списке`);
       await fetchAllExtraData(userData.id);
       return;
     }
@@ -489,9 +415,7 @@ const copyInviteLink = () => {
         setCalendars(prev => prev.filter(cal => cal.provider !== provider));
         setCalendarEvents(prev => prev.filter(event => event.provider !== provider));
         setUpcomingEvents(prev => prev.filter(event => event.provider !== provider));
-        console.log(`Календарь ${providerName} успешно удалён`);
       } else if (response.status === 404) {
-        console.log(`Календарь ${providerName} не найден на сервере`);
         await fetchAllExtraData(userData.id);
       } else if (response.status === 401) {
         localStorage.removeItem('access_token');
@@ -736,7 +660,7 @@ const copyInviteLink = () => {
                         ) : (
                           <button
                             className="calendar-connect-btn"
-                            onClick={() => connectCalendar(calendar.id)}
+                            onClick={() => handleConnectCalendar(calendar.id)}
                             disabled={isConnectingCalendar}
                           >
                             {isConnectingCalendar ? 'Подключение...' : 'Подключить'}
