@@ -400,7 +400,7 @@ export default function EventsDigest() {
 
   // Отображение ввода кода (только в dev-режиме)
   if (showInputCode) {
-    if (import.meta.env.VITE_DEV_MODE !== 'true') return null;
+    if (import.meta.env.VITE_DEV_MODE === 'false') return null;
     return (
       <div className="events">
         <div className="login-container">

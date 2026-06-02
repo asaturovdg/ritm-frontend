@@ -21,6 +21,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_DEV_MODE: 'false'
 
       - name: Setup SSH
         run: |
