@@ -5,6 +5,7 @@ import { Link, useLocation } from "react-router-dom";
 import Filters from "../Filters/Filters";
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js"
 import { useAuth } from "../AuthContext.jsx";
+import { useUserFilters } from "../useUserFilters.jsx";
 import { openLink } from "../../data/platformService.js"
 
 import dateIcon from "../../assets/icons/DateRange.svg";
@@ -71,18 +72,17 @@ const getWeekRange = (offset = 0) => {
   };
 };
 
-export default function EventsDigest({ filters, setFilters }) {
-  // 
+export default function EventsDigest() {
   const {
     platform,
     token,
     userId,
-    userData,
     isAuthReady,
     isCheckingAuth,
     showInputCode,
     setShowInputCode,
   } = useAuth();
+  const { filters, setFilters, saveFilters } = useUserFilters();
   
   const location = useLocation();
   
@@ -126,18 +126,6 @@ export default function EventsDigest({ filters, setFilters }) {
       window.Telegram.WebApp.expand();
     }
   }, [platform]);
-  useEffect(() => {
-    if (userData) {
-      const newFilters = {
-        cities: userData.city ? userData.city.split(',').map(c => c.trim()).filter(c => c && c !== 'string') : [],
-        categories: userData.track ? userData.track.split(',').map(t => t.trim()).filter(t => t && t !== 'string') : [],
-        eventTypes: userData.preferred_event_types ? userData.preferred_event_types.split(',').map(e => e.trim()).filter(e => e && e !== 'string') : [],
-        participationTypes: userData.preferred_participation_types ? userData.preferred_participation_types.split(',').map(p => p.trim()).filter(p => p && p !== 'string') : []
-      };
-      setFilters(newFilters);
-    }
-  }, [userData, setFilters]);
-
   // Сохраняем состояние в sessionStorage
   useEffect(() => {
     sessionStorage.setItem('events_week_offset', currentWeekOffset);
@@ -151,30 +139,6 @@ export default function EventsDigest({ filters, setFilters }) {
     localStorage.removeItem('user_id');
     setShowInputCode(true);
   }, [setShowInputCode]);
-
-  // Сохранение фильтров на сервер 
-  const saveFiltersToServer = useCallback(async (newFilters, authToken, uid) => {
-    if (!authToken || !uid) return;
-    try {
-      const payload = {
-        city: newFilters.cities.join(','),
-        track: newFilters.categories.join(','),
-        preferred_event_types: newFilters.eventTypes.join(','),
-        preferred_participation_types: newFilters.participationTypes.join(',')
-      };
-      const res = await fetch(`https://ritmevents.ru/api/v1/users/${uid}/filters`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-      if (res.status === 401) handleInvalidToken();
-    } catch (e) {
-      console.error('Ошибка сохранения фильтров:', e);
-    }
-  }, [handleInvalidToken]);
 
   // Основной fetch событий 
   const fetchEvents = useCallback(async (page = currentPage) => {
@@ -368,18 +332,16 @@ export default function EventsDigest({ filters, setFilters }) {
     setCurrentPage(0);
   };
 
-  const handleFilterChange = useCallback(async (newFilters) => {
+  const handleFilterChange = useCallback((newFilters) => {
     setFilters(newFilters);
     setCurrentPage(0);
-    if (token && userId && isAuthReady) {
-      await saveFiltersToServer(newFilters, token, userId);
-    }
+    saveFilters(newFilters);
     if (searchQuery.trim()) {
       runSearch(searchQuery.trim(), 0);
     }
-  }, [token, userId, setFilters, saveFiltersToServer, isAuthReady, searchQuery, runSearch]);
+  }, [setFilters, saveFilters, searchQuery, runSearch]);
 
-  const resetFilters = useCallback(async () => {
+  const resetFilters = useCallback(() => {
     const empty = { cities: [], categories: [], eventTypes: [], participationTypes: [] };
     setFilters(empty);
     setCurrentPage(0);
@@ -388,15 +350,8 @@ export default function EventsDigest({ filters, setFilters }) {
     sessionStorage.removeItem('events_search_query');
     setCurrentWeekOffset(0);
     setSearchQuery('');
-    
-    if (token && userId && isAuthReady) {
-      await saveFiltersToServer(empty, token, userId);
-    }
-    
-    if (searchQuery.trim()) {
-      runSearch(searchQuery.trim(), 0);
-    }
-  }, [token, userId, setFilters, saveFiltersToServer, isAuthReady, searchQuery, runSearch]);
+    saveFilters(empty);
+  }, [setFilters, saveFilters]);
 
   const goToPage = (page) => {
     setCurrentPage(page);
