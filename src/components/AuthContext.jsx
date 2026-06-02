@@ -18,7 +18,6 @@ const detectPlatform = () => {
   const userAgent = navigator.userAgent.toLowerCase();
 
   if (typeof window !== 'undefined' && window.WebApp?.initData) {
-    console.log('MAX detected via window.WebApp.initData');
     return PLATFORMS.MAX;
   }
 
@@ -28,12 +27,10 @@ const detectPlatform = () => {
     urlParams.get('init_data') ||
     window.__MESSENGER_MAX__
   ) {
-    console.log('MAX detected via userAgent/params');
     return PLATFORMS.MAX;
   }
 
   if (typeof window !== 'undefined' && window.Telegram?.WebApp?.initData) {
-    console.log('Telegram detected');
     return PLATFORMS.TELEGRAM;
   }
 
@@ -49,7 +46,6 @@ const detectPlatform = () => {
     return PLATFORMS.VK;
   }
 
-  console.log('No platform detected, using WEB');
   return PLATFORMS.WEB;
 };
 
@@ -70,7 +66,6 @@ const getInitData = (platform) => {
 
     case PLATFORMS.MAX: {
       if (window.WebApp?.initData) {
-        console.log('Getting MAX initData from window.WebApp');
         return window.WebApp.initData;
       }
       const p = new URLSearchParams(window.location.search);
@@ -172,29 +167,25 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // 1. Wait up to 3 s for platform SDK to load
-        const start = Date.now();
-        while (Date.now() - start < 3000) {
-          if (window.WebApp?.initData && detectPlatform() === PLATFORMS.MAX) {
+        const initSdk = () => {
+          if (window.WebApp?.initData) {
             window.WebApp.ready();
-            break;
+            return PLATFORMS.MAX;
           }
-          if (window.Telegram?.WebApp?.initData && detectPlatform() === PLATFORMS.TELEGRAM) {
+          if (window.Telegram?.WebApp?.initData) {
             window.Telegram.WebApp.ready();
             window.Telegram.WebApp.expand();
-            break;
+            return PLATFORMS.TELEGRAM;
           }
-          await new Promise(r => setTimeout(r, 50));
-        }
+          return detectPlatform();
+        };
 
-        const detectedPlatform = detectPlatform();
-        console.log('Detected platform:', detectedPlatform);
+        const detectedPlatform = initSdk();
         setPlatform(detectedPlatform);
 
         // 2. Try cached access_token
         const savedToken = localStorage.getItem('access_token');
         if (savedToken) {
-          console.log('Validating cached token...');
           const user = await fetchUserData(savedToken);
           if (user) {
             setToken(savedToken);
@@ -203,7 +194,6 @@ export function AuthProvider({ children }) {
           }
 
           // 3. Token invalid — try refresh
-          console.log('Cached token invalid, trying refresh...');
           const newToken = await tryRefresh();
           if (newToken) {
             const user = await fetchUserData(newToken);
@@ -217,16 +207,13 @@ export function AuthProvider({ children }) {
 
         // 4. Platform auth (Telegram / VK / MAX)
         if (detectedPlatform !== PLATFORMS.WEB) {
-          console.log(`Authorizing via platform: ${detectedPlatform}`);
           const result = await authorize(detectedPlatform);
           if (result.success) return;
-          console.warn('Platform auth failed:', result.error);
           setAuthError(result.error);
           return; // non-WEB: no code-input fallback
         }
 
         // 5. WEB only: show manual code input
-        console.log('WEB platform, showing code input');
         setShowInputCode(true);
       } catch (error) {
         console.error('Auth initialization error:', error);
