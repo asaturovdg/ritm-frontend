@@ -43,7 +43,11 @@ export function FiltersProvider({ children }) {
           preferred_participation_types: filtersToSave.participationTypes.join(','),
         }),
       });
-      if (res.ok) await refreshUserData();
+      if (res.ok) {
+        await refreshUserData();
+      } else {
+        console.error('Ошибка сохранения фильтров на сервер:', res.status, await res.text().catch(() => ''));
+      }
     } catch (err) {
       console.error('Ошибка сохранения фильтров:', err);
     }
