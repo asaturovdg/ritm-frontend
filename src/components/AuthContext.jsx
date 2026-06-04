@@ -13,8 +13,11 @@ const AUTH_ENDPOINTS = {
   max: 'https://ritmevents.ru/api/v1/auth/max'
 };
 
+const getMaxHashParams = () => new URLSearchParams(window.location.hash.slice(1));
+
 const detectPlatform = () => {
   const urlParams = new URLSearchParams(window.location.search);
+  const hashParams = getMaxHashParams();
   const userAgent = navigator.userAgent.toLowerCase();
 
   if (typeof window !== 'undefined' && window.WebApp?.initData) {
@@ -23,6 +26,7 @@ const detectPlatform = () => {
 
   if (
     userAgent.includes('messengermax') ||
+    hashParams.get('WebAppData') ||
     urlParams.get('initData') ||
     urlParams.get('init_data') ||
     window.__MESSENGER_MAX__
@@ -67,6 +71,10 @@ const getInitData = (platform) => {
     case PLATFORMS.MAX: {
       if (window.WebApp?.initData) {
         return window.WebApp.initData;
+      }
+      const hashParams = getMaxHashParams();
+      if (hashParams.get('WebAppData')) {
+        return hashParams.get('WebAppData');
       }
       const p = new URLSearchParams(window.location.search);
       return p.get('initData') || p.get('init_data');
