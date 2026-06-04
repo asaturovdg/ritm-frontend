@@ -228,6 +228,12 @@ export function AuthProvider({ children }) {
     initAuth();
   }, [authorize, fetchUserData, tryRefresh]);
 
+  const refreshUserData = useCallback(() => {
+    const accessToken = token || localStorage.getItem('access_token');
+    if (accessToken) return fetchUserData(accessToken);
+    return Promise.resolve(null);
+  }, [token, fetchUserData]);
+
   return (
     <AuthContext.Provider value={{
       platform,
@@ -243,7 +249,8 @@ export function AuthProvider({ children }) {
       setIsAuthReady,
       setToken,
       setUserId,
-      authorize
+      authorize,
+      refreshUserData,
     }}>
       {children}
     </AuthContext.Provider>
