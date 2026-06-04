@@ -114,9 +114,9 @@ export default function EventsDigest() {
   const [totalPages, setTotalPages] = useState(0);
   const searchIdRef = useRef(0);
 
-  const hasFilters = filters.cities.length > 0 ||
-                     filters.categories.length > 0 ||
-                     filters.eventTypes.length > 0 ||
+  const hasFilters = filters.cities.length > 0 &&
+                     filters.categories.length > 0 &&
+                     filters.eventTypes.length > 0 &&
                      filters.participationTypes.length > 0;
   const isSearchMode = searchQuery.trim().length > 0;
 
