@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext.jsx';
 
 const API_URL = 'https://ritmevents.ru/api/v1';
+const FILTERS_KEY = 'user_filters_session';
 
 const parseField = (value) =>
   value ? value.split(',').map(s => s.trim()).filter(s => s && s !== 'string') : [];
@@ -20,18 +21,32 @@ const EMPTY_FILTERS = {
   participationTypes: [],
 };
 
+function readSessionFilters() {
+  try {
+    const stored = sessionStorage.getItem(FILTERS_KEY);
+    return stored ? JSON.parse(stored) : null;
+  } catch { return null; }
+}
+
 export function useUserFilters() {
   const { token, userId, userData, refreshUserData } = useAuth();
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [isSaving, setIsSaving] = useState(false);
   const initializedRef = useRef(false);
 
-  // Apply server filters exactly once per mount
+  // Initialize once: sessionStorage (survives navigation) → userData (fresh load)
   useEffect(() => {
     if (!userData || initializedRef.current) return;
     initializedRef.current = true;
-    setFilters(parseFiltersFromUserData(userData));
+    const stored = readSessionFilters();
+    setFilters(stored ?? parseFiltersFromUserData(userData));
   }, [userData]);
+
+  // Persist every change to sessionStorage so navigation doesn't reset state
+  useEffect(() => {
+    if (!initializedRef.current) return;
+    sessionStorage.setItem(FILTERS_KEY, JSON.stringify(filters));
+  }, [filters]);
 
   const saveFilters = useCallback(async (filtersToSave) => {
     if (!token || !userId) return;
