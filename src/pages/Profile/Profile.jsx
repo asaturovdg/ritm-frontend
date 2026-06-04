@@ -18,7 +18,7 @@ export function Profile() {
   const { token, userData, isCheckingAuth } = useAuth();
   const { connectCalendar, waitForCalendarConnection } = useCalendar();
   const { openLink } = usePlatform();
-  const { filters, setFilters, saveFilters, isSaving } = useUserFilters();
+  const { filters, setFilters, saveFilters, flushPendingSave, isSaving } = useUserFilters();
 
   // Только нужные состояния для помощников
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -125,6 +125,8 @@ const applyFilters = async () => {
     setDigestDay(userData.digest_day_of_week ?? null);
     fetchAllExtraData(userData.id);
   }, [userData]);
+
+  useEffect(() => () => flushPendingSave(), [flushPendingSave]);
 
 
 
@@ -601,11 +603,7 @@ const copyInviteLink = () => {
             </button>
             <button
               className="reset-filters__btn"
-              onClick={() => {
-                const empty = { cities: [], categories: [], eventTypes: [], participationTypes: [] };
-                setFilters(empty);
-                saveFilters(empty);
-              }}
+              onClick={() => saveFilters({ cities: [], categories: [], eventTypes: [], participationTypes: [] })}
             >
               Сбросить всё
             </button>
