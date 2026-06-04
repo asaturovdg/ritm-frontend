@@ -94,8 +94,28 @@ export function FiltersProvider({ children }) {
     }
   }, []);
 
+  // Flush: fires any pending debounced PATCH immediately (call on component unmount)
+  const flushPendingSave = useCallback(() => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+      patchRef.current(filtersRef.current);
+    }
+  }, []);
+
+  // Save on app close — fires pending PATCH before the browser unloads
+  useEffect(() => {
+    const handle = () => {
+      if (saveTimerRef.current) {
+        patchRef.current(filtersRef.current);
+      }
+    };
+    window.addEventListener('beforeunload', handle);
+    return () => window.removeEventListener('beforeunload', handle);
+  }, []);
+
   return (
-    <FiltersContext.Provider value={{ filters, setFilters, saveFilters, isSaving }}>
+    <FiltersContext.Provider value={{ filters, setFilters, saveFilters, flushPendingSave, isSaving }}>
       {children}
     </FiltersContext.Provider>
   );
