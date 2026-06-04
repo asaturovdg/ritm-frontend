@@ -82,7 +82,7 @@ export default function EventsDigest() {
     setShowInputCode,
   } = useAuth();
   const { openLink, expandApp } = usePlatform();
-  const { filters, setFilters, saveFilters } = useUserFilters();
+  const { filters, saveFilters } = useUserFilters();
   
   const location = useLocation();
   
@@ -331,25 +331,23 @@ export default function EventsDigest() {
   };
 
   const handleFilterChange = useCallback((newFilters) => {
-    setFilters(newFilters);
-    setCurrentPage(0);
     saveFilters(newFilters);
+    setCurrentPage(0);
     if (searchQuery.trim()) {
       runSearch(searchQuery.trim(), 0);
     }
-  }, [setFilters, saveFilters, searchQuery, runSearch]);
+  }, [saveFilters, searchQuery, runSearch]);
 
   const resetFilters = useCallback(() => {
     const empty = { cities: [], categories: [], eventTypes: [], participationTypes: [] };
-    setFilters(empty);
+    saveFilters(empty);
     setCurrentPage(0);
     sessionStorage.removeItem('events_week_offset');
     sessionStorage.removeItem('events_page');
     sessionStorage.removeItem('events_search_query');
     setCurrentWeekOffset(0);
     setSearchQuery('');
-    saveFilters(empty);
-  }, [setFilters, saveFilters]);
+  }, [saveFilters]);
 
   const goToPage = (page) => {
     setCurrentPage(page);
