@@ -7,6 +7,7 @@ import '@telegram-apps/telegram-ui/dist/styles.css';
 import './index.css'
 import App from './App/App'
 import { AuthProvider } from './components/AuthContext.jsx'
+import { FiltersProvider } from './components/FiltersContext.jsx'
 
 
 const meta = document.createElement('meta');
@@ -19,7 +20,9 @@ createRoot(document.getElementById('root')).render(
     <StrictMode>
       <AppRoot platform="base">
         <AuthProvider>
-          <App />
+          <FiltersProvider>
+            <App />
+          </FiltersProvider>
         </AuthProvider>
       </AppRoot>
     </StrictMode>
