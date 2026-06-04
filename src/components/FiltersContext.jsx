@@ -20,12 +20,18 @@ const FiltersContext = createContext(null);
 
 export function FiltersProvider({ children }) {
   const { token, userId, userData, refreshUserData } = useAuth();
-  const [filters, setFiltersState] = useState(EMPTY_FILTERS);
+  const [filters, setFiltersState] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem(FILTERS_KEY);
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    return EMPTY_FILTERS;
+  });
   const [isSaving, setIsSaving] = useState(false);
 
   const initializedRef = useRef(false);
   // Always-current values for use inside async callbacks / setTimeout
-  const filtersRef = useRef(EMPTY_FILTERS);
+  const filtersRef = useRef(filters);
   const saveTimerRef = useRef(null);
   // patchRef points to the latest closure so setTimeout never captures stale token/userId
   const patchRef = useRef(null);
