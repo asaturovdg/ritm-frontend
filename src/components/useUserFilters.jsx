@@ -28,37 +28,43 @@ function readSessionFilters() {
   } catch { return null; }
 }
 
+function writeSessionFilters(filters) {
+  sessionStorage.setItem(FILTERS_KEY, JSON.stringify(filters));
+}
+
 export function useUserFilters() {
   const { token, userId, userData, refreshUserData } = useAuth();
-  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [filters, setFiltersState] = useState(EMPTY_FILTERS);
   const [isSaving, setIsSaving] = useState(false);
   const initializedRef = useRef(false);
-  const skipAutoSaveRef = useRef(false);
   const saveTimerRef = useRef(null);
+
+  // Wrapped setter: writes to sessionStorage synchronously so navigation
+  // can't race ahead of React's async useEffect flush.
+  const setFilters = useCallback((valueOrUpdater) => {
+    setFiltersState(prev => {
+      const next = typeof valueOrUpdater === 'function' ? valueOrUpdater(prev) : valueOrUpdater;
+      writeSessionFilters(next);
+      return next;
+    });
+  }, []);
 
   // Initialize once: sessionStorage (survives navigation) → userData (fresh load)
   useEffect(() => {
     if (!userData || initializedRef.current) return;
     initializedRef.current = true;
-    skipAutoSaveRef.current = true; // don't PATCH on initialization
     const stored = readSessionFilters();
-    setFilters(stored ?? parseFiltersFromUserData(userData));
+    const initial = stored ?? parseFiltersFromUserData(userData);
+    writeSessionFilters(initial);
+    setFiltersState(initial);
   }, [userData]);
 
-  // On every filter change: persist to sessionStorage + debounced PATCH to server
+  // Debounced auto-save to server on every user change.
+  // useEffect fires after render — that's fine, we already wrote to sessionStorage synchronously above.
   useEffect(() => {
-    if (!initializedRef.current) return;
-
-    sessionStorage.setItem(FILTERS_KEY, JSON.stringify(filters));
-
-    if (skipAutoSaveRef.current) {
-      skipAutoSaveRef.current = false;
-      return;
-    }
-
+    if (!initializedRef.current || !token || !userId) return;
     clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(async () => {
-      if (!token || !userId) return;
       try {
         const res = await fetch(`${API_URL}/users/${userId}/filters`, {
           method: 'PATCH',
@@ -78,14 +84,14 @@ export function useUserFilters() {
         console.error('Ошибка сохранения фильтров:', err);
       }
     }, 800);
-
     return () => clearTimeout(saveTimerRef.current);
   }, [filters, token, userId, refreshUserData]);
 
-  // Explicit save — cancels pending debounce and saves immediately
+  // Explicit save — cancels debounce and saves immediately
   const saveFilters = useCallback(async (filtersToSave) => {
     if (!token || !userId) return;
     clearTimeout(saveTimerRef.current);
+    writeSessionFilters(filtersToSave);
     setIsSaving(true);
     try {
       const res = await fetch(`${API_URL}/users/${userId}/filters`, {
