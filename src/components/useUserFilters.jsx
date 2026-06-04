@@ -21,7 +21,7 @@ const EMPTY_FILTERS = {
 };
 
 export function useUserFilters() {
-  const { token, userId, userData } = useAuth();
+  const { token, userId, userData, refreshUserData } = useAuth();
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [isSaving, setIsSaving] = useState(false);
   const initializedRef = useRef(false);
@@ -37,7 +37,7 @@ export function useUserFilters() {
     if (!token || !userId) return;
     setIsSaving(true);
     try {
-      await fetch(`${API_URL}/users/${userId}/filters`, {
+      const res = await fetch(`${API_URL}/users/${userId}/filters`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -50,12 +50,13 @@ export function useUserFilters() {
           preferred_participation_types: filtersToSave.participationTypes.join(','),
         }),
       });
+      if (res.ok) await refreshUserData();
     } catch (err) {
       console.error('Ошибка сохранения фильтров:', err);
     } finally {
       setIsSaving(false);
     }
-  }, [token, userId]);
+  }, [token, userId, refreshUserData]);
 
   return { filters, setFilters, saveFilters, isSaving };
 }
