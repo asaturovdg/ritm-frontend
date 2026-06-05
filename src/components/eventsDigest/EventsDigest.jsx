@@ -80,7 +80,7 @@ export default function EventsDigest() {
     setShowInputCode,
   } = useAuth();
   const { openLink, expandApp } = usePlatform();
-  const { filters, saveFilters } = useUserFilters();
+  const { filters } = useUserFilters();
   
   const location = useLocation();
   
