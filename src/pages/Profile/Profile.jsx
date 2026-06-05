@@ -123,6 +123,7 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
 const applyFilters = async () => {
   if (!token || !userData) return;
   await saveFilters(filters);
+  window.scrollTo(0, 0);
   navigate('/');
 };
 
