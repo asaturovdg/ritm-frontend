@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import './Profile.css';
 import { useAuth } from "../../components/AuthContext.jsx";
 import { useCalendar } from "../../components/useCalendar.jsx";
@@ -31,10 +31,17 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   const [activeTab, setActiveTab] = useState('myFilters');
   const [isConnectingCalendar, setIsConnectingCalendar] = useState(false);
   const [error, setError] = useState(null);
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [digestPeriod, setDigestPeriod] = useState('daily');
   const [digestDay, setDigestDay] = useState(null);
   const [weeklyDayError, setWeeklyDayError] = useState(false);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.tab) {
+      setActiveTab(location.state.tab);
+    }
+  }, [location.state?.tab]);
 
   const [assistants, setAssistants] = useState([]);
   const [submissions, setSubmissions] = useState([]);
@@ -419,6 +426,11 @@ const copyInviteLink = () => {
     }
   };
   
+  const hasAllFilters = filters.cities.length > 0 &&
+                        filters.categories.length > 0 &&
+                        filters.eventTypes.length > 0 &&
+                        filters.participationTypes.length > 0;
+
   if (isCheckingAuth) {
     return (
       <div className="profile-container">
@@ -479,6 +491,11 @@ const copyInviteLink = () => {
         {/* фильтры */}
         {activeTab === 'myFilters' && (
           <div className="profile__filters-section">
+            {!hasAllFilters && (
+              <div className="profile-inactive-banner">
+                ⚠️ Дайджест неактивен — заполни все разделы
+              </div>
+            )}
             <div className="filter-section">
               <div className="filter-section-header">
                 <h3 className="filter-section__title">Категории</h3>
@@ -542,6 +559,24 @@ const copyInviteLink = () => {
                 ))}
               </div>
             </div>
+            <button
+              className={`apply-filters__btn ${isSaving ? 'saving' : ''}`}
+              onClick={applyFilters}
+              disabled={isSaving}
+            >
+              {isSaving ? 'Сохранение...' : 'Сохранить фильтры'}
+            </button>
+            <button
+              className="reset-filters__btn"
+              onClick={() => saveFilters({ cities: [], categories: [], eventTypes: [], participationTypes: [] })}
+            >
+              Сбросить всё
+            </button>
+          </div>
+        )}
+
+        {activeTab === 'myFilters' && (
+          <div className="profile__digest-settings-section">
             <div className="filter-section">
               <div className="filter-section-header">
                 <h3 className="filter-section__title">Периодичность дайджеста</h3>
@@ -592,20 +627,6 @@ const copyInviteLink = () => {
                 </div>
               )}
             </div>
-
-            <button
-              className={`apply-filters__btn ${isSaving ? 'saving' : ''}`}
-              onClick={applyFilters}
-              disabled={isSaving}
-            >
-              {isSaving ? 'Сохранение...' : 'Сохранить фильтры'}
-            </button>
-            <button
-              className="reset-filters__btn"
-              onClick={() => saveFilters({ cities: [], categories: [], eventTypes: [], participationTypes: [] })}
-            >
-              Сбросить всё
-            </button>
           </div>
         )}
 

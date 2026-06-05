@@ -817,3 +817,19 @@
   color: #aaa;
   margin: 0 0 12px 0;
 }
+
+.profile-inactive-banner {
+  background: #fff8e1;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #8a6400;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.profile__digest-settings-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
