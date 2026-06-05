@@ -120,6 +120,14 @@ export default function EventsDigest() {
                      filters.participationTypes.length > 0;
   const isSearchMode = searchQuery.trim().length > 0;
 
+  const missingSections = [
+    { key: 'cities', label: 'Город', filled: filters.cities.length > 0 },
+    { key: 'categories', label: 'Категории', filled: filters.categories.length > 0 },
+    { key: 'eventTypes', label: 'Тип мероприятия', filled: filters.eventTypes.length > 0 },
+    { key: 'participationTypes', label: 'Тип участия', filled: filters.participationTypes.length > 0 },
+  ].filter(s => !s.filled);
+  const hasPartialFilters = missingSections.length < 4 && missingSections.length > 0;
+
   
   useEffect(() => {
     expandApp();
@@ -481,8 +489,12 @@ export default function EventsDigest() {
         {!hasFilters && !isSearchMode ? (
           <Placeholder
             className="placeholder"
-            header="Выберите фильтры или введите поиск"
-            description="Нажмите «Фильтры» или введите запрос, чтобы найти мероприятия"
+            header={hasPartialFilters ? 'Почти готово!' : 'Выберите фильтры'}
+            description={
+              hasPartialFilters
+                ? `Не хватает выбора в: ${missingSections.map(s => s.label).join(', ')}`
+                : 'Нужен выбор во всех разделах, чтобы увидеть события'
+            }
           />
         ) : isLoadingEvents ? (
           <div className="loading-container">

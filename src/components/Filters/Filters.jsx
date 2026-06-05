@@ -79,6 +79,14 @@ export default function Filters({ filters, onFilterChange, isOpen, setIsOpen, on
   const isAllEventTypesSelected = tempFilters.eventTypes.length === EVENT_TYPES.length;
   const isAllParticipationTypesSelected = tempFilters.participationTypes.length === PARTICIPATION_TYPES.length;
 
+  const sectionStatus = [
+    { key: 'categories', label: 'Категории', filled: tempFilters.categories.length > 0 },
+    { key: 'cities', label: 'Город', filled: tempFilters.cities.length > 0 },
+    { key: 'eventTypes', label: 'Тип мероприятия', filled: tempFilters.eventTypes.length > 0 },
+    { key: 'participationTypes', label: 'Тип участия', filled: tempFilters.participationTypes.length > 0 },
+  ];
+  const hasAllFilters = sectionStatus.every(s => s.filled);
+
   return (
     <div className="filters-drawer-overlay" onClick={applyFilters}>  
       <div className="filters-drawer" onClick={(e) => e.stopPropagation()}>
@@ -182,9 +190,25 @@ export default function Filters({ filters, onFilterChange, isOpen, setIsOpen, on
         </div>
 
         <div className="filter-actions">
-          <button className='apply-filters__btn' onClick={applyFilters}> 
-            Показать результаты
-          </button>
+          {!hasAllFilters && (
+            <>
+              <p className='filter-completion-warning'>
+                Выбери значения во всех разделах — иначе события не появятся
+              </p>
+              <div className='filter-completion-chips'>
+                {sectionStatus.map(s => (
+                  <span key={s.key} className={`filter-completion-chip ${s.filled ? 'filter-completion-chip--ok' : 'filter-completion-chip--missing'}`}>
+                    {s.filled ? '✓' : '✗'} {s.label}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
+          {hasAllFilters && (
+            <button className='apply-filters__btn' onClick={applyFilters}>
+              Показать результаты
+            </button>
+          )}
           <button className='reset-filters__btn' onClick={resetFilters}>
             Сбросить всё
           </button>
