@@ -492,7 +492,16 @@ export default function EventsDigest() {
             header={hasPartialFilters ? 'Почти готово!' : 'Выберите фильтры'}
             description={
               hasPartialFilters
-                ? `Не хватает выбора в: ${missingSections.map(s => s.label).join(', ')}`
+                ? (
+                  <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                    <span>Не хватает выбора в:</span>
+                    {missingSections.map(s => (
+                      <span key={s.key} style={{ background: '#fde8e8', color: '#9b1c1c', padding: '3px 10px', borderRadius: 8, fontSize: 13, fontWeight: 600 }}>
+                        ✗ {s.label}
+                      </span>
+                    ))}
+                  </span>
+                )
                 : 'Нужен выбор во всех разделах, чтобы увидеть события'
             }
           />
