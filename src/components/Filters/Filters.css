@@ -170,3 +170,36 @@ button{
   border: none;
   cursor: pointer;
 }
+
+.filter-completion-warning {
+  background: #fff8e1;
+  border-radius: 10px;
+  padding: 9px 12px;
+  color: #8a6400;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.filter-completion-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-completion-chip {
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.filter-completion-chip--ok {
+  background: #d4edda;
+  color: #155724;
+}
+
+.filter-completion-chip--missing {
+  background: #fde8e8;
+  color: #9b1c1c;
+}
