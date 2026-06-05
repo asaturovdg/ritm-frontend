@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Button, Placeholder } from '@telegram-apps/telegram-ui';
 import './EventsDigest.css';
-import { Link, useLocation } from "react-router-dom";
-import Filters from "../Filters/Filters";
-import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js"
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../AuthContext.jsx";
 import { useUserFilters } from "../useUserFilters.jsx";
 import { usePlatform } from "../../platform/usePlatform.js"
@@ -82,9 +80,10 @@ export default function EventsDigest() {
     setShowInputCode,
   } = useAuth();
   const { openLink, expandApp } = usePlatform();
-  const { filters, saveFilters } = useUserFilters();
-  
+  const { filters } = useUserFilters();
+
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Состояния для дайджеста
   const [currentWeekOffset, setCurrentWeekOffset] = useState(() => {
@@ -105,7 +104,6 @@ export default function EventsDigest() {
   });
   
   const [weekRange, setWeekRange] = useState({ start: '', end: '' });
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [events, setEvents] = useState([]);
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
   const [code, setCode] = useState('');
@@ -120,15 +118,6 @@ export default function EventsDigest() {
                      filters.participationTypes.length > 0;
   const isSearchMode = searchQuery.trim().length > 0;
 
-  const missingSections = [
-    { key: 'cities', label: 'Город', filled: filters.cities.length > 0 },
-    { key: 'categories', label: 'Категории', filled: filters.categories.length > 0 },
-    { key: 'eventTypes', label: 'Тип мероприятия', filled: filters.eventTypes.length > 0 },
-    { key: 'participationTypes', label: 'Тип участия', filled: filters.participationTypes.length > 0 },
-  ].filter(s => !s.filled);
-  const hasPartialFilters = missingSections.length < 4 && missingSections.length > 0;
-
-  
   useEffect(() => {
     expandApp();
   }, [expandApp]);
@@ -206,20 +195,17 @@ export default function EventsDigest() {
 
     setIsLoadingEvents(true);
     try {
-      const res = await fetch('https://ritmevents.ru/api/v1/events/by-ids', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        },
-        body: JSON.stringify({ ids: pageIds })
+      const url = new URL('https://ritmevents.ru/api/v1/events/by-ids');
+      pageIds.forEach(id => url.searchParams.append('ids', id));
+      const res = await fetch(url.toString(), {
+        headers: { ...(token && { 'Authorization': `Bearer ${token}` }) }
       });
 
       if (searchId !== undefined && searchId !== searchIdRef.current) return;
 
       if (res.ok) {
         const data = await res.json();
-        const validEvents = (data.items || data || []).filter(
+        const validEvents = (Array.isArray(data) ? data : []).filter(
           event => event && !isEventPassed(event.start_date, event.start_time)
         );
         setEvents(validEvents);
@@ -338,25 +324,6 @@ export default function EventsDigest() {
     setCurrentPage(0);
   };
 
-  const handleFilterChange = useCallback((newFilters) => {
-    saveFilters(newFilters);
-    setCurrentPage(0);
-    if (searchQuery.trim()) {
-      runSearch(searchQuery.trim(), 0);
-    }
-  }, [saveFilters, searchQuery, runSearch]);
-
-  const resetFilters = useCallback(() => {
-    const empty = { cities: [], categories: [], eventTypes: [], participationTypes: [] };
-    saveFilters(empty);
-    setCurrentPage(0);
-    sessionStorage.removeItem('events_week_offset');
-    sessionStorage.removeItem('events_page');
-    sessionStorage.removeItem('events_search_query');
-    setCurrentWeekOffset(0);
-    setSearchQuery('');
-  }, [saveFilters]);
-
   const goToPage = (page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -438,24 +405,8 @@ export default function EventsDigest() {
             value={searchQuery}
             onChange={handleSearchChange}
           />
-          <Button
-            mode={hasFilters ? "filled" : "outline"}
-            size="m"
-            onClick={() => setIsDrawerOpen(true)}
-            className="filters-open-btn"
-          >
-            Фильтры
-          </Button>
         </div>
       </div>
-
-      <Filters
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        isOpen={isDrawerOpen}
-        setIsOpen={setIsDrawerOpen}
-        onReset={resetFilters}
-      />
 
       {(hasFilters || isSearchMode) && !isLoadingEvents && (
         <>
@@ -489,20 +440,16 @@ export default function EventsDigest() {
         {!hasFilters && !isSearchMode ? (
           <Placeholder
             className="placeholder"
-            header={hasPartialFilters ? 'Почти готово!' : 'Выберите фильтры'}
-            description={
-              hasPartialFilters
-                ? (
-                  <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, marginTop: 4 }}>
-                    <span>Не хватает выбора в:</span>
-                    {missingSections.map(s => (
-                      <span key={s.key} style={{ background: '#fde8e8', color: '#9b1c1c', padding: '3px 10px', borderRadius: 8, fontSize: 13, fontWeight: 600 }}>
-                        ✗ {s.label}
-                      </span>
-                    ))}
-                  </span>
-                )
-                : 'Нужен выбор во всех разделах, чтобы увидеть события'
+            header="Дайджест неактивен"
+            description="Настрой предпочтения в профиле, чтобы увидеть события"
+            action={
+              <Button
+                mode="filled"
+                size="m"
+                onClick={() => navigate('/profile', { state: { tab: 'myFilters' } })}
+              >
+                Настроить предпочтения
+              </Button>
             }
           />
         ) : isLoadingEvents ? (

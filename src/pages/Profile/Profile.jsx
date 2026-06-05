@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import './Profile.css';
 import { useAuth } from "../../components/AuthContext.jsx";
 import { useCalendar } from "../../components/useCalendar.jsx";
 import { usePlatform } from "../../platform/usePlatform.js";
 import { useUserFilters } from "../../components/useUserFilters.jsx";
-import Filters from "../../components/Filters/Filters.jsx";
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js";
 
 import dateIcon from "../../assets/icons/DateRange.svg";
@@ -32,10 +31,17 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   const [activeTab, setActiveTab] = useState('myFilters');
   const [isConnectingCalendar, setIsConnectingCalendar] = useState(false);
   const [error, setError] = useState(null);
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [digestPeriod, setDigestPeriod] = useState('daily');
   const [digestDay, setDigestDay] = useState(null);
   const [weeklyDayError, setWeeklyDayError] = useState(false);
+
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.tab) {
+      setActiveTab(location.state.tab);
+    }
+  }, [location.state?.tab]);
 
   const [assistants, setAssistants] = useState([]);
   const [submissions, setSubmissions] = useState([]);
@@ -319,21 +325,23 @@ const copyInviteLink = () => {
           setCalendarEvents(data);
 
           const futureEventsList = [];
-          
-          await Promise.all(
-            data.map(async (item) => {
-              try {
-                const res = await fetch(
-                  `https://ritmevents.ru/api/v1/events/${item.event_id}`,
-                  { 
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    mode: 'cors'
-                  }
+
+          const ids = data.map(item => item.event_id).filter(Boolean);
+          if (ids.length > 0) {
+            try {
+              const url = new URL('https://ritmevents.ru/api/v1/events/by-ids');
+              ids.forEach(id => url.searchParams.append('ids', id));
+              const res = await fetch(url.toString(), {
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              if (res.ok) {
+                const eventsArray = await res.json();
+                const eventsMap = Object.fromEntries(
+                  (Array.isArray(eventsArray) ? eventsArray : []).map(e => [e.id, e])
                 );
-                if (res.ok) {
-                  const eventData = await res.json();
-                  
-                  if (eventData.start_date && isUpcomingEvent(eventData.start_date)) {
+                for (const item of data) {
+                  const eventData = eventsMap[item.event_id];
+                  if (eventData?.start_date && isUpcomingEvent(eventData.start_date)) {
                     futureEventsList.push({
                       id: item.id,
                       event_id: item.event_id,
@@ -341,15 +349,15 @@ const copyInviteLink = () => {
                       eventDetails: eventData
                     });
                   }
-                } else if (res.status === 401) {
-                  console.error('Токен недействителен');
-                  localStorage.removeItem('access_token');
                 }
-              } catch (e) {
-                console.error(`Ошибка загрузки события ${item.event_id}:`, e);
+              } else if (res.status === 401) {
+                console.error('Токен недействителен');
+                localStorage.removeItem('access_token');
               }
-            })
-          );
+            } catch (e) {
+              console.error('Ошибка загрузки событий по ID:', e);
+            }
+          }
           
           futureEventsList.sort((a, b) => {
             const dateA = new Date(a.eventDetails.start_date);
@@ -420,6 +428,11 @@ const copyInviteLink = () => {
     }
   };
   
+  const hasAllFilters = filters.cities.length > 0 &&
+                        filters.categories.length > 0 &&
+                        filters.eventTypes.length > 0 &&
+                        filters.participationTypes.length > 0;
+
   if (isCheckingAuth) {
     return (
       <div className="profile-container">
@@ -438,7 +451,7 @@ const copyInviteLink = () => {
   return (
     <div className="profile-container">
       <div className="profileTabs">
-        {['myFilters', 'myCalendars', 'myEvents', 'myHelpers'].map((tab) => (
+        {['myFilters', 'myCalendars', 'myEvents'].map((tab) => (
           <button
             key={tab}
             className={`profile-tab ${activeTab === tab ? 'active' : ''}`}
@@ -447,8 +460,7 @@ const copyInviteLink = () => {
           >
             {tab === 'myFilters' ? 'Мои фильтры'
               : tab === 'myCalendars' ? 'Календари'
-              : tab === 'myEvents' ? 'Мои события'
-              : 'Помощники'}
+              : 'Мои события'}
           </button>
         ))}
       </div>
@@ -480,6 +492,11 @@ const copyInviteLink = () => {
         {/* фильтры */}
         {activeTab === 'myFilters' && (
           <div className="profile__filters-section">
+            {!hasAllFilters && (
+              <div className="profile-inactive-banner">
+                ⚠️ Дайджест неактивен — заполни все разделы
+              </div>
+            )}
             <div className="filter-section">
               <div className="filter-section-header">
                 <h3 className="filter-section__title">Категории</h3>
@@ -543,6 +560,24 @@ const copyInviteLink = () => {
                 ))}
               </div>
             </div>
+            <button
+              className={`apply-filters__btn ${isSaving ? 'saving' : ''}`}
+              onClick={applyFilters}
+              disabled={isSaving}
+            >
+              {isSaving ? 'Сохранение...' : 'Сохранить фильтры'}
+            </button>
+            <button
+              className="reset-filters__btn"
+              onClick={() => saveFilters({ cities: [], categories: [], eventTypes: [], participationTypes: [] })}
+            >
+              Сбросить всё
+            </button>
+          </div>
+        )}
+
+        {activeTab === 'myFilters' && (
+          <div className="profile__digest-settings-section">
             <div className="filter-section">
               <div className="filter-section-header">
                 <h3 className="filter-section__title">Периодичность дайджеста</h3>
@@ -593,20 +628,6 @@ const copyInviteLink = () => {
                 </div>
               )}
             </div>
-
-            <button
-              className={`apply-filters__btn ${isSaving ? 'saving' : ''}`}
-              onClick={applyFilters}
-              disabled={isSaving}
-            >
-              {isSaving ? 'Сохранение...' : 'Сохранить фильтры'}
-            </button>
-            <button
-              className="reset-filters__btn"
-              onClick={() => saveFilters({ cities: [], categories: [], eventTypes: [], participationTypes: [] })}
-            >
-              Сбросить всё
-            </button>
           </div>
         )}
 
@@ -634,9 +655,8 @@ const copyInviteLink = () => {
                             <button
                               className="calendar-open-btn"
                               onClick={() => openLink(calendarRootUrl[calendar.id])}
-                              title="Открыть календарь"
                             >
-                              ↗
+                              Открыть
                             </button>
                             <button
                               className="calendar-delete-btn"

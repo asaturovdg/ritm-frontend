@@ -103,6 +103,14 @@
 }
 
 .apply-filters__btn{
+  padding: 14px;
+  background: #0882ff;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
   width: 100%;
 }
 
@@ -200,13 +208,15 @@
 } */
 
 
-.profileTabs{
+.profileTabs {
   display: flex;
-  overflow-x: auto;
-  gap:7px;
+  background: #e8ecf8;
+  border-radius: 12px;
+  padding: 4px;
   margin-block: 20px;
-  
+  gap: 0;
 }
+
 
 .profile__filters-section{
   border-radius: 20px;
@@ -222,15 +232,25 @@
   margin-top: 10px;
 }
 
-.profile-tab{
-  font-size: 14px;
-  
+.profile-tab {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 4px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.profile-tab.active{
-  border-bottom: 3px #56FF71 solid;
-  font-weight: 500;
-
+.profile-tab.active {
+  background: white;
+  color: #000;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
 }
 
 .filter-section {
@@ -482,7 +502,7 @@
 
 .calendar-connect-btn {
   padding: 6px 20px;
-  background: linear-gradient(135deg, #1032a1, #0882ff);
+  background: #0882ff;
   color: white;
   border: none;
   border-radius: 8px;
@@ -504,18 +524,13 @@
 }
 
 .calendar-open-btn {
-  background: none;
+  padding: 6px 20px;
+  background: #0882ff;
+  color: white;
   border: none;
-  font-size: 18px;
+  border-radius: 8px;
   cursor: pointer;
-  color: #1032A1;
-  padding: 4px 6px;
-  border-radius: 6px;
-  line-height: 1;
-}
-
-.calendar-open-btn:hover {
-  background: #e8ecf8;
+  font-size: 14px;
 }
 
 .calendar-badge-btn {
@@ -816,4 +831,20 @@
   font-size: 12px;
   color: #aaa;
   margin: 0 0 12px 0;
+}
+
+.profile-inactive-banner {
+  background: #fff8e1;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #8a6400;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.profile__digest-settings-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
 }

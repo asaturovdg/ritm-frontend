@@ -60,34 +60,22 @@ const renderDigest = () =>
     </MemoryRouter>
   );
 
-describe('EventsDigest — filter save behaviour', () => {
+describe('EventsDigest — filter behaviour', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     sessionStorage.clear();
   });
 
-  it('handleFilterChange calls saveFilters and NOT setFilters', async () => {
+  it('loads with full filters from useUserFilters', () => {
     renderDigest();
 
-    fireEvent.click(screen.getByText('Фильтры'));
-    fireEvent.click(screen.getByText('Показать результаты'));
-
-    expect(mockSaveFilters).toHaveBeenCalledOnce();
-    expect(mockSetFilters).not.toHaveBeenCalled();
+    // Verify that mockSaveFilters was not called on mount (filters come from context)
+    expect(mockSaveFilters).not.toHaveBeenCalled();
   });
 
-  it('resetFilters calls saveFilters with empty filters and NOT setFilters', async () => {
+  it('does not call setFilters when filters come from useUserFilters', () => {
     renderDigest();
 
-    fireEvent.click(screen.getByText('Фильтры'));
-    fireEvent.click(screen.getByText('Сбросить всё'));
-
-    expect(mockSaveFilters).toHaveBeenCalledWith({
-      cities: [],
-      categories: [],
-      eventTypes: [],
-      participationTypes: [],
-    });
     expect(mockSetFilters).not.toHaveBeenCalled();
   });
 });
