@@ -45,6 +45,7 @@ export const EVENT_TYPES = [
     "Демо-день",
     "День открытых дверей",
     "Фестиваль",
+    "Выставка",
 ];
 
 export const PARTICIPATION_TYPES = [
