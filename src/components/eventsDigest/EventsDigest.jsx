@@ -195,20 +195,17 @@ export default function EventsDigest() {
 
     setIsLoadingEvents(true);
     try {
-      const res = await fetch('https://ritmevents.ru/api/v1/events/by-ids', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        },
-        body: JSON.stringify({ ids: pageIds })
+      const url = new URL('https://ritmevents.ru/api/v1/events/by-ids');
+      pageIds.forEach(id => url.searchParams.append('ids', id));
+      const res = await fetch(url.toString(), {
+        headers: { ...(token && { 'Authorization': `Bearer ${token}` }) }
       });
 
       if (searchId !== undefined && searchId !== searchIdRef.current) return;
 
       if (res.ok) {
         const data = await res.json();
-        const validEvents = (data.items || data || []).filter(
+        const validEvents = (Array.isArray(data) ? data : []).filter(
           event => event && !isEventPassed(event.start_date, event.start_time)
         );
         setEvents(validEvents);

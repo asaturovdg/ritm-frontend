@@ -32,3 +32,5 @@ docs
 CLAUDE.md
 .gstack/
 .env.local
+.superpowers/
+vite.nossl.config.js

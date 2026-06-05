@@ -325,21 +325,23 @@ const copyInviteLink = () => {
           setCalendarEvents(data);
 
           const futureEventsList = [];
-          
-          await Promise.all(
-            data.map(async (item) => {
-              try {
-                const res = await fetch(
-                  `https://ritmevents.ru/api/v1/events/${item.event_id}`,
-                  { 
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    mode: 'cors'
-                  }
+
+          const ids = data.map(item => item.event_id).filter(Boolean);
+          if (ids.length > 0) {
+            try {
+              const url = new URL('https://ritmevents.ru/api/v1/events/by-ids');
+              ids.forEach(id => url.searchParams.append('ids', id));
+              const res = await fetch(url.toString(), {
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              if (res.ok) {
+                const eventsArray = await res.json();
+                const eventsMap = Object.fromEntries(
+                  (Array.isArray(eventsArray) ? eventsArray : []).map(e => [e.id, e])
                 );
-                if (res.ok) {
-                  const eventData = await res.json();
-                  
-                  if (eventData.start_date && isUpcomingEvent(eventData.start_date)) {
+                for (const item of data) {
+                  const eventData = eventsMap[item.event_id];
+                  if (eventData?.start_date && isUpcomingEvent(eventData.start_date)) {
                     futureEventsList.push({
                       id: item.id,
                       event_id: item.event_id,
@@ -347,15 +349,15 @@ const copyInviteLink = () => {
                       eventDetails: eventData
                     });
                   }
-                } else if (res.status === 401) {
-                  console.error('Токен недействителен');
-                  localStorage.removeItem('access_token');
                 }
-              } catch (e) {
-                console.error(`Ошибка загрузки события ${item.event_id}:`, e);
+              } else if (res.status === 401) {
+                console.error('Токен недействителен');
+                localStorage.removeItem('access_token');
               }
-            })
-          );
+            } catch (e) {
+              console.error('Ошибка загрузки событий по ID:', e);
+            }
+          }
           
           futureEventsList.sort((a, b) => {
             const dateA = new Date(a.eventDetails.start_date);
@@ -449,7 +451,7 @@ const copyInviteLink = () => {
   return (
     <div className="profile-container">
       <div className="profileTabs">
-        {['myFilters', 'myCalendars', 'myEvents', 'myHelpers'].map((tab) => (
+        {['myFilters', 'myCalendars', 'myEvents'].map((tab) => (
           <button
             key={tab}
             className={`profile-tab ${activeTab === tab ? 'active' : ''}`}
@@ -458,8 +460,7 @@ const copyInviteLink = () => {
           >
             {tab === 'myFilters' ? 'Мои фильтры'
               : tab === 'myCalendars' ? 'Календари'
-              : tab === 'myEvents' ? 'Мои события'
-              : 'Помощники'}
+              : 'Мои события'}
           </button>
         ))}
       </div>
@@ -654,9 +655,8 @@ const copyInviteLink = () => {
                             <button
                               className="calendar-open-btn"
                               onClick={() => openLink(calendarRootUrl[calendar.id])}
-                              title="Открыть календарь"
                             >
-                              ↗
+                              Открыть
                             </button>
                             <button
                               className="calendar-delete-btn"
