@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import './Profile.css';
 import { useAuth } from "../../components/AuthContext.jsx";
 import { useCalendar } from "../../components/useCalendar.jsx";
@@ -18,12 +18,14 @@ export function Profile() {
   const { connectCalendar, waitForCalendarConnection } = useCalendar();
   const { openLink } = usePlatform();
   const { filters, setFilters, saveFilters, flushPendingSave, isSaving } = useUserFilters();
+  const navigate = useNavigate();
 
   // Только нужные состояния для помощников
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteLink, setInviteLink] = useState(null);
   const [isCreatingInvite, setIsCreatingInvite] = useState(false);
   const [showFilterSuccessModal, setShowFilterSuccessModal] = useState(false);
+  const [showPeriodSuccessModal, setShowPeriodSuccessModal] = useState(false);
 const [showCopySuccessModal, setShowCopySuccessModal] = useState(false);
 const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   // Остальные состояния
@@ -121,8 +123,7 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
 const applyFilters = async () => {
   if (!token || !userData) return;
   await saveFilters(filters);
-  setShowFilterSuccessModal(true);
-  setTimeout(() => setShowFilterSuccessModal(false), 1500);
+  navigate('/');
 };
 
   useEffect(() => {
@@ -155,8 +156,8 @@ const applyFilters = async () => {
         },
         body: JSON.stringify({ period, day_of_week: day })
       });
-      setShowFilterSuccessModal(true);
-      setTimeout(() => setShowFilterSuccessModal(false), 1500);
+      setShowPeriodSuccessModal(true);
+      setTimeout(() => setShowPeriodSuccessModal(false), 1500);
     } catch (err) {
       console.error('Ошибка сохранения периодичности:', err);
     }
@@ -470,6 +471,13 @@ const copyInviteLink = () => {
             <div className="filter-success-modal">
               <div className="filter-success-content">
                 <p>Фильтры сохранены!</p>
+              </div>
+            </div>
+          )}
+          {showPeriodSuccessModal && (
+            <div className="filter-success-modal">
+              <div className="filter-success-content">
+                <p>Периодичность сохранена!</p>
               </div>
             </div>
           )}
