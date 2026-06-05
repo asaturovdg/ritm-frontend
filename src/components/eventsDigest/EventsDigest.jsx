@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Button, Placeholder } from '@telegram-apps/telegram-ui';
 import './EventsDigest.css';
-import { Link, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../AuthContext.jsx";
 import { useUserFilters } from "../useUserFilters.jsx";
 import { usePlatform } from "../../platform/usePlatform.js"
@@ -81,8 +81,9 @@ export default function EventsDigest() {
   } = useAuth();
   const { openLink, expandApp } = usePlatform();
   const { filters } = useUserFilters();
-  
+
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Состояния для дайджеста
   const [currentWeekOffset, setCurrentWeekOffset] = useState(() => {
@@ -442,8 +443,17 @@ export default function EventsDigest() {
         {!hasFilters && !isSearchMode ? (
           <Placeholder
             className="placeholder"
-            header="Выберите фильтры"
-            description="Настройте фильтры в профиле, чтобы увидеть события"
+            header="Дайджест неактивен"
+            description="Настрой предпочтения в профиле, чтобы увидеть события"
+            action={
+              <Button
+                mode="filled"
+                size="m"
+                onClick={() => navigate('/profile', { state: { tab: 'myFilters' } })}
+              >
+                Настроить предпочтения
+              </Button>
+            }
           />
         ) : isLoadingEvents ? (
           <div className="loading-container">
