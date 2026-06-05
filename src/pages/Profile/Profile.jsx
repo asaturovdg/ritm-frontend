@@ -5,7 +5,6 @@ import { useAuth } from "../../components/AuthContext.jsx";
 import { useCalendar } from "../../components/useCalendar.jsx";
 import { usePlatform } from "../../platform/usePlatform.js";
 import { useUserFilters } from "../../components/useUserFilters.jsx";
-import Filters from "../../components/Filters/Filters.jsx";
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js";
 
 import dateIcon from "../../assets/icons/DateRange.svg";

@@ -1,0 +1,81 @@
+<h2>Финальный дизайн</h2>
+<p class="subtitle">Два места, три состояния</p>
+
+<!-- МЕСТО 1: Шторка фильтров -->
+<div class="section">
+  <h3>1. Шторка фильтров</h3>
+  <p class="subtitle" style="margin-bottom:16px">Внизу шторки, перед кнопками действий</p>
+
+  <div style="display:flex;gap:16px;flex-wrap:wrap">
+
+    <!-- State: все заполнены -->
+    <div style="flex:1;min-width:200px">
+      <div class="label" style="margin-bottom:8px">Все 4 заполнены ✓</div>
+      <div style="background:white;border:1.5px solid #e0e0e0;border-radius:16px;padding:16px;font-family:Montserrat,sans-serif">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+          <span style="background:#d4edda;color:#155724;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600">✓ Категории</span>
+          <span style="background:#d4edda;color:#155724;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600">✓ Город</span>
+          <span style="background:#d4edda;color:#155724;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600">✓ Тип мероприятия</span>
+          <span style="background:#d4edda;color:#155724;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600">✓ Тип участия</span>
+        </div>
+        <div style="background:#1032A1;color:white;border-radius:12px;padding:12px;text-align:center;font-size:14px;font-weight:600">Показать результаты</div>
+        <div style="background:#f0f2f8;color:#1032A1;border-radius:12px;padding:10px;text-align:center;font-size:13px;font-weight:600;margin-top:8px">Сбросить всё</div>
+      </div>
+    </div>
+
+    <!-- State: частично заполнены -->
+    <div style="flex:1;min-width:200px">
+      <div class="label" style="margin-bottom:8px">Заполнено частично (2/4)</div>
+      <div style="background:white;border:1.5px solid #e0e0e0;border-radius:16px;padding:16px;font-family:Montserrat,sans-serif">
+        <div style="background:#fff8e1;border-radius:10px;padding:9px 12px;color:#8a6400;font-size:12px;font-weight:500;margin-bottom:10px">
+          ⚠️ Выберите хотя бы по одному значению во всех 4 разделах — иначе события не появятся
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+          <span style="background:#d4edda;color:#155724;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600">✓ Категории</span>
+          <span style="background:#fde8e8;color:#9b1c1c;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600">✗ Город</span>
+          <span style="background:#d4edda;color:#155724;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600">✓ Тип мероприятия</span>
+          <span style="background:#fde8e8;color:#9b1c1c;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600">✗ Тип участия</span>
+        </div>
+        <!-- кнопки "Показать результаты" НЕТ -->
+        <div style="background:#f0f2f8;color:#1032A1;border-radius:12px;padding:10px;text-align:center;font-size:13px;font-weight:600">Сбросить всё</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- МЕСТО 2: Плейсхолдер -->
+<div class="section">
+  <h3>2. Плейсхолдер на главном экране</h3>
+  <p class="subtitle" style="margin-bottom:16px">Когда шторка закрыта, события не загружаются</p>
+
+  <div style="display:flex;gap:16px;flex-wrap:wrap">
+
+    <!-- State: ничего не выбрано -->
+    <div style="flex:1;min-width:160px">
+      <div class="label" style="margin-bottom:8px">Ничего не выбрано (0/4)</div>
+      <div style="background:white;border:1.5px solid #e0e0e0;border-radius:16px;padding:20px;text-align:center;font-family:Montserrat,sans-serif">
+        <div style="font-size:36px;margin-bottom:8px">🔍</div>
+        <div style="font-size:16px;font-weight:700;color:#1032A1;margin-bottom:6px">Выберите фильтры</div>
+        <div style="font-size:13px;color:#666">Нужен выбор во всех 4 категориях, чтобы увидеть события</div>
+      </div>
+    </div>
+
+    <!-- State: частично -->
+    <div style="flex:1;min-width:160px">
+      <div class="label" style="margin-bottom:8px">Частично заполнено (2/4)</div>
+      <div style="background:white;border:1.5px solid #e0e0e0;border-radius:16px;padding:20px;text-align:center;font-family:Montserrat,sans-serif">
+        <div style="font-size:36px;margin-bottom:8px">🔍</div>
+        <div style="font-size:16px;font-weight:700;color:#1032A1;margin-bottom:6px">Почти готово!</div>
+        <div style="font-size:13px;color:#666;margin-bottom:10px">Не хватает выбора в:</div>
+        <div style="display:inline-flex;flex-direction:column;gap:4px;text-align:left">
+          <span style="font-size:13px;color:#9b1c1c;font-weight:500">✗ Город</span>
+          <span style="font-size:13px;color:#9b1c1c;font-weight:500">✗ Тип участия</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:16px">Выглядит правильно? Или что-то хочется поменять?</p>

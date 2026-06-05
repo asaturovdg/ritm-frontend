@@ -1,0 +1,124 @@
+<h2>Как именно показывать?</h2>
+<p class="subtitle">Три подхода. Для каждого — как выглядит шторка фильтров и плейсхолдер на главном экране.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)" style="align-items:flex-start">
+    <div class="letter">A</div>
+    <div class="content" style="width:100%">
+      <h3>Счётчик + список незаполненных</h3>
+      <p style="margin-bottom:12px;color:#666">Простой и ненавязчивый</p>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <!-- Drawer mockup -->
+        <div style="flex:1;min-width:180px;background:#f8f9ff;border-radius:12px;padding:12px;font-size:12px">
+          <div style="font-weight:600;color:#1032A1;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:.5px">Шторка фильтров</div>
+          <div style="background:#fff3cd;border-radius:8px;padding:8px 10px;color:#856404;font-size:11px;margin-bottom:8px">
+            ⚠️ Заполните все 4 раздела, чтобы увидеть события
+          </div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+            <span style="background:#d4edda;color:#155724;padding:2px 7px;border-radius:6px;font-size:10px">✓ Категории</span>
+            <span style="background:#f8d7da;color:#721c24;padding:2px 7px;border-radius:6px;font-size:10px">✗ Город</span>
+            <span style="background:#d4edda;color:#155724;padding:2px 7px;border-radius:6px;font-size:10px">✓ Тип мероприятия</span>
+            <span style="background:#f8d7da;color:#721c24;padding:2px 7px;border-radius:6px;font-size:10px">✗ Тип участия</span>
+          </div>
+          <div style="background:#1032A1;color:white;border-radius:8px;padding:7px;text-align:center;font-size:11px;opacity:.5">Показать результаты</div>
+        </div>
+
+        <!-- Placeholder mockup -->
+        <div style="flex:1;min-width:180px;background:#f8f9ff;border-radius:12px;padding:12px;font-size:12px">
+          <div style="font-weight:600;color:#1032A1;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:.5px">Плейсхолдер</div>
+          <div style="text-align:center;padding:12px 0">
+            <div style="font-size:28px;margin-bottom:6px">🔍</div>
+            <div style="font-weight:600;color:#1032A1;margin-bottom:6px">Почти готово!</div>
+            <div style="color:#666;font-size:11px;margin-bottom:10px">Не хватает выбора в:</div>
+            <div style="display:inline-flex;flex-direction:column;gap:4px;text-align:left">
+              <span style="font-size:11px;color:#dc3545">✗ Город</span>
+              <span style="font-size:11px;color:#dc3545">✗ Тип участия</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)" style="align-items:flex-start">
+    <div class="letter">B</div>
+    <div class="content" style="width:100%">
+      <h3>Прогресс-бар + нейтральный плейсхолдер</h3>
+      <p style="margin-bottom:12px;color:#666">Геймификация, менее тревожный</p>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <!-- Drawer mockup -->
+        <div style="flex:1;min-width:180px;background:#f8f9ff;border-radius:12px;padding:12px;font-size:12px">
+          <div style="font-weight:600;color:#1032A1;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:.5px">Шторка фильтров</div>
+          <div style="margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#555;margin-bottom:4px">
+              <span>Заполнено разделов</span><span style="font-weight:600">2 / 4</span>
+            </div>
+            <div style="background:#e0e0e0;border-radius:4px;height:6px">
+              <div style="background:linear-gradient(90deg,#56ff71,#adffc6);width:50%;height:6px;border-radius:4px"></div>
+            </div>
+          </div>
+          <div style="background:#1032A1;color:white;border-radius:8px;padding:7px;text-align:center;font-size:11px;opacity:.5">Показать результаты</div>
+        </div>
+
+        <!-- Placeholder mockup -->
+        <div style="flex:1;min-width:180px;background:#f8f9ff;border-radius:12px;padding:12px;font-size:12px">
+          <div style="font-weight:600;color:#1032A1;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:.5px">Плейсхолдер</div>
+          <div style="text-align:center;padding:12px 0">
+            <div style="font-size:28px;margin-bottom:6px">⚙️</div>
+            <div style="font-weight:600;color:#1032A1;margin-bottom:6px">Настройте фильтры</div>
+            <div style="margin-bottom:10px">
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:#555;margin-bottom:4px">
+                <span>Готово</span><span>2 / 4</span>
+              </div>
+              <div style="background:#e0e0e0;border-radius:4px;height:6px">
+                <div style="background:linear-gradient(90deg,#56ff71,#adffc6);width:50%;height:6px;border-radius:4px"></div>
+              </div>
+            </div>
+            <div style="background:#0088cc;color:white;border-radius:8px;padding:6px 12px;font-size:11px;display:inline-block">Открыть фильтры</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)" style="align-items:flex-start">
+    <div class="letter">C</div>
+    <div class="content" style="width:100%">
+      <h3>Метки на заголовках разделов</h3>
+      <p style="margin-bottom:12px;color:#666">Локальная подсказка прямо у раздела</p>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <!-- Drawer mockup -->
+        <div style="flex:1;min-width:180px;background:#f8f9ff;border-radius:12px;padding:12px;font-size:12px">
+          <div style="font-weight:600;color:#1032A1;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:.5px">Шторка фильтров</div>
+          <div style="margin-bottom:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-weight:600;font-size:11px">Город</span>
+              <span style="background:#fff3cd;color:#856404;font-size:9px;padding:2px 6px;border-radius:4px">обязательно</span>
+            </div>
+            <div style="color:#aaa;font-size:10px;margin-top:3px">ничего не выбрано</div>
+          </div>
+          <div style="margin-bottom:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-weight:600;font-size:11px">Категории</span>
+              <span style="background:#d4edda;color:#155724;font-size:9px;padding:2px 6px;border-radius:4px">✓ 3 выбрано</span>
+            </div>
+          </div>
+          <div style="background:#1032A1;color:white;border-radius:8px;padding:7px;text-align:center;font-size:11px;opacity:.5;margin-top:8px">Показать результаты</div>
+        </div>
+
+        <!-- Placeholder mockup -->
+        <div style="flex:1;min-width:180px;background:#f8f9ff;border-radius:12px;padding:12px;font-size:12px">
+          <div style="font-weight:600;color:#1032A1;margin-bottom:8px;font-size:11px;text-transform:uppercase;letter-spacing:.5px">Плейсхолдер</div>
+          <div style="text-align:center;padding:12px 0">
+            <div style="font-size:28px;margin-bottom:6px">📋</div>
+            <div style="font-weight:600;color:#1032A1;margin-bottom:6px">Выберите фильтры</div>
+            <div style="color:#666;font-size:11px">Нужен выбор во всех 4 категориях</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
