@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence, LayoutGroup, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Newspaper, User, MessageCircle, FilePlus } from 'lucide-react';
 
 import InviteAccept from '../components/InviteAccept/InviteAccept';
@@ -139,7 +139,6 @@ export default function App() {
   return (
     <ThemeWrapper>
       <TransitionContext.Provider value={transitionConfig}>
-        <LayoutGroup>
           <div className="app-container">
 
             <div className="app-content">
@@ -204,8 +203,7 @@ export default function App() {
             </AnimatePresence>
 
           </div>
-        </LayoutGroup>
-      </TransitionContext.Provider>
+        </TransitionContext.Provider>
     </ThemeWrapper>
   );
 }
