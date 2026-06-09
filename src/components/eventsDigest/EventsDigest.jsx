@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { motion } from 'framer-motion';
 import { Button, Placeholder } from '@telegram-apps/telegram-ui';
 import './EventsDigest.css';
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -462,12 +461,12 @@ export default function EventsDigest() {
           events.map(event => (
             <div key={event.id} className="digest__item">
               <div className="digest__header">
-                <motion.p layoutId={`event-type-${event.id}`} className="digest__type">
+                <p className="digest__type">
                   {event.event_type?.join(', ')}
-                </motion.p>
-                <motion.h3 layoutId={`event-title-${event.id}`} className="digest__title">
+                </p>
+                <h3 className="digest__title">
                   {event.title}
-                </motion.h3>
+                </h3>
               </div>
               <div className="digest__mainInfo">
                 <div className="digest__date-row">
@@ -527,8 +526,6 @@ export default function EventsDigest() {
                   weekOffset: currentWeekOffset,
                   page: currentPage,
                   searchQuery: searchQuery,
-                  eventTitle: event.title,
-                  eventType: event.event_type,
                 }}
                 className="digest__link"
               >
