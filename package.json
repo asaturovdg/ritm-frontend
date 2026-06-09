@@ -16,6 +16,8 @@
     "@telegram-apps/telegram-ui": "^2.1.13",
     "@vitejs/plugin-basic-ssl": "^2.3.0",
     "date-fns": "^4.1.0",
+    "framer-motion": "^12.40.0",
+    "lucide-react": "^1.17.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-horizontal-date": "^1.0.2",

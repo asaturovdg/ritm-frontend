@@ -1,5 +1,6 @@
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { motion } from 'framer-motion';
 import currency from "../../assets/icons/currency.svg";
 import date from "../../assets/icons/DateRange.svg";
 import place from "../../assets/icons/Place.svg";
@@ -25,13 +26,16 @@ export default function Event({ embeddedId, isPreview = false, status }) {
   const { openLink, showAlert } = usePlatform();
 
   const fromProfileEvents = location.state?.from === 'profile-events';
-  
-  // Получаем сохраненное состояние для возврата
+
   const returnState = {
     weekOffset: location.state?.weekOffset,
     page: location.state?.page,
-    searchQuery: location.state?.searchQuery
+    searchQuery: location.state?.searchQuery,
   };
+
+  // Pre-populate title/type from list state so shared layout animation starts immediately
+  const initTitle = location.state?.eventTitle ?? null;
+  const initType  = location.state?.eventType  ?? null;
 
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -218,8 +222,20 @@ export default function Event({ embeddedId, isPreview = false, status }) {
       )}
 
       <div className="event__header">
-        <p className="event__type">{event.event_type?.join(', ')}</p>
-        <h1 className="event__title">{event.title}</h1>
+        <motion.p
+          layoutId={`event-type-${id}`}
+          className="event__type"
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        >
+          {event?.event_type?.join(', ') ?? initType?.join(', ')}
+        </motion.p>
+        <motion.h1
+          layoutId={`event-title-${id}`}
+          className="event__title"
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        >
+          {event?.title ?? initTitle}
+        </motion.h1>
       </div>
 
       <div className="event__info">
