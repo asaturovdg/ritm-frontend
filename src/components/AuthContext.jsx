@@ -175,6 +175,10 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
+        if (document.readyState !== 'complete') {
+          await new Promise(resolve => window.addEventListener('load', resolve, { once: true }));
+        }
+
         const initSdk = () => {
           if (window.WebApp?.initData) {
             window.WebApp.ready();
