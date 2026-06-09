@@ -217,6 +217,13 @@ const applyFilters = async () => {
     setCityInput('');
   };
 
+  const removeCustomCity = (city) => {
+    const updatedOptions = customCityOptions.filter(c => c !== city);
+    setCustomCityOptions(updatedOptions);
+    localStorage.setItem('user_custom_cities', JSON.stringify(updatedOptions));
+    setFilters({ ...filters, cities: filters.cities.filter(c => c !== city) });
+  };
+
   // Удаление помощника
 const deleteHelper = async (assistantId) => {
   if (!token || !userData) return;
@@ -570,9 +577,10 @@ const copyInviteLink = () => {
                   </button>
                 ))}
                 {customCityOptions.map((item, i) => (
-                  <button key={`custom-${i}`} className={`profile_chip ${filters.cities.includes(item) ? 'profile_chip-active' : ''}`} onClick={() => toggleChip('cities', item)}>
-                    {item}
-                  </button>
+                  <span key={`custom-${i}`} className={`profile_chip profile_chip--custom ${filters.cities.includes(item) ? 'profile_chip-active' : ''}`}>
+                    <span onClick={() => toggleChip('cities', item)}>{item}</span>
+                    <span className="profile_chip__remove" onClick={() => removeCustomCity(item)}>×</span>
+                  </span>
                 ))}
               </div>
               <div className="city-add-row">
