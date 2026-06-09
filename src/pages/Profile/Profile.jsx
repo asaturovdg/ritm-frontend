@@ -207,7 +207,9 @@ const applyFilters = async () => {
   const addCustomCity = () => {
     const city = cityInput.trim()
       .toLowerCase()
-      .replace(/(^|[\s-])([а-яёa-z])/g, (_, sep, char) => sep + char.toUpperCase());
+      .replace(/(^|[\s-])([а-яёa-z]+)/g, (_, sep, word) =>
+        sep + (sep === '-' && word.length <= 2 ? word : word.charAt(0).toUpperCase() + word.slice(1))
+      );
     if (!city || customCityOptions.includes(city) || CITIES.includes(city)) {
       setCityInput('');
       return;
