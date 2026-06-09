@@ -505,9 +505,9 @@ const copyInviteLink = () => {
             onClick={() => setActiveTab(tab)}
             style={{color: '#000000'}}
           >
-            {tab === 'myFilters' ? 'Мои фильтры'
+            {tab === 'myFilters' ? 'Фильтры'
               : tab === 'myCalendars' ? 'Календари'
-              : 'Мои события'}
+              : 'События'}
           </button>
         ))}
       </div>
