@@ -311,6 +311,52 @@
   justify-content: space-between;
 }
 
+.profile_chip--custom {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.profile_chip__remove {
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.5;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.profile_chip__remove:hover {
+  opacity: 1;
+}
+
+.city-add-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.city-add-input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #d0d5e8;
+  background: #f0f2f8;
+  font-size: 14px;
+  font-family: 'Montserrat';
+  outline: none;
+}
+
+.city-add-btn {
+  padding: 8px 16px;
+  background: #0882ff;
+  color: white;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: 'Montserrat';
+  cursor: pointer;
+  white-space: nowrap;
+}
+
 .profile-events-list {
   display: flex;
   flex-direction: column;

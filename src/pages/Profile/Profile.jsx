@@ -36,6 +36,13 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   const [digestPeriod, setDigestPeriod] = useState('daily');
   const [digestDay, setDigestDay] = useState(null);
   const [weeklyDayError, setWeeklyDayError] = useState(false);
+  const [cityInput, setCityInput] = useState('');
+  const [customCityOptions, setCustomCityOptions] = useState(() => {
+    try {
+      const stored = localStorage.getItem('user_custom_cities');
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  });
 
   const location = useLocation();
 
@@ -44,6 +51,18 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
       setActiveTab(location.state.tab);
     }
   }, [location.state?.tab]);
+
+  // Sync: if server returned custom cities not in localStorage, add them
+  useEffect(() => {
+    const serverCustom = filters.cities.filter(c => !CITIES.includes(c));
+    if (serverCustom.length === 0) return;
+    setCustomCityOptions(prev => {
+      const merged = [...new Set([...prev, ...serverCustom])];
+      if (merged.length === prev.length) return prev;
+      localStorage.setItem('user_custom_cities', JSON.stringify(merged));
+      return merged;
+    });
+  }, [filters.cities]);
 
   const [assistants, setAssistants] = useState([]);
   const [submissions, setSubmissions] = useState([]);
@@ -181,6 +200,32 @@ const applyFilters = async () => {
       [section]: filters[section].length === allValues.length ? [] : [...allValues]
     };
     setFilters(updated);
+  };
+
+  const allCities = [...CITIES, ...customCityOptions];
+
+  const addCustomCity = () => {
+    const city = cityInput.trim()
+      .toLowerCase()
+      .replace(/(^|[\s-])([а-яёa-z]+)/g, (_, sep, word) =>
+        sep + (sep === '-' && word.length <= 2 ? word : word.charAt(0).toUpperCase() + word.slice(1))
+      );
+    if (!city || customCityOptions.includes(city) || CITIES.includes(city)) {
+      setCityInput('');
+      return;
+    }
+    const updated = [...customCityOptions, city];
+    setCustomCityOptions(updated);
+    localStorage.setItem('user_custom_cities', JSON.stringify(updated));
+    setFilters({ ...filters, cities: [...filters.cities, city] });
+    setCityInput('');
+  };
+
+  const removeCustomCity = (city) => {
+    const updatedOptions = customCityOptions.filter(c => c !== city);
+    setCustomCityOptions(updatedOptions);
+    localStorage.setItem('user_custom_cities', JSON.stringify(updatedOptions));
+    setFilters({ ...filters, cities: filters.cities.filter(c => c !== city) });
   };
 
   // Удаление помощника
@@ -525,8 +570,8 @@ const copyInviteLink = () => {
             <div className="filter-section">
               <div className="filter-section-header">
                 <h3 className="filter-section__title">Город</h3>
-                <button className="filter-section--chooseAll" onClick={() => toggleAll('cities', CITIES)}>
-                  {filters.cities.length === CITIES.length ? 'Очистить все' : 'Выбрать все'}
+                <button className="filter-section--chooseAll" onClick={() => toggleAll('cities', allCities)}>
+                  {filters.cities.length === allCities.length ? 'Очистить все' : 'Выбрать все'}
                 </button>
               </div>
               <div className="profile_chips-container">
@@ -535,6 +580,23 @@ const copyInviteLink = () => {
                     {item}
                   </button>
                 ))}
+                {customCityOptions.map((item, i) => (
+                  <span key={`custom-${i}`} className={`profile_chip profile_chip--custom ${filters.cities.includes(item) ? 'profile_chip-active' : ''}`}>
+                    <span onClick={() => toggleChip('cities', item)}>{item}</span>
+                    <span className="profile_chip__remove" onClick={() => removeCustomCity(item)}>×</span>
+                  </span>
+                ))}
+              </div>
+              <div className="city-add-row">
+                <input
+                  className="city-add-input"
+                  type="text"
+                  placeholder="Другой город..."
+                  value={cityInput}
+                  onChange={e => setCityInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && addCustomCity()}
+                />
+                <button className="city-add-btn" onClick={addCustomCity}>Добавить</button>
               </div>
             </div>
 
