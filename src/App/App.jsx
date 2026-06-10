@@ -12,6 +12,7 @@ import Submissions from '../pages/Submissions/Submissions';
 import { ThemeWrapper } from '../components/ThemeWrapper';
 import { TransitionContext } from '../components/TransitionContext';
 
+import { useTabSwipe } from '../hooks/useTabSwipe';
 import './App.css';
 
 const TAB_PATHS = ['/', '/profile', '/feedback', '/submissions'];
@@ -114,6 +115,7 @@ export default function App() {
 
   const activeTab = getActiveTab();
   const isEventPage = location.pathname.startsWith('/events/');
+  const bindSwipe = useTabSwipe(location.pathname, !isEventPage);
 
   // Page slide variants — direction-aware for tabs, fade for event transitions
   const pageVariants = {
@@ -141,7 +143,7 @@ export default function App() {
       <TransitionContext.Provider value={transitionConfig}>
           <div className="app-container">
 
-            <div className="app-content">
+            <div className="app-content" {...bindSwipe()}>
               <AnimatePresence initial={false} custom={transitionConfig}>
                 <motion.div
                   key={location.key}
