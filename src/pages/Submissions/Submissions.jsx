@@ -513,7 +513,6 @@ export default function Submissions() {
         className="question-input"
         value={formData[currentQuestion.id]}
         onChange={(e) => handleChange(currentQuestion.id, e.target.value)}
-        autoFocus
       />
     )}
 
