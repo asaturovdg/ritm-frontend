@@ -180,9 +180,11 @@
 }
 
 
-/* текст по количеству найденных событий */
-.events__found{
-    margin-block: 15px;
+.events__found-subtitle {
+  font-size: 13px;
+  color: #888;
+  text-align: center;
+  margin: 4px 0 8px;
 }
 
 /* иконки фильтра */

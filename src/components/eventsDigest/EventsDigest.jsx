@@ -409,14 +409,9 @@ export default function EventsDigest() {
       </div>
 
       {(hasFilters || isSearchMode) && !isLoadingEvents && (
-        <>
-          <div className="events__found">
-            {isSearchMode
-              ? `Результаты поиска «${searchQuery}»:`
-              : `Нашёл (${totalEvents}) мероприятий на ближайшей неделе`}
-          </div>
+        <div className="week-nav-section">
           <div className="week-navigation">
-            <button 
+            <button
               className="week-nav-btn prev"
               onClick={prevWeek}
               disabled={currentWeekOffset === 0}
@@ -424,16 +419,21 @@ export default function EventsDigest() {
               Предыдущая неделя
             </button>
             <span className="week-range">
-              {weekRange.start} - {weekRange.end}
+              {weekRange.start} – {weekRange.end}
             </span>
-            <button 
+            <button
               className="week-nav-btn next"
               onClick={nextWeek}
             >
               Следующая неделя
             </button>
           </div>
-        </>
+          {events.length > 0 && (
+            <p className="events__found-subtitle">
+              Найдено {events.length} мероприятий
+            </p>
+          )}
+        </div>
       )}
 
       <div className="digest-list">
