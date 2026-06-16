@@ -33,6 +33,8 @@ vi.mock('../../useUserFilters.jsx', () => ({
   }),
 }));
 
+const mockSetShowInputCode = vi.fn();
+
 vi.mock('../../AuthContext.jsx', () => ({
   useAuth: () => ({
     token: 'test-token',
@@ -40,7 +42,7 @@ vi.mock('../../AuthContext.jsx', () => ({
     isAuthReady: true,
     isCheckingAuth: false,
     showInputCode: false,
-    setShowInputCode: vi.fn(),
+    setShowInputCode: mockSetShowInputCode,
   }),
 }));
 
@@ -59,6 +61,76 @@ const renderDigest = () =>
       <EventsDigest />
     </MemoryRouter>
   );
+
+describe('EventsDigest — event card tracks', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    sessionStorage.clear();
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        items: [
+          {
+            id: 1,
+            title: 'Test Event',
+            start_date: '2099-01-01',
+            start_time: '10:00',
+            city: ['Москва'],
+            track: ['ИИ', 'Кибербезопасность'],
+            tags: ['тег1'],
+            event_type: ['Конференция'],
+          },
+        ],
+        total: 1,
+      }),
+    });
+  });
+
+  it('renders track chips above tag chips', async () => {
+    renderDigest();
+
+    const aiChip = await screen.findByText('ИИ');
+    const secChip = await screen.findByText('Кибербезопасность');
+    const tagChip = await screen.findByText('#тег1');
+
+    expect(aiChip).toBeInTheDocument();
+    expect(secChip).toBeInTheDocument();
+    expect(aiChip).toHaveClass('digest__track');
+
+    expect(aiChip.compareDocumentPosition(tagChip)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
+
+  it('does not render digest__tracks when track is empty', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        items: [
+          {
+            id: 2,
+            title: 'No Track Event',
+            start_date: '2099-01-01',
+            start_time: '10:00',
+            city: ['Москва'],
+            track: [],
+            tags: ['тег1'],
+            event_type: ['Конференция'],
+          },
+        ],
+        total: 1,
+      }),
+    });
+
+    renderDigest();
+
+    await screen.findByText('#тег1');
+
+    const trackContainer = document.querySelector('.digest__tracks');
+    expect(trackContainer).toBeNull();
+  });
+});
 
 describe('EventsDigest — filter behaviour', () => {
   beforeEach(() => {
