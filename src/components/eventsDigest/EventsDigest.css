@@ -296,3 +296,19 @@
   padding: 6px 12px;
   border-radius: 10px;
 }
+
+.digest__tracks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+}
+
+.digest__track {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    background-color: #1032A1;
+    color: #ffffff;
+}
