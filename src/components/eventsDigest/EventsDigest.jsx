@@ -511,6 +511,13 @@ export default function EventsDigest() {
                   </div>
                 )}
               </div>
+              {event.track?.length > 0 && (
+                <div className="digest__tracks">
+                  {event.track.map((track, i) => (
+                    <span key={i} className="digest__track">{track}</span>
+                  ))}
+                </div>
+              )}
               {event.tags?.length > 0 && (
                 <div className="digest__tags">
                   {event.tags.map((tag, i) => (
