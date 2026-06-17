@@ -50,12 +50,25 @@ export default function App() {
   }
   const transitionConfig = transitionConfigRef.current;
 
-  // Telegram invite deep-link
+  // Telegram deep-links (invite + event)
   useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-    const startParam = tg?.initDataUnsafe?.start_param;
+    const startParam = window.Telegram?.WebApp?.initDataUnsafe?.start_param;
     if (startParam?.startsWith('invite_')) {
       navigate(`/invite/assistant/${startParam.replace('invite_', '')}`, { replace: true });
+    } else if (startParam?.startsWith('event_')) {
+      navigate(`/events/${startParam.replace('event_', '')}`, { replace: true });
+    }
+  }, [navigate]);
+
+  // Max deep-links (invite + event)
+  useEffect(() => {
+    const startParam =
+      window.WebApp?.initDataUnsafe?.start_param ||
+      new URLSearchParams(window.location.search).get('WebAppStartParam');
+    if (startParam?.startsWith('invite_')) {
+      navigate(`/invite/assistant/${startParam.replace('invite_', '')}`, { replace: true });
+    } else if (startParam?.startsWith('event_')) {
+      navigate(`/events/${startParam.replace('event_', '')}`, { replace: true });
     }
   }, [navigate]);
 

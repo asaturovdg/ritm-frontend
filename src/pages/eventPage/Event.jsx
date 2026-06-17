@@ -22,7 +22,7 @@ export default function Event({ embeddedId, isPreview = false, status }) {
   const id = embeddedId || paramId;
   const { token, isCheckingAuth } = useAuth();
   const { isProcessing, handleAddToCalendar } = useCalendar();
-  const { openLink, showAlert } = usePlatform();
+  const { openLink, showAlert, shareEvent, platform } = usePlatform();
 
   const fromProfileEvents = location.state?.from === 'profile-events';
 
@@ -223,6 +223,15 @@ export default function Event({ embeddedId, isPreview = false, status }) {
         <h1 className="event__title">
           {event?.title}
         </h1>
+        {!isPreview && platform !== 'web' && (
+          <button
+            className="event__share-btn"
+            onClick={() => shareEvent(event.id, event.title)}
+            aria-label="Поделиться"
+          >
+            Поделиться
+          </button>
+        )}
       </div>
 
       <div className="event__info">
