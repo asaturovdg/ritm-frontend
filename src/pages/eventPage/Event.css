@@ -10,10 +10,15 @@
     gap: 12px;
 }
 
-.event__header > .event__title {
+.event__header-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.event__header > .event__title,
+.event__header-text > .event__title {
     font-size: 28px;
     color: #1032A1;
-    flex: 1;
 }
 
 .event__share-btn {

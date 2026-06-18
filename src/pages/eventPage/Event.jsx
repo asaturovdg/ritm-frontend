@@ -218,12 +218,14 @@ export default function Event({ embeddedId, isPreview = false, status }) {
       )}
 
       <div className="event__header">
-        <p className="event__type">
-          {event?.event_type?.join(', ')}
-        </p>
-        <h1 className="event__title">
-          {event?.title}
-        </h1>
+        <div className="event__header-text">
+          <p className="event__type">
+            {event?.event_type?.join(', ')}
+          </p>
+          <h1 className="event__title">
+            {event?.title}
+          </h1>
+        </div>
         {!isPreview && (
           <button
             className="event__share-btn"
