@@ -296,6 +296,13 @@ export default function Event({ embeddedId, isPreview = false, status }) {
             </div>
           )}
 
+          {event.track?.length > 0 && (
+            <div className="event__tracks">
+              {event.track.map((track, i) => (
+                <span key={i} className="event__track">{track}</span>
+              ))}
+            </div>
+          )}
           <div className="event__tags">
             {event.tags?.map((tag, index) => (
               <span key={index} className="event__tag">#{tag}</span>
