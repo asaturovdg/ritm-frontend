@@ -1,4 +1,5 @@
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
+import { Share2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import currency from "../../assets/icons/currency.svg";
 import date from "../../assets/icons/DateRange.svg";
@@ -229,7 +230,7 @@ export default function Event({ embeddedId, isPreview = false, status }) {
             onClick={() => shareEvent(event.id, event.title)}
             aria-label="Поделиться"
           >
-            Поделиться
+            <Share2 size={20} strokeWidth={1.8} />
           </button>
         )}
       </div>
