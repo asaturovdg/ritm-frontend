@@ -33,8 +33,8 @@ const buildShareLines = (title, eventType) => {
 export const shareEventForPlatform = async (id, title, eventType, platform, showToast) => {
   if (platform === 'telegram') {
     const eventUrl = `https://t.me/${BOT}?startapp=event_${id}`;
-    const text = buildShareLines(title, eventType);
-    const shareUrl = `https://t.me/share/url?${new URLSearchParams({ url: eventUrl, text })}`;
+    const text = `${buildShareLines(title, eventType)}\n\n${eventUrl}`;
+    const shareUrl = `https://t.me/share/url?${new URLSearchParams({ text })}`;
     window.Telegram?.WebApp?.openTelegramLink(shareUrl);
   } else if (platform === 'max') {
     const eventUrl = `https://max.ru/${BOT}?startapp=event_${id}`;
