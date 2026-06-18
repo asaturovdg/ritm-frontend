@@ -8,7 +8,7 @@ export function ToastProvider({ children }) {
 
   const showToast = useCallback((message) => {
     setToast(message);
-    setTimeout(() => setToast(null), 2200);
+    setTimeout(() => setToast(null), 1150);
   }, []);
 
   return (
