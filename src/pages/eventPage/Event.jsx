@@ -1,4 +1,5 @@
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
+import { Share2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import currency from "../../assets/icons/currency.svg";
 import date from "../../assets/icons/DateRange.svg";
@@ -22,7 +23,7 @@ export default function Event({ embeddedId, isPreview = false, status }) {
   const id = embeddedId || paramId;
   const { token, isCheckingAuth } = useAuth();
   const { isProcessing, handleAddToCalendar } = useCalendar();
-  const { openLink, showAlert } = usePlatform();
+  const { openLink, showAlert, shareEvent, platform } = usePlatform();
 
   const fromProfileEvents = location.state?.from === 'profile-events';
 
@@ -217,12 +218,23 @@ export default function Event({ embeddedId, isPreview = false, status }) {
       )}
 
       <div className="event__header">
-        <p className="event__type">
-          {event?.event_type?.join(', ')}
-        </p>
-        <h1 className="event__title">
-          {event?.title}
-        </h1>
+        <div className="event__header-text">
+          <p className="event__type">
+            {event?.event_type?.join(', ')}
+          </p>
+          <h1 className="event__title">
+            {event?.title}
+          </h1>
+        </div>
+        {!isPreview && platform !== 'web' && (
+          <button
+            className="event__share-btn"
+            onClick={() => shareEvent(event.id, event.title)}
+            aria-label="Поделиться"
+          >
+            <Share2 size={20} strokeWidth={1.8} />
+          </button>
+        )}
       </div>
 
       <div className="event__info">
