@@ -185,7 +185,7 @@ export default function Event({ embeddedId, isPreview = false, status }) {
 
   return (
     <div className={`event ${isPreview ? 'event-preview' : ''}`}>
-      {platform === 'max' && !isPreview && (
+      {(platform === 'max' || platform === 'telegram') && !isPreview && (
         <button onClick={handleBack} className="event-back-btn">
           ← Назад
         </button>
