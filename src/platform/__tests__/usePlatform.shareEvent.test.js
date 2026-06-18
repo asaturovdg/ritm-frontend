@@ -13,34 +13,37 @@ describe('shareEventForPlatform', () => {
     });
   });
 
-  it('opens Telegram share dialog with event deep link and title', () => {
+  it('opens Telegram share dialog with formatted message and deep link', () => {
     const openTelegramLink = vi.fn();
     window.Telegram = { WebApp: { openTelegramLink } };
 
-    shareEventForPlatform(42, 'HolyJS 2026', 'telegram');
+    shareEventForPlatform(42, 'HolyJS 2026', ['Конференция'], 'telegram');
 
     expect(openTelegramLink).toHaveBeenCalledOnce();
-    const calledUrl = openTelegramLink.mock.calls[0][0];
+    const calledUrl = decodeURIComponent(openTelegramLink.mock.calls[0][0]);
     expect(calledUrl).toContain('t.me/share/url');
     expect(calledUrl).toContain('ritmevents_bot');
     expect(calledUrl).toContain('event_42');
-    expect(calledUrl).toContain('HolyJS');
+    expect(calledUrl).toContain('рИТме');
   });
 
-  it('copies Max deep link to clipboard and shows toast on Max platform', async () => {
+  it('copies formatted Max message to clipboard and shows toast', async () => {
     const showToast = vi.fn();
-    await shareEventForPlatform(42, 'HolyJS 2026', 'max', showToast);
+    await shareEventForPlatform(42, 'HolyJS 2026', ['Конференция'], 'max', showToast);
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      'https://max.ru/ritmevents_bot?startapp=event_42'
+      expect.stringContaining('https://max.ru/ritmevents_bot?startapp=event_42')
+    );
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      expect.stringContaining('рИТме')
     );
     expect(showToast).toHaveBeenCalledWith('Ссылка скопирована');
   });
 
-  it('copies web URL to clipboard on web platform when navigator.share unavailable', async () => {
+  it('copies formatted text to clipboard on web when navigator.share unavailable', async () => {
     delete navigator.share;
     const showToast = vi.fn();
-    await shareEventForPlatform(42, 'HolyJS 2026', 'web', showToast);
+    await shareEventForPlatform(42, 'HolyJS 2026', ['Конференция'], 'web', showToast);
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
       expect.stringContaining('/events/42')

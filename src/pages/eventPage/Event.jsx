@@ -39,21 +39,9 @@ export default function Event({ embeddedId, isPreview = false, status }) {
   const [activeTab, setActiveTab] = useState('description');
   const [addToCalendar, setAddToCalendar] = useState(false);
 
-  // Функция для возврата на дайджест с сохранением состояния
   const handleBack = () => {
-    // Если есть состояние для возврата, передаем его
-    if (returnState.weekOffset !== undefined || returnState.page !== undefined || returnState.searchQuery !== undefined) {
-      navigate('/', { 
-        state: {
-          weekOffset: returnState.weekOffset,
-          page: returnState.page,
-          searchQuery: returnState.searchQuery
-        }
-      });
-    } else {
-      // Если нет состояния, просто возвращаемся назад
-      navigate(-1);
-    }
+    const hasReturnState = returnState.weekOffset !== undefined || returnState.page !== undefined || returnState.searchQuery !== undefined;
+    navigate('/', { state: hasReturnState ? returnState : undefined });
   };
 
   // Функция для форматирования строки времени
@@ -230,7 +218,7 @@ export default function Event({ embeddedId, isPreview = false, status }) {
         {!isPreview && platform !== 'web' && (
           <button
             className="event__share-btn"
-            onClick={() => shareEvent(event.id, event.title)}
+            onClick={() => shareEvent(event.id, event.title, event.event_type)}
             aria-label="Поделиться"
           >
             <Share2 size={20} strokeWidth={1.8} />

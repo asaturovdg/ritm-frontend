@@ -66,7 +66,7 @@ describe('Event — share button', () => {
     renderEvent();
     const btn = await screen.findByRole('button', { name: /поделиться/i });
     fireEvent.click(btn);
-    expect(mockShareEvent).toHaveBeenCalledWith(42, 'HolyJS 2026');
+    expect(mockShareEvent).toHaveBeenCalledWith(42, 'HolyJS 2026', mockEvent.event_type);
   });
 
   it('hides share button when platform is web', async () => {

@@ -25,21 +25,28 @@ const expandAppForPlatform = (platform) => {
   }
 };
 
-export const shareEventForPlatform = async (id, title, platform, showToast) => {
+const buildShareText = (title, eventType, url) => {
+  const type = Array.isArray(eventType) ? eventType.join(', ') : (eventType || '');
+  return `Смотри что нашёл в рИТме!\n${type}\n${title}\n\n${url}`;
+};
+
+export const shareEventForPlatform = async (id, title, eventType, platform, showToast) => {
   if (platform === 'telegram') {
     const eventUrl = `https://t.me/${BOT}?startapp=event_${id}`;
-    const shareUrl = `https://t.me/share/url?${new URLSearchParams({ url: eventUrl, text: title })}`;
+    const text = buildShareText(title, eventType, eventUrl);
+    const shareUrl = `https://t.me/share/url?${new URLSearchParams({ url: eventUrl, text })}`;
     window.Telegram?.WebApp?.openTelegramLink(shareUrl);
   } else if (platform === 'max') {
     const eventUrl = `https://max.ru/${BOT}?startapp=event_${id}`;
-    await navigator.clipboard.writeText(eventUrl);
+    await navigator.clipboard.writeText(buildShareText(title, eventType, eventUrl));
     showToast?.('Ссылка скопирована');
   } else {
     const eventUrl = `${window.location.origin}/events/${id}`;
+    const text = buildShareText(title, eventType, eventUrl);
     if (navigator.share) {
-      await navigator.share({ url: eventUrl, title });
+      await navigator.share({ url: eventUrl, title: text });
     } else {
-      await navigator.clipboard.writeText(eventUrl);
+      await navigator.clipboard.writeText(text);
       showToast?.('Ссылка скопирована');
     }
   }
@@ -53,6 +60,6 @@ export function usePlatform() {
     openLink: (url) => openLinkForPlatform(url, platform),
     showAlert: (msg) => showAlertForPlatform(msg, platform),
     expandApp: () => expandAppForPlatform(platform),
-    shareEvent: (id, title) => shareEventForPlatform(id, title, platform, showToast),
+    shareEvent: (id, title, eventType) => shareEventForPlatform(id, title, eventType, platform, showToast),
   };
 }
