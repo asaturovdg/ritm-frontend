@@ -6,12 +6,7 @@ import { useAuth } from "../AuthContext.jsx";
 import { useUserFilters } from "../useUserFilters.jsx";
 import { usePlatform } from "../../platform/usePlatform.js"
 
-import dateIcon from "../../assets/icons/DateRange.svg";
-import timeIcon from "../../assets/icons/time.svg";
-import priceIcon from "../../assets/icons/currency.svg";
-import placeIcon from "../../assets/icons/Place.svg";
-import partType from "../../assets/icons/partType.svg";
-import webIcon from "../../assets/icons/web.svg"
+import { Calendar, Clock, RussianRuble, MapPin, Users, Globe } from "lucide-react";
 
 
 const ITEMS_PER_PAGE = 20;
@@ -484,35 +479,35 @@ export default function EventsDigest() {
                 <div className="digest__date-row">
                   {event.start_date && (
                     <div className="digest__day">
-                      <img src={dateIcon} alt="icon" /> {formatDate(event.start_date)}
+                      <Calendar size={14} color="#1032A1" strokeWidth={1.5} /> {formatDate(event.start_date)}
                     </div>
                   )}
                   {event.start_time && (
                     <div className="digest__time">
-                      <img src={timeIcon} alt="icon" /> {formatTime(event.start_time)}
+                      <Clock size={14} color="#1032A1" strokeWidth={1.5} /> {formatTime(event.start_time)}
                     </div>
                   )}
                 </div>
                 {typeof event.price === 'number' && (
                   <div className="digest__price">
-                    <img src={priceIcon} alt="ruble icon" />
+                    <RussianRuble size={14} color="#1032A1" strokeWidth={1.5} />
                     {event.price === 0 ? 'Бесплатно' : `${event.price}`}
                   </div>
                 )}
                 {event.participation_type && (
                   <div className="digest__partType">
-                    <img src={partType} alt="person speaking icon"/>
+                    <Users size={14} color="#1032A1" strokeWidth={1.5} />
                     {event.participation_type?.join(', ')}
                   </div>
                 )}
                 <div className="digest__location">
-                  <img src={placeIcon} alt="icon" />
+                  <MapPin size={14} color="#1032A1" strokeWidth={1.5} />
                   {event.city?.join(', ') || event.address || 'Онлайн'}
                 </div>
 
                 {event.event_url && (
                   <div className="digest__eventUrl">
-                    <img src={webIcon} alt="site icon" className="icon"/>
+                    <Globe size={14} color="#1032A1" strokeWidth={1.5} />
                     <a
                       href={event.event_url}
                       onClick={(e) => { e.stopPropagation(); handleOpenLink(e, event.event_url); }}

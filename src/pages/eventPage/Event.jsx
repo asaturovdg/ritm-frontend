@@ -1,12 +1,6 @@
 import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
-import { Share2 } from "lucide-react";
+import { Share2, Calendar, Clock, RussianRuble, MapPin, Users, Globe } from "lucide-react";
 import { useState, useEffect } from "react";
-import currency from "../../assets/icons/currency.svg";
-import date from "../../assets/icons/DateRange.svg";
-import place from "../../assets/icons/Place.svg";
-import time from "../../assets/icons/time.svg";
-import partType from "../../assets/icons/partType.svg";
-import webIcon from "../../assets/icons/web.svg";
 import blueCalendar from "../../assets/icons/calendarBlue.svg";
 import yandex from "../../assets/icons/Yandex.svg"
 import google from "../../assets/icons/Google.svg"
@@ -232,7 +226,7 @@ export default function Event({ embeddedId, isPreview = false, status }) {
             <div className="event__day">
               {event.start_date && (
                 <div className="event__dates">
-                  <img src={date} alt="date icon" />
+                  <Calendar size={16} color="#1032A1" strokeWidth={1.5} />
                   <time dateTime={event.start_date}>
                     {event.start_date.split('-').reverse().join('.')}
                   </time>
@@ -250,7 +244,7 @@ export default function Event({ embeddedId, isPreview = false, status }) {
 
             {event.start_time && (
               <div className="event__time">
-                <img src={time} alt="time icon" />
+                <Clock size={16} color="#1032A1" strokeWidth={1.5} />
                 <time dateTime={event.start_time}>{formatTime(event.start_time)}</time>
                 {event.end_time && (
                   <>
@@ -264,20 +258,20 @@ export default function Event({ embeddedId, isPreview = false, status }) {
 
           {typeof event.price === 'number' && (
             <div className="event__price">
-              <img src={currency} alt="price icon" />
+              <RussianRuble size={16} color="#1032A1" strokeWidth={1.5} />
               {event.price === 0 ? "Бесплатно" : `${event.price}`}
             </div>
           )}
 
           {event.participation_type && (
             <div className="event__partType">
-              <img src={partType} alt="person speaking icon" />
+              <Users size={16} color="#1032A1" strokeWidth={1.5} />
               {event.participation_type?.join(', ')}
             </div>
           )}
 
           <div className="event__location">
-            <img src={place} alt="place icon" />
+            <MapPin size={16} color="#1032A1" strokeWidth={1.5} />
             <span className="location__text">
               <span className="event__city">{event.city?.join(', ')}</span>
               {event.address && <span className="event__address">, {event.address}</span>}
@@ -286,7 +280,7 @@ export default function Event({ embeddedId, isPreview = false, status }) {
 
           {event.event_url && (
             <div className="event__eventUrl">
-              <img src={webIcon} alt="site icon" className="icon" />
+              <Globe size={16} color="#1032A1" strokeWidth={1.5} />
               <a
                 href={event.event_url}
                 onClick={(e) => handleOpenLink(e, event.event_url)}
