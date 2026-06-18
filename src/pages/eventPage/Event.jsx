@@ -203,10 +203,11 @@ export default function Event({ embeddedId, isPreview = false, status }) {
 
   return (
     <div className={`event ${isPreview ? 'event-preview' : ''}`}>
-      {/* Кнопка возврата */}
-      {/* <button onClick={handleBack} className="event-back-btn">
-        Назад
-      </button> */}
+      {platform === 'max' && !isPreview && (
+        <button onClick={handleBack} className="event-back-btn">
+          ← Назад
+        </button>
+      )}
 
       {/* Блок статуса для режима предпросмотра (заявки) */}
       {isPreview && status && (

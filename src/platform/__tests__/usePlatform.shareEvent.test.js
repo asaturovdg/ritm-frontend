@@ -27,18 +27,20 @@ describe('shareEventForPlatform', () => {
     expect(calledUrl).toContain('HolyJS');
   });
 
-  it('copies Max deep link to clipboard on Max platform', async () => {
-    await shareEventForPlatform(42, 'HolyJS 2026', 'max');
+  it('copies Max deep link to clipboard and shows toast on Max platform', async () => {
+    const showToast = vi.fn();
+    await shareEventForPlatform(42, 'HolyJS 2026', 'max', showToast);
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
       'https://max.ru/ritmevents_bot?startapp=event_42'
     );
+    expect(showToast).toHaveBeenCalledWith('Ссылка скопирована');
   });
 
   it('copies web URL to clipboard on web platform when navigator.share unavailable', async () => {
     delete navigator.share;
-
-    await shareEventForPlatform(42, 'HolyJS 2026', 'web');
+    const showToast = vi.fn();
+    await shareEventForPlatform(42, 'HolyJS 2026', 'web', showToast);
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
       expect.stringContaining('/events/42')

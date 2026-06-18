@@ -8,6 +8,7 @@ import './index.css'
 import App from './App/App'
 import { AuthProvider } from './components/AuthContext.jsx'
 import { FiltersProvider } from './components/FiltersContext.jsx'
+import { ToastProvider } from './components/Toast/ToastContext.jsx'
 
 
 const meta = document.createElement('meta');
@@ -20,9 +21,11 @@ createRoot(document.getElementById('root')).render(
     <StrictMode>
       <AppRoot platform="base">
         <AuthProvider>
-          <FiltersProvider>
-            <App />
-          </FiltersProvider>
+          <ToastProvider>
+            <FiltersProvider>
+              <App />
+            </FiltersProvider>
+          </ToastProvider>
         </AuthProvider>
       </AppRoot>
     </StrictMode>

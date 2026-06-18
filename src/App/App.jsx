@@ -31,10 +31,9 @@ export default function App() {
 
   const prevPathRef = useRef(location.pathname);
   const transitionConfigRef = useRef({ direction: 0, type: 'tab' });
-
-  const curr = location.pathname;
   const deepLinkHandledRef = useRef(false);
 
+  const curr = location.pathname;
   const prev = prevPathRef.current;
   if (prev !== curr) {
     const isTab = (p) => TAB_PATHS.includes(p);
