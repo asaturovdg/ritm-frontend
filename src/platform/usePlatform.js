@@ -1,4 +1,5 @@
 import { useAuth } from '../components/AuthContext.jsx';
+import { useToast } from '../components/Toast/ToastContext.jsx';
 
 const BOT = 'ritmevents_bot';
 
@@ -24,7 +25,7 @@ const expandAppForPlatform = (platform) => {
   }
 };
 
-export const shareEventForPlatform = async (id, title, platform) => {
+export const shareEventForPlatform = async (id, title, platform, showToast) => {
   if (platform === 'telegram') {
     const eventUrl = `https://t.me/${BOT}?startapp=event_${id}`;
     const shareUrl = `https://t.me/share/url?${new URLSearchParams({ url: eventUrl, text: title })}`;
@@ -32,25 +33,26 @@ export const shareEventForPlatform = async (id, title, platform) => {
   } else if (platform === 'max') {
     const eventUrl = `https://max.ru/${BOT}?startapp=event_${id}`;
     await navigator.clipboard.writeText(eventUrl);
-    showAlertForPlatform('Ссылка скопирована', platform);
+    showToast?.('Ссылка скопирована');
   } else {
     const eventUrl = `${window.location.origin}/events/${id}`;
     if (navigator.share) {
       await navigator.share({ url: eventUrl, title });
     } else {
       await navigator.clipboard.writeText(eventUrl);
-      showAlertForPlatform('Ссылка скопирована', platform);
+      showToast?.('Ссылка скопирована');
     }
   }
 };
 
 export function usePlatform() {
   const { platform } = useAuth();
+  const showToast = useToast();
   return {
     platform,
     openLink: (url) => openLinkForPlatform(url, platform),
     showAlert: (msg) => showAlertForPlatform(msg, platform),
     expandApp: () => expandAppForPlatform(platform),
-    shareEvent: (id, title) => shareEventForPlatform(id, title, platform),
+    shareEvent: (id, title) => shareEventForPlatform(id, title, platform, showToast),
   };
 }
