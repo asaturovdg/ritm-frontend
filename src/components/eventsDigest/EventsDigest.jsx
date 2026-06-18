@@ -457,6 +457,8 @@ export default function EventsDigest() {
             <div
               key={event.id}
               className="digest__item"
+              tabIndex={0}
+              role="article"
               onClick={() => navigate(`/events/${event.id}`, {
                 state: {
                   token,
@@ -466,6 +468,20 @@ export default function EventsDigest() {
                   searchQuery: searchQuery,
                 },
               })}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  navigate(`/events/${event.id}`, {
+                    state: {
+                      token,
+                      userId,
+                      weekOffset: currentWeekOffset,
+                      page: currentPage,
+                      searchQuery: searchQuery,
+                    },
+                  });
+                }
+              }}
             >
               <div className="digest__header">
                 <p className="digest__type">
@@ -532,7 +548,7 @@ export default function EventsDigest() {
                   ))}
                 </div>
               )}
-              <span className="digest__knowMore">ПОДРОБНЕЕ</span>
+              <button className="digest__knowMore" tabIndex={-1}>ПОДРОБНЕЕ</button>
             </div>
           ))
         ) : (
