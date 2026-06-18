@@ -459,7 +459,19 @@ export default function EventsDigest() {
           </div>
         ) : events.length > 0 ? (
           events.map(event => (
-            <div key={event.id} className="digest__item">
+            <div
+              key={event.id}
+              className="digest__item"
+              onClick={() => navigate(`/events/${event.id}`, {
+                state: {
+                  token,
+                  userId,
+                  weekOffset: currentWeekOffset,
+                  page: currentPage,
+                  searchQuery: searchQuery,
+                },
+              })}
+            >
               <div className="digest__header">
                 <p className="digest__type">
                   {event.event_type?.join(', ')}
@@ -489,7 +501,7 @@ export default function EventsDigest() {
                 )}
                 {event.participation_type && (
                   <div className="digest__partType">
-                    <img src={partType} alt="person speaking icon"/> 
+                    <img src={partType} alt="person speaking icon"/>
                     {event.participation_type?.join(', ')}
                   </div>
                 )}
@@ -501,9 +513,9 @@ export default function EventsDigest() {
                 {event.event_url && (
                   <div className="digest__eventUrl">
                     <img src={webIcon} alt="site icon" className="icon"/>
-                    <a 
+                    <a
                       href={event.event_url}
-                      onClick={(e) => handleOpenLink(e, event.event_url)}
+                      onClick={(e) => { e.stopPropagation(); handleOpenLink(e, event.event_url); }}
                       className="digest-link"
                     >
                       Сайт мероприятия
@@ -525,19 +537,7 @@ export default function EventsDigest() {
                   ))}
                 </div>
               )}
-              <Link
-                to={`/events/${event.id}`}
-                state={{
-                  token,
-                  userId,
-                  weekOffset: currentWeekOffset,
-                  page: currentPage,
-                  searchQuery: searchQuery,
-                }}
-                className="digest__knowMore"
-              >
-                ПОДРОБНЕЕ
-              </Link>
+              <span className="digest__knowMore">ПОДРОБНЕЕ</span>
             </div>
           ))
         ) : (
