@@ -25,24 +25,24 @@ const expandAppForPlatform = (platform) => {
   }
 };
 
-const buildShareText = (title, eventType, url) => {
+const buildShareLines = (title, eventType) => {
   const type = Array.isArray(eventType) ? eventType.join(', ') : (eventType || '');
-  return `Смотри, что нашёл рИТм!\n${type}\n${title}\n\n${url}`;
+  return `Смотри, что нашёл рИТм!\n\n${type}\n\n${title}`;
 };
 
 export const shareEventForPlatform = async (id, title, eventType, platform, showToast) => {
   if (platform === 'telegram') {
     const eventUrl = `https://t.me/${BOT}?startapp=event_${id}`;
-    const text = buildShareText(title, eventType, eventUrl);
+    const text = buildShareLines(title, eventType);
     const shareUrl = `https://t.me/share/url?${new URLSearchParams({ url: eventUrl, text })}`;
     window.Telegram?.WebApp?.openTelegramLink(shareUrl);
   } else if (platform === 'max') {
     const eventUrl = `https://max.ru/${BOT}?startapp=event_${id}`;
-    await navigator.clipboard.writeText(buildShareText(title, eventType, eventUrl));
+    await navigator.clipboard.writeText(`${buildShareLines(title, eventType)}\n\n${eventUrl}`);
     showToast?.('Ссылка скопирована');
   } else {
     const eventUrl = `${window.location.origin}/events/${id}`;
-    const text = buildShareText(title, eventType, eventUrl);
+    const text = `${buildShareLines(title, eventType)}\n\n${eventUrl}`;
     if (navigator.share) {
       await navigator.share({ url: eventUrl, title: text });
     } else {
