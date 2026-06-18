@@ -24,7 +24,7 @@ describe('shareEventForPlatform', () => {
     expect(calledUrl).toContain('t.me/share/url');
     expect(calledUrl).toContain('ritmevents_bot');
     expect(calledUrl).toContain('event_42');
-    expect(calledUrl).toContain('рИТме');
+    expect(calledUrl).toContain('рИТм');
   });
 
   it('copies formatted Max message to clipboard and shows toast', async () => {
@@ -35,7 +35,7 @@ describe('shareEventForPlatform', () => {
       expect.stringContaining('https://max.ru/ritmevents_bot?startapp=event_42')
     );
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      expect.stringContaining('рИТме')
+      expect.stringContaining('рИТм')
     );
     expect(showToast).toHaveBeenCalledWith('Ссылка скопирована');
   });

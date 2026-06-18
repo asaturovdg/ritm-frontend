@@ -27,7 +27,7 @@ const expandAppForPlatform = (platform) => {
 
 const buildShareText = (title, eventType, url) => {
   const type = Array.isArray(eventType) ? eventType.join(', ') : (eventType || '');
-  return `Смотри что нашёл в рИТме!\n${type}\n${title}\n\n${url}`;
+  return `Смотри, что нашёл рИТм!\n${type}\n${title}\n\n${url}`;
 };
 
 export const shareEventForPlatform = async (id, title, eventType, platform, showToast) => {
