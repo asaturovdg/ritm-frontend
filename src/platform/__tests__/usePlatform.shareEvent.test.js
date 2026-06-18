@@ -25,9 +25,7 @@ describe('shareEventForPlatform', () => {
     expect(calledUrl).toContain('ritmevents_bot');
     expect(calledUrl).toContain('event_42');
     expect(calledUrl).toContain('рИТм');
-    // URL is in text= at the end, no separate url= param
-    expect(calledUrl).toContain('text=');
-    expect(calledUrl).not.toContain('url=https://');
+    expect(calledUrl).toContain('url=https://t.me/ritmevents_bot');
   });
 
   it('copies formatted Max message to clipboard and shows toast', async () => {
