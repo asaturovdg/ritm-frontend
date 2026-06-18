@@ -25,9 +25,8 @@ const expandAppForPlatform = (platform) => {
   }
 };
 
-const buildShareLines = (title, eventType, url) => {
-  const type = Array.isArray(eventType) ? eventType.join(', ') : (eventType || '');
-  const lines = ['Смотри, что нашёл рИТм!', '', type, '', title];
+const buildShareLines = (title, url) => {
+  const lines = ['Смотри, что нашёл рИТм!', '', title];
   if (url) lines.push('', url);
   return lines.join('\n');
 };
@@ -35,15 +34,15 @@ const buildShareLines = (title, eventType, url) => {
 export const shareEventForPlatform = async (id, title, eventType, platform, showToast) => {
   if (platform === 'telegram') {
     const eventUrl = `https://t.me/${BOT}?startapp=event_${id}`;
-    await navigator.clipboard.writeText(buildShareLines(title, eventType, eventUrl));
+    await navigator.clipboard.writeText(buildShareLines(title, eventUrl));
     showToast?.('Ссылка скопирована');
   } else if (platform === 'max') {
     const eventUrl = `https://max.ru/${BOT}?startapp=event_${id}`;
-    await navigator.clipboard.writeText(buildShareLines(title, eventType, eventUrl));
+    await navigator.clipboard.writeText(buildShareLines(title, eventUrl));
     showToast?.('Ссылка скопирована');
   } else {
     const eventUrl = `${window.location.origin}/events/${id}`;
-    const text = buildShareLines(title, eventType, eventUrl);
+    const text = buildShareLines(title, eventUrl);
     if (navigator.share) {
       await navigator.share({ url: eventUrl, title: text });
     } else {
