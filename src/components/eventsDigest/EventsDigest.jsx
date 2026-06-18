@@ -534,9 +534,9 @@ export default function EventsDigest() {
                   page: currentPage,
                   searchQuery: searchQuery,
                 }}
-                className="digest__link"
+                className="digest__knowMore"
               >
-                <button className="btn digest__knowMore">ПОДРОБНЕЕ</button>
+                ПОДРОБНЕЕ
               </Link>
             </div>
           ))
