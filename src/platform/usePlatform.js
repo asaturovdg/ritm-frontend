@@ -33,6 +33,14 @@ export const shareEventForPlatform = async (id, title, platform) => {
     const eventUrl = `https://max.ru/${BOT}?startapp=event_${id}`;
     await navigator.clipboard.writeText(eventUrl);
     showAlertForPlatform('Ссылка скопирована', platform);
+  } else {
+    const eventUrl = `${window.location.origin}/events/${id}`;
+    if (navigator.share) {
+      await navigator.share({ url: eventUrl, title });
+    } else {
+      await navigator.clipboard.writeText(eventUrl);
+      showAlertForPlatform('Ссылка скопирована', platform);
+    }
   }
 };
 

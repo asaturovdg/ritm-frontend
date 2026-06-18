@@ -35,9 +35,13 @@ describe('shareEventForPlatform', () => {
     );
   });
 
-  it('does nothing on web platform', async () => {
+  it('copies web URL to clipboard on web platform when navigator.share unavailable', async () => {
+    delete navigator.share;
+
     await shareEventForPlatform(42, 'HolyJS 2026', 'web');
 
-    expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      expect.stringContaining('/events/42')
+    );
   });
 });

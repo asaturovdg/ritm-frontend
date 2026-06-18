@@ -69,11 +69,10 @@ describe('Event — share button', () => {
     expect(mockShareEvent).toHaveBeenCalledWith(42, 'HolyJS 2026');
   });
 
-  it('hides share button when platform is web', async () => {
+  it('renders share button on web platform', async () => {
     mockPlatform = 'web';
     renderEvent();
-    await screen.findByText('HolyJS 2026');
-    expect(screen.queryByRole('button', { name: /поделиться/i })).toBeNull();
+    expect(await screen.findByRole('button', { name: /поделиться/i })).toBeInTheDocument();
   });
 
   it('hides share button in isPreview mode', async () => {

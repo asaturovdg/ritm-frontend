@@ -223,7 +223,7 @@ export default function Event({ embeddedId, isPreview = false, status }) {
         <h1 className="event__title">
           {event?.title}
         </h1>
-        {!isPreview && platform !== 'web' && (
+        {!isPreview && (
           <button
             className="event__share-btn"
             onClick={() => shareEvent(event.id, event.title)}
