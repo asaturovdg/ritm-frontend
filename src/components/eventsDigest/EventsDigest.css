@@ -1,6 +1,11 @@
 .digest__item {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    font-family: inherit;
+    font-size: inherit;
     padding: 15px;
     border-radius: 12px;
     background-color: #ffffff;
