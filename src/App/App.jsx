@@ -31,6 +31,7 @@ export default function App() {
 
   const prevPathRef = useRef(location.pathname);
   const transitionConfigRef = useRef({ direction: 0, type: 'tab' });
+  const deepLinkHandledRef = useRef(false);
 
   const curr = location.pathname;
   const prev = prevPathRef.current;
@@ -52,22 +53,28 @@ export default function App() {
 
   // Telegram deep-links (invite + event)
   useEffect(() => {
+    if (deepLinkHandledRef.current) return;
     const startParam = window.Telegram?.WebApp?.initDataUnsafe?.start_param;
     if (startParam?.startsWith('invite_')) {
+      deepLinkHandledRef.current = true;
       navigate(`/invite/assistant/${startParam.replace('invite_', '')}`, { replace: true });
     } else if (startParam?.startsWith('event_')) {
+      deepLinkHandledRef.current = true;
       navigate(`/events/${startParam.replace('event_', '')}`, { replace: true });
     }
   }, [navigate]);
 
   // Max deep-links (invite + event)
   useEffect(() => {
+    if (deepLinkHandledRef.current) return;
     const startParam =
       window.WebApp?.initDataUnsafe?.start_param ||
       new URLSearchParams(window.location.search).get('WebAppStartParam');
     if (startParam?.startsWith('invite_')) {
+      deepLinkHandledRef.current = true;
       navigate(`/invite/assistant/${startParam.replace('invite_', '')}`, { replace: true });
     } else if (startParam?.startsWith('event_')) {
+      deepLinkHandledRef.current = true;
       navigate(`/events/${startParam.replace('event_', '')}`, { replace: true });
     }
   }, [navigate]);
