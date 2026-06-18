@@ -94,6 +94,21 @@
     font-weight: 500;
 }
 
+.event__tracks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.event__track {
+    padding: 4px 8px;
+    border-radius: 7px;
+    font-size: 14px;
+    background-color: #E8EDFB;
+    color: #1032A1;
+}
+
 .event__tags{
     display: flex;
     gap:7px;
