@@ -1,10 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { Newspaper, User, MessageCircle, FilePlus } from 'lucide-react';
+import { Newspaper, User, MessageCircle, FilePlus, Sparkles } from 'lucide-react';
 
 import InviteAccept from '../components/InviteAccept/InviteAccept';
 import EventsDigest from '../components/eventsDigest/EventsDigest';
+import Featured from '../pages/Featured/Featured';
 import Event from '../pages/eventPage/Event';
 import { Profile } from '../pages/Profile/Profile';
 import Feedback from '../pages/Feedback/Feedback';
@@ -15,10 +16,11 @@ import { TransitionContext } from '../components/TransitionContext';
 import { useTabSwipe } from '../hooks/useTabSwipe';
 import './App.css';
 
-const TAB_PATHS = ['/', '/profile', '/feedback', '/submissions'];
+const TAB_PATHS = ['/featured', '/', '/profile', '/feedback', '/submissions'];
 
 const TABS = [
-  { id: 'events',      label: 'Дайджест',         Icon: Newspaper,      path: '/' },
+  { id: 'featured',    label: 'Важное',            Icon: Sparkles,       path: '/featured' },
+  { id: 'events',      label: 'Дайджест',          Icon: Newspaper,      path: '/' },
   { id: 'profile',     label: 'Профиль',           Icon: User,           path: '/profile' },
   { id: 'feedback',    label: 'Обратная связь',    Icon: MessageCircle,  path: '/feedback' },
   { id: 'submissions', label: 'Заявка',            Icon: FilePlus,       path: '/submissions' },
@@ -121,6 +123,7 @@ export default function App() {
   }, []);
 
   const getActiveTab = () => {
+    if (location.pathname === '/featured') return 'featured';
     if (location.pathname === '/' || location.pathname.includes('/events/')) return 'events';
     if (location.pathname === '/profile') return 'profile';
     if (location.pathname === '/feedback') return 'feedback';
@@ -129,7 +132,13 @@ export default function App() {
   };
 
   const handleTabChange = (tab) => {
-    const paths = { events: '/', profile: '/profile', feedback: '/feedback', submissions: '/submissions' };
+    const paths = {
+      featured: '/featured',
+      events: '/',
+      profile: '/profile',
+      feedback: '/feedback',
+      submissions: '/submissions',
+    };
     navigate(paths[tab] ?? '/');
   };
 
@@ -176,6 +185,7 @@ export default function App() {
                   transition={activeTransition}
                 >
                   <Routes location={location}>
+                    <Route path='/featured' element={<Featured />} />
                     <Route path='/' element={<EventsDigest />} />
                     <Route path='/events/:id' element={<Event />} />
                     <Route path='/profile' element={<Profile />} />
