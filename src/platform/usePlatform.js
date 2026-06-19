@@ -3,6 +3,18 @@ import { useToast } from '../components/Toast/ToastContext.jsx';
 
 const BOT = 'ritmevents_bot';
 
+export const buildCalendarReturnUrl = (provider, eventId, platform) => {
+  if (platform === 'telegram') return `https://t.me/${BOT}?startapp=cal_${provider}_${eventId}`;
+  if (platform === 'max') return `https://max.ru/${BOT}?startapp=cal_${provider}_${eventId}`;
+  return `https://app.ritmevents.ru?calendar_connected=true&provider=${provider}`;
+};
+
+export const buildCalendarErrorReturnUrl = (provider, eventId, platform) => {
+  if (platform === 'telegram') return `https://t.me/${BOT}?startapp=calerr_${provider}_${eventId}`;
+  if (platform === 'max') return `https://max.ru/${BOT}?startapp=calerr_${provider}_${eventId}`;
+  return `https://app.ritmevents.ru?calendar_error=true`;
+};
+
 const openLinkForPlatform = (url, platform) => {
   if (platform === 'telegram' && window.Telegram?.WebApp?.openLink) {
     window.Telegram.WebApp.openLink(url);
@@ -61,5 +73,7 @@ export function usePlatform() {
     showAlert: (msg) => showAlertForPlatform(msg, platform),
     expandApp: () => expandAppForPlatform(platform),
     shareEvent: (id, title, eventType) => shareEventForPlatform(id, title, eventType, platform, showToast),
+    buildCalendarReturnUrl: (provider, eventId) => buildCalendarReturnUrl(provider, eventId, platform),
+    buildCalendarErrorReturnUrl: (provider, eventId) => buildCalendarErrorReturnUrl(provider, eventId, platform),
   };
 }

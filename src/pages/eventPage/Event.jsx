@@ -1,6 +1,6 @@
-import { useParams, useLocation, useNavigate, Link } from "react-router-dom";
+import { useParams, useLocation, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Share2, Calendar, Clock, RussianRuble, MapPin, Users, Globe } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import blueCalendar from "../../assets/icons/calendarBlue.svg";
 import yandex from "../../assets/icons/Yandex.svg"
 import google from "../../assets/icons/Google.svg"
@@ -16,7 +16,7 @@ export default function Event({ embeddedId, isPreview = false, status }) {
   const { id: paramId } = useParams();
   const id = embeddedId || paramId;
   const { token, isCheckingAuth } = useAuth();
-  const { isProcessing, handleAddToCalendar } = useCalendar();
+  const { isProcessing, handleAddToCalendar, addEventToCalendar } = useCalendar();
   const { openLink, showAlert, shareEvent, platform } = usePlatform();
 
   const fromProfileEvents = location.state?.from === 'profile-events';
@@ -32,6 +32,28 @@ export default function Event({ embeddedId, isPreview = false, status }) {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('description');
   const [addToCalendar, setAddToCalendar] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const calCallbackRef = useRef(false);
+
+  const PROVIDER_LABEL = { google: 'Google', yandex: 'Яндекс' };
+
+  useEffect(() => {
+    if (isCheckingAuth || calCallbackRef.current) return;
+    const cal = searchParams.get('cal');
+    const calerr = searchParams.get('calerr');
+    if (!cal && !calerr) return;
+
+    calCallbackRef.current = true;
+    setSearchParams({}, { replace: true });
+
+    if (cal) {
+      addEventToCalendar(id, cal)
+        .then(() => showAlert(`Событие добавлено в ${PROVIDER_LABEL[cal] ?? cal} Календарь`))
+        .catch((e) => showAlert(`Ошибка: ${e.message}`));
+    } else {
+      showAlert('Не удалось подключить календарь. Попробуйте позже.');
+    }
+  }, [isCheckingAuth]);
 
   const handleBack = () => {
     const hasReturnState = returnState.weekOffset !== undefined || returnState.page !== undefined || returnState.searchQuery !== undefined;
