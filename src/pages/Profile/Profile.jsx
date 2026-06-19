@@ -819,13 +819,19 @@ const copyInviteLink = () => {
                           ))}
                         </div>
                       )}
-                      <Link 
-                        to={`/events/${event.id}`} 
+                      <Link
+                        to={`/events/${event.id}`}
                         className="digest__link"
-                        state={{ 
-                          token: token, 
-                          userId: userData?.id, 
-                          from: 'profile-events'  
+                        state={{
+                          token: token,
+                          userId: userData?.id,
+                          from: 'profile-events'
+                        }}
+                        onClick={() => {
+                          fetch(`https://ritmevents.ru/api/v1/events/${event.id}/view`, {
+                            method: 'POST',
+                            headers: token ? { Authorization: `Bearer ${token}` } : {},
+                          });
                         }}
                       >
                         <button className="btn digest__knowMore">ПОДРОБНЕЕ</button>

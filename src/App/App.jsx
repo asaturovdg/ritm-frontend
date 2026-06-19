@@ -1,10 +1,11 @@
 import { useEffect, useRef } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { Newspaper, User, MessageCircle, FilePlus } from 'lucide-react';
+import { Newspaper, User, MessageCircle, FilePlus, Sparkles } from 'lucide-react';
 
 import InviteAccept from '../components/InviteAccept/InviteAccept';
 import EventsDigest from '../components/eventsDigest/EventsDigest';
+import Featured from '../pages/Featured/Featured';
 import Event from '../pages/eventPage/Event';
 import { Profile } from '../pages/Profile/Profile';
 import Feedback from '../pages/Feedback/Feedback';
@@ -13,21 +14,29 @@ import { ThemeWrapper } from '../components/ThemeWrapper';
 import { TransitionContext } from '../components/TransitionContext';
 
 import { useTabSwipe } from '../hooks/useTabSwipe';
+import { useAuth } from '../components/AuthContext.jsx';
 import './App.css';
 
-const TAB_PATHS = ['/', '/profile', '/feedback', '/submissions'];
+const FEATURED_ALLOWLIST = new Set([5, 88]);
 
-const TABS = [
-  { id: 'events',      label: 'Дайджест',         Icon: Newspaper,      path: '/' },
+const BASE_TAB_PATHS = ['/', '/profile', '/feedback', '/submissions'];
+const BASE_TABS = [
+  { id: 'events',      label: 'Дайджест',          Icon: Newspaper,      path: '/' },
   { id: 'profile',     label: 'Профиль',           Icon: User,           path: '/profile' },
   { id: 'feedback',    label: 'Обратная связь',    Icon: MessageCircle,  path: '/feedback' },
   { id: 'submissions', label: 'Заявка',            Icon: FilePlus,       path: '/submissions' },
 ];
+const FEATURED_TAB = { id: 'featured', label: 'Важное', Icon: Sparkles, path: '/featured' };
 
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const prefersReduced = useReducedMotion();
+  const { userId } = useAuth();
+
+  const hasFeatured = FEATURED_ALLOWLIST.has(Number(userId));
+  const TABS = hasFeatured ? [FEATURED_TAB, ...BASE_TABS] : BASE_TABS;
+  const TAB_PATHS = hasFeatured ? ['/featured', ...BASE_TAB_PATHS] : BASE_TAB_PATHS;
 
   const prevPathRef = useRef(location.pathname);
   const transitionConfigRef = useRef({ direction: 0, type: 'tab' });
@@ -121,6 +130,7 @@ export default function App() {
   }, []);
 
   const getActiveTab = () => {
+    if (location.pathname === '/featured') return 'featured';
     if (location.pathname === '/' || location.pathname.includes('/events/')) return 'events';
     if (location.pathname === '/profile') return 'profile';
     if (location.pathname === '/feedback') return 'feedback';
@@ -129,7 +139,13 @@ export default function App() {
   };
 
   const handleTabChange = (tab) => {
-    const paths = { events: '/', profile: '/profile', feedback: '/feedback', submissions: '/submissions' };
+    const paths = {
+      featured: '/featured',
+      events: '/',
+      profile: '/profile',
+      feedback: '/feedback',
+      submissions: '/submissions',
+    };
     navigate(paths[tab] ?? '/');
   };
 
@@ -176,6 +192,7 @@ export default function App() {
                   transition={activeTransition}
                 >
                   <Routes location={location}>
+                    <Route path='/featured' element={hasFeatured ? <Featured /> : <Navigate to="/" replace />} />
                     <Route path='/' element={<EventsDigest />} />
                     <Route path='/events/:id' element={<Event />} />
                     <Route path='/profile' element={<Profile />} />

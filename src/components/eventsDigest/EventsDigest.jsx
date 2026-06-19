@@ -458,15 +458,21 @@ export default function EventsDigest() {
               key={event.id}
               type="button"
               className="digest__item"
-              onClick={() => navigate(`/events/${event.id}`, {
-                state: {
-                  token,
-                  userId,
-                  weekOffset: currentWeekOffset,
-                  page: currentPage,
-                  searchQuery: searchQuery,
-                },
-              })}
+              onClick={() => {
+                fetch(`https://ritmevents.ru/api/v1/events/${event.id}/view`, {
+                  method: 'POST',
+                  headers: token ? { Authorization: `Bearer ${token}` } : {},
+                });
+                navigate(`/events/${event.id}`, {
+                  state: {
+                    token,
+                    userId,
+                    weekOffset: currentWeekOffset,
+                    page: currentPage,
+                    searchQuery: searchQuery,
+                  },
+                });
+              }}
             >
               <div className="digest__header">
                 <p className="digest__type">
