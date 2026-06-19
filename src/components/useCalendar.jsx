@@ -8,7 +8,7 @@ const PROVIDER_LABEL = { google: 'Google', yandex: 'Яндекс' };
 
 export function useCalendar() {
   const { token, userId } = useAuth();
-  const { openLink } = usePlatform();
+  const { openLink, platform, buildCalendarReturnUrl, buildCalendarErrorReturnUrl } = usePlatform();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
   const mountedRef = useRef(true);
@@ -34,12 +34,15 @@ export function useCalendar() {
   }, [token, userId]);
 
   // POST /calendars/connect → oauth_url (throws on error)
-  const connectCalendar = useCallback(async (provider) => {
+  const connectCalendar = useCallback(async (provider, returnTo, errorReturnTo) => {
     if (!token) throw new Error('Необходима авторизация');
+    const body = { provider };
+    if (returnTo) body.return_to = returnTo;
+    if (errorReturnTo) body.error_return_to = errorReturnTo;
     const res = await fetch(`${API_URL}/calendars/connect`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ provider })
+      body: JSON.stringify(body)
     });
     if (!res.ok) {
       const text = await res.text();
@@ -119,8 +122,17 @@ export function useCalendar() {
       const isConnected = await checkCalendarConnected(provider);
 
       if (!isConnected) {
-        const oauthUrl = await connectCalendar(provider);
+        const isMiniapp = platform === 'telegram' || platform === 'max';
+        const returnTo = buildCalendarReturnUrl(provider, eventId);
+        const errorReturnTo = buildCalendarErrorReturnUrl(provider, eventId);
+        const oauthUrl = await connectCalendar(provider, returnTo, errorReturnTo);
         openLink(oauthUrl);
+
+        if (isMiniapp) {
+          // Miniapp приостанавливается; flow возобновится через deep link → Event.jsx
+          return;
+        }
+
         const connected = await waitForCalendarConnection(provider);
         if (!connected) throw new Error('Не удалось подключить календарь. Попробуйте позже.');
       }
