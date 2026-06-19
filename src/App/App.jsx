@@ -60,7 +60,7 @@ export default function App() {
   }
   const transitionConfig = transitionConfigRef.current;
 
-  // Telegram deep-links (invite + event)
+  // Telegram deep-links (invite + event + calendar)
   useEffect(() => {
     if (deepLinkHandledRef.current) return;
     const startParam = window.Telegram?.WebApp?.initDataUnsafe?.start_param;
@@ -70,10 +70,18 @@ export default function App() {
     } else if (startParam?.startsWith('event_')) {
       deepLinkHandledRef.current = true;
       navigate(`/events/${startParam.replace('event_', '')}`, { replace: true });
+    } else if (startParam?.startsWith('cal_')) {
+      const [, provider, eventId] = startParam.split('_');
+      deepLinkHandledRef.current = true;
+      navigate(`/events/${eventId}?cal=${provider}`, { replace: true });
+    } else if (startParam?.startsWith('calerr_')) {
+      const [, provider, eventId] = startParam.split('_');
+      deepLinkHandledRef.current = true;
+      navigate(`/events/${eventId}?calerr=${provider}`, { replace: true });
     }
   }, [navigate]);
 
-  // Max deep-links (invite + event)
+  // Max deep-links (invite + event + calendar)
   useEffect(() => {
     if (deepLinkHandledRef.current) return;
     const startParam =
@@ -85,6 +93,14 @@ export default function App() {
     } else if (startParam?.startsWith('event_')) {
       deepLinkHandledRef.current = true;
       navigate(`/events/${startParam.replace('event_', '')}`, { replace: true });
+    } else if (startParam?.startsWith('cal_')) {
+      const [, provider, eventId] = startParam.split('_');
+      deepLinkHandledRef.current = true;
+      navigate(`/events/${eventId}?cal=${provider}`, { replace: true });
+    } else if (startParam?.startsWith('calerr_')) {
+      const [, provider, eventId] = startParam.split('_');
+      deepLinkHandledRef.current = true;
+      navigate(`/events/${eventId}?calerr=${provider}`, { replace: true });
     }
   }, [navigate]);
 
