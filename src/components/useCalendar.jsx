@@ -95,7 +95,8 @@ export function useCalendar() {
     });
   }, [checkCalendarConnected]);
 
-  // POST /events/{eventId}/add-to-calendar (throws on error)
+  // POST /events/{eventId}/add-to-calendar
+  // Returns { alreadyExists: true } on 200/already_exists, { alreadyExists: false } on 201
   const addEventToCalendar = useCallback(async (eventId, provider) => {
     const res = await fetch(`${API_URL}/events/${eventId}/add-to-calendar`, {
       method: 'POST',
@@ -106,7 +107,8 @@ export function useCalendar() {
       const text = await res.text();
       throw new Error(`Ошибка добавления: ${res.status} ${text}`);
     }
-    return res.json();
+    const data = await res.json();
+    return { alreadyExists: data.result === 'already_exists' };
   }, [token]);
 
   // Full flow for Event page:
@@ -137,8 +139,8 @@ export function useCalendar() {
         if (!connected) throw new Error('Не удалось подключить календарь. Попробуйте позже.');
       }
 
-      await addEventToCalendar(eventId, provider);
-      onSuccess?.(PROVIDER_LABEL[provider] ?? provider);
+      const { alreadyExists } = await addEventToCalendar(eventId, provider);
+      onSuccess?.(PROVIDER_LABEL[provider] ?? provider, alreadyExists);
     } catch (err) {
       console.error('Ошибка добавления в календарь:', err);
       if (mountedRef.current) setError(err.message);

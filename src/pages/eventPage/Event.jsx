@@ -48,7 +48,11 @@ export default function Event({ embeddedId, isPreview = false, status }) {
 
     if (cal) {
       addEventToCalendar(id, cal)
-        .then(() => showAlert(`Событие добавлено в ${PROVIDER_LABEL[cal] ?? cal} Календарь`))
+        .then(({ alreadyExists }) => showAlert(
+          alreadyExists
+            ? `Событие уже добавлено в ${PROVIDER_LABEL[cal] ?? cal} Календарь`
+            : `Событие добавлено в ${PROVIDER_LABEL[cal] ?? cal} Календарь`
+        ))
         .catch((e) => showAlert(`Ошибка: ${e.message}`));
     } else {
       showAlert('Не удалось подключить календарь. Попробуйте позже.');
@@ -145,8 +149,11 @@ export default function Event({ embeddedId, isPreview = false, status }) {
 
   const onAddToCalendar = (provider) => {
     handleAddToCalendar(event.id, provider, {
-      onSuccess: (label) => {
-        showAlert(`Событие добавлено в ${label} Календарь`);
+      onSuccess: (label, alreadyExists) => {
+        showAlert(alreadyExists
+          ? `Событие уже добавлено в ${label} Календарь`
+          : `Событие добавлено в ${label} Календарь`
+        );
         setAddToCalendar(false);
       },
       onError: (msg) => showAlert(`Ошибка: ${msg}`)
