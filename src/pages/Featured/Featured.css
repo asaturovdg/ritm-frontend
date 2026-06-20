@@ -33,7 +33,7 @@
   padding-bottom: 12px;
   padding-left: 16px;
   -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
 }
 
 .featured-carousel::after {
@@ -59,7 +59,6 @@
   font-family: inherit;
   font-size: inherit;
   background: #fff;
-  scroll-snap-align: center;
   will-change: transform, opacity;
 }
 

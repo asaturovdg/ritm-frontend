@@ -66,12 +66,11 @@ function FeaturedCarousel({ title, items, onCardClick }) {
     const applyScale = (withTransition) => {
       const cards = el.querySelectorAll('.featured-card');
       const centerX = el.scrollLeft + el.offsetWidth / 2;
-      const cardWidth = 240;
 
       cards.forEach((card) => {
         const cardMidX = card.offsetLeft + card.offsetWidth / 2;
         const dist = Math.abs(cardMidX - centerX);
-        const progress = Math.max(0, Math.min(1, 1 - dist / (cardWidth * 1.5)));
+        const progress = Math.max(0, Math.min(1, 1 - dist / (card.offsetWidth * 1.5)));
         const scale = 0.92 + 0.08 * progress;
         const opacity = 0.8 + 0.2 * progress;
 
