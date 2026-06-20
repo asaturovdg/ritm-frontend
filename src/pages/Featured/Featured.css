@@ -1,5 +1,5 @@
 .featured {
-  padding: 16px;
+  padding: 0 0 24px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -10,7 +10,7 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: 10px;
+  padding: 0 16px 10px;
 }
 
 .featured-section__title {
@@ -30,9 +30,15 @@
   gap: 12px;
   overflow-x: auto;
   padding-top: 6px;
-  padding-bottom: 8px;
-  padding-right: 20px;
+  padding-bottom: 12px;
+  padding-left: 16px;
   -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+
+.featured-carousel::after {
+  content: '';
+  flex: 0 0 16px;
 }
 
 .featured-carousel::-webkit-scrollbar {
@@ -41,7 +47,7 @@
 
 /* ── Card ── */
 .featured-card {
-  flex: 0 0 220px;
+  flex: 0 0 240px;
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(16, 50, 161, 0.10);
@@ -53,12 +59,8 @@
   font-family: inherit;
   font-size: inherit;
   background: #fff;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.featured-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(16, 50, 161, 0.18);
+  scroll-snap-align: center;
+  will-change: transform, opacity;
 }
 
 .featured-card__header {
