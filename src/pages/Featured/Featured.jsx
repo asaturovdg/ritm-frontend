@@ -160,12 +160,12 @@ export default function Featured() {
         />
       )}
       <FeaturedCarousel
-        title="Топ месяца"
+        title="Главное за месяц"
         items={data?.top_month?.items}
         onCardClick={handleCardClick}
       />
       <FeaturedCarousel
-        title="От Сбера"
+        title="Открывая Сбер"
         items={data?.sber?.items}
         onCardClick={handleCardClick}
       />
