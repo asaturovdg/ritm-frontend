@@ -465,7 +465,7 @@ export default function EventsDigest() {
                     ...(token ? { Authorization: `Bearer ${token}` } : {}),
                     'Content-Type': 'application/json',
                   },
-                  body: JSON.stringify({ surface: isSearchMode ? 'search' : 'list' }),
+                  body: JSON.stringify({ source: isSearchMode ? 'search' : 'list' }),
                 });
                 navigate(`/events/${event.id}`, {
                   state: {

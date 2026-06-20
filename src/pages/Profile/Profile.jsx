@@ -834,7 +834,7 @@ const copyInviteLink = () => {
                               ...(token ? { Authorization: `Bearer ${token}` } : {}),
                               'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({ surface: 'profile' }),
+                            body: JSON.stringify({ source: 'profile' }),
                           });
                         }}
                       >

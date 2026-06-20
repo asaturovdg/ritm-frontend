@@ -110,7 +110,7 @@ export default function Featured() {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ surface: 'featured' }),
+      body: JSON.stringify({ source: 'featured' }),
     });
     navigate(`/events/${id}`);
   };
