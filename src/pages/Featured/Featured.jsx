@@ -154,7 +154,7 @@ export default function Featured() {
         />
       ) : (
         <FeaturedCarousel
-          title="Для вас"
+          title="Что-то для тебя"
           items={data?.for_you?.items}
           onCardClick={handleCardClick}
         />
