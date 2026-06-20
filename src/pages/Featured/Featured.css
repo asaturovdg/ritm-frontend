@@ -29,7 +29,6 @@
   display: flex;
   gap: 12px;
   overflow-x: auto;
-  scroll-snap-type: x proximity;
   padding-top: 6px;
   padding-bottom: 8px;
   padding-right: 20px;
@@ -43,7 +42,6 @@
 /* ── Card ── */
 .featured-card {
   flex: 0 0 220px;
-  scroll-snap-align: start;
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(16, 50, 161, 0.10);
