@@ -26,7 +26,7 @@ const BASE_TABS = [
   { id: 'feedback',    label: 'Обратная связь',    Icon: MessageCircle,  path: '/feedback' },
   { id: 'submissions', label: 'Заявка',            Icon: FilePlus,       path: '/submissions' },
 ];
-const FEATURED_TAB = { id: 'featured', label: 'Важное', Icon: Sparkles, path: '/featured' };
+const FEATURED_TAB = { id: 'featured', label: 'Подборки', Icon: Sparkles, path: '/featured' };
 
 export default function App() {
   const navigate = useNavigate();
