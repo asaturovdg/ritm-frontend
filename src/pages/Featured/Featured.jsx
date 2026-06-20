@@ -106,7 +106,11 @@ export default function Featured() {
   const handleCardClick = (id) => {
     fetch(`https://ritmevents.ru/api/v1/events/${id}/view`, {
       method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ surface: 'featured' }),
     });
     navigate(`/events/${id}`);
   };

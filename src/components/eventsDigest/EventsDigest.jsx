@@ -461,7 +461,11 @@ export default function EventsDigest() {
               onClick={() => {
                 fetch(`https://ritmevents.ru/api/v1/events/${event.id}/view`, {
                   method: 'POST',
-                  headers: token ? { Authorization: `Bearer ${token}` } : {},
+                  headers: {
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ surface: isSearchMode ? 'search' : 'list' }),
                 });
                 navigate(`/events/${event.id}`, {
                   state: {
