@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 const WIDGET_TIMEOUT_MS = 5000;
 const IFRAME_CHECK_DELAY_MS = 300;
 const AUTH_ENDPOINT = 'https://ritmevents.ru/api/v1/auth/telegram-widget';
+const BOT_USERNAME = 'ritmevents_bot';
 
 export default function TelegramLoginWidget({ onSuccess, onError, onStatusChange }) {
   const [status, setStatus] = useState('loading');
@@ -38,7 +39,7 @@ export default function TelegramLoginWidget({ onSuccess, onError, onStatusChange
 
     const script = document.createElement('script');
     script.src = 'https://telegram.org/js/telegram-widget.js?22';
-    script.setAttribute('data-telegram-login', import.meta.env.VITE_TG_BOT_USERNAME);
+    script.setAttribute('data-telegram-login', BOT_USERNAME);
     script.setAttribute('data-size', 'large');
     script.setAttribute('data-onauth', 'onTelegramAuth(user)');
     script.setAttribute('data-request-access', 'write');
