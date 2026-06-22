@@ -343,7 +343,7 @@ export default function EventsDigest() {
 
   // Отображение ввода кода (только в dev-режиме)
   if (showInputCode) {
-    if (import.meta.env.VITE_DEV_MODE === 'false') return null;
+    const isDevMode = import.meta.env.VITE_DEV_MODE !== 'false';
     return (
       <div className="events">
         <div className="login-container">
@@ -365,21 +365,26 @@ export default function EventsDigest() {
             onStatusChange={(s) => setWidgetReady(s === 'ready')}
           />
 
-          {widgetReady && <p className="login-divider">— или —</p>}
+          {isDevMode && widgetReady && <p className="login-divider">— или —</p>}
 
-          <p>Получите код, написав <b>/login</b> боту <b>@ritmevents_bot</b>, и введите его ниже</p>
-          <input
-            type="text"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="Введите код"
-            maxLength={6}
-            className="login-input"
-          />
+          {isDevMode && (
+            <>
+              <p>Получите код, написав <b>/login</b> боту <b>@ritmevents_bot</b>, и введите его ниже</p>
+              <input
+                type="text"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="Введите код"
+                maxLength={6}
+                className="login-input"
+              />
+              <Button mode="filled" stretched size="m" onClick={handleLogin}>
+                Войти
+              </Button>
+            </>
+          )}
+
           {loginError && <p className="login-error">{loginError}</p>}
-          <Button mode="filled" stretched size="m" onClick={handleLogin}>
-            Войти
-          </Button>
         </div>
       </div>
     );
