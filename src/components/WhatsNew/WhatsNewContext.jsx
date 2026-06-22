@@ -8,7 +8,7 @@ const WhatsNewContext = createContext(null);
 
 export function WhatsNewProvider({ children }) {
   const [visible, setVisible] = useState(
-    () => localStorage.getItem(STORAGE_KEY) !== latest.version
+    () => latest.items.length > 0 && localStorage.getItem(STORAGE_KEY) !== latest.version
   );
 
   const dismiss = useCallback(() => {
