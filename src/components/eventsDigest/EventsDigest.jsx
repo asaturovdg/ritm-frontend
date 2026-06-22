@@ -142,14 +142,16 @@ export default function EventsDigest() {
     setIsLoadingEvents(true);
     try {
       const { startISO, endISO } = getWeekRange(currentWeekOffset);
+      const todayISO = new Date().toISOString().split('T')[0];
+      const dateFrom = currentWeekOffset === 0 && todayISO > startISO ? todayISO : startISO;
       const url = new URL('https://ritmevents.ru/api/v1/events');
 
       filters.cities.forEach(c => url.searchParams.append('city', c));
       filters.categories.forEach(c => url.searchParams.append('track', c));
       filters.eventTypes.forEach(t => url.searchParams.append('event_type', t));
       filters.participationTypes.forEach(t => url.searchParams.append('participation_type', t));
-      url.searchParams.append('date_from', startISO);  
-      url.searchParams.append('date_to', endISO);      
+      url.searchParams.append('date_from', dateFrom);
+      url.searchParams.append('date_to', endISO);
       url.searchParams.append('limit', ITEMS_PER_PAGE);
       url.searchParams.append('offset', page * ITEMS_PER_PAGE);
 
@@ -158,11 +160,10 @@ export default function EventsDigest() {
 
       if (res.ok) {
         const data = await res.json();
-        const sortedAndFilteredEvents = (data.items || [])
-          .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+        const filteredEvents = (data.items || [])
           .filter((event) => !isEventPassed(event.start_date, event.start_time));
-        
-        setEvents(sortedAndFilteredEvents);
+
+        setEvents(filteredEvents);
         setTotalEvents(data.total || 0);
         setTotalPages(Math.ceil((data.total || 0) / ITEMS_PER_PAGE));
       }
@@ -238,12 +239,14 @@ export default function EventsDigest() {
     setIsLoadingEvents(true);
     try {
       const { startISO, endISO } = getWeekRange(currentWeekOffset);
+      const todayISO = new Date().toISOString().split('T')[0];
+      const dateFrom = currentWeekOffset === 0 && todayISO > startISO ? todayISO : startISO;
 
       const body = {
         query,
         limit: ITEMS_PER_PAGE,
         offset: page * ITEMS_PER_PAGE,
-        date_from: startISO,
+        date_from: dateFrom,
         date_to: endISO
       };
 
