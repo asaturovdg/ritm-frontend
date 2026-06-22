@@ -3,6 +3,10 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import EventsDigest from '../EventsDigest.jsx';
 
+vi.mock('../../TelegramLoginWidget/TelegramLoginWidget.jsx', () => ({
+  default: () => null,
+}));
+
 vi.mock('@telegram-apps/telegram-ui', () => ({
   Button: ({ children, onClick, mode, size, className }) => (
     <button onClick={onClick} className={className}>{children}</button>
@@ -43,6 +47,9 @@ vi.mock('../../AuthContext.jsx', () => ({
     isCheckingAuth: false,
     showInputCode: false,
     setShowInputCode: mockSetShowInputCode,
+    setToken: vi.fn(),
+    setIsAuthReady: vi.fn(),
+    refreshUserData: vi.fn().mockResolvedValue(null),
   }),
 }));
 
