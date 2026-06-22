@@ -152,10 +152,10 @@
     
 }
 
-.event__action{
+.event__cta{
     display: flex;
     justify-content: space-between;
-    margin-top: 20px;
+    margin-bottom: 16px;
 }
 
 .tab-btn.active{
