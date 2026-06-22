@@ -52,7 +52,9 @@ export default function TelegramLoginWidget({ onSuccess, onError, onStatusChange
     script.onload = () => {
       clearTimeout(timer);
       setTimeout(() => {
-        updateStatus(container.querySelector('iframe') ? 'ready' : 'failed');
+        const iframe = container.querySelector('iframe');
+        const hasErrorText = container.textContent.trim().length > 0;
+        updateStatus(iframe && !hasErrorText ? 'ready' : 'failed');
       }, IFRAME_CHECK_DELAY_MS);
     };
 

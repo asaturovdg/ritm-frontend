@@ -38,6 +38,33 @@ describe('TelegramLoginWidget', () => {
     expect(onStatusChange).toHaveBeenCalledWith('failed');
   });
 
+  it('calls onStatusChange("failed") when script loads but container has error text (Bot domain invalid)', async () => {
+    let capturedScript;
+    const origCreate = document.createElement.bind(document);
+    vi.spyOn(document, 'createElement').mockImplementation((tag) => {
+      const el = origCreate(tag);
+      if (tag === 'script') capturedScript = el;
+      return el;
+    });
+
+    const onStatusChange = vi.fn();
+    render(
+      <TelegramLoginWidget onSuccess={vi.fn()} onError={vi.fn()} onStatusChange={onStatusChange} />
+    );
+
+    // Telegram renders error text directly in container instead of a button iframe
+    const container = document.querySelector('div[style]');
+    if (container) container.textContent = 'Bot domain invalid';
+
+    await act(async () => {
+      capturedScript.onload();
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(onStatusChange).toHaveBeenCalledWith('failed');
+    vi.restoreAllMocks();
+  });
+
   it('calls onStatusChange("failed") when script.onerror fires', () => {
     let capturedScript;
     const origCreate = document.createElement.bind(document);
