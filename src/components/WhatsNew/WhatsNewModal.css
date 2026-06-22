@@ -1,0 +1,63 @@
+.whats-new-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.whats-new-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px 24px 24px;
+  max-width: 360px;
+  width: 100%;
+  font-family: 'Montserrat', sans-serif;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.whats-new-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 16px;
+}
+
+.whats-new-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.whats-new-list li {
+  font-size: 14px;
+  color: #000;
+  padding-left: 16px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.whats-new-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #000;
+}
+
+.whats-new-btn {
+  width: 100%;
+  padding: 14px;
+  background: #000;
+  color: #fff;
+  border-radius: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
