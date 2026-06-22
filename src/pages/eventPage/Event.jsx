@@ -334,6 +334,53 @@ export default function Event({ embeddedId, isPreview = false, status }) {
           </div>
         </div>
 
+        {(event.registration_url || (!isPreview && !fromProfileEvents && event.start_date)) && (
+          <div className="event__cta" style={{ position: 'relative' }}>
+            {event.registration_url && (
+              <a
+                href={event.registration_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (event.registration_url) {
+                    handleOpenLink(e, event.registration_url);
+                  }
+                }}
+                className="event-register--btn"
+              >
+                Регистрация
+              </a>
+            )}
+
+            {!isPreview && !fromProfileEvents && event.start_date && (
+              <div className="calendar-wrapper" style={{ paddingBottom: addToCalendar ? '110px' : '0' }}>
+                <button
+                  onClick={() => setAddToCalendar(!addToCalendar)}
+                  className="event-addToCalendar--btn"
+                  disabled={isProcessing}
+                >
+                  <img src={blueCalendar} alt='blue calendar icon' className="icon" />
+                  {isProcessing ? 'Обработка...' : 'В календарь'}
+                </button>
+
+                {addToCalendar && (
+                  <div className="calendar-dropdown">
+                    <button onClick={() => onAddToCalendar('google')} disabled={isProcessing} className="calendar--btn">
+                      <img src={google} alt='google icon'/>
+                      Google Календарь
+                    </button>
+                    <button onClick={() => onAddToCalendar('yandex')} disabled={isProcessing} className="calendar--btn">
+                      <img src={yandex} alt='yandex icon'/>
+                      Яндекс Календарь
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="event__extraInfo">
           <div className="event__tabs">
             {[
@@ -353,57 +400,8 @@ export default function Event({ embeddedId, isPreview = false, status }) {
 
           <div className="tab__content">
             {activeTab === 'description' && (
-              <div>
-                <div className="event__description-tab">
-                  <p className="description-text">{event.description}</p>
-                </div>
-
-                <div className="event__action" style={{ position: 'relative' }}>
-                  {event.registration_url && (
-                      <a
-                        href={event.registration_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (event.registration_url) {
-                            handleOpenLink(e, event.registration_url);
-                          }
-                        }}
-                        className="event-register--btn"
-                      >
-                        Регистрация
-                      </a>
-                    )}
-
-
-                  {/* Кнопка "В календарь"  */}
-                  {!isPreview && !fromProfileEvents && event.start_date && (
-                    <div className="calendar-wrapper" style={{ paddingBottom: addToCalendar ? '110px' : '0' }}>
-                      <button
-                        onClick={() => setAddToCalendar(!addToCalendar)}
-                        className="event-addToCalendar--btn"
-                        disabled={isProcessing}
-                      >
-                        <img src={blueCalendar} alt='blue calendar icon' className="icon" />
-                        {isProcessing ? 'Обработка...' : 'В календарь'}
-                      </button>
-
-                      {addToCalendar && (
-                        <div className="calendar-dropdown">
-                          <button onClick={() => onAddToCalendar('google')} disabled={isProcessing} className="calendar--btn">
-                            <img src={google} alt='google icon'/>
-                            Google Календарь
-                          </button>
-                          <button onClick={() => onAddToCalendar('yandex')} disabled={isProcessing} className="calendar--btn">
-                            <img src={yandex} alt='yandex icon'/>
-                            Яндекс Календарь
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+              <div className="event__description-tab">
+                <p className="description-text">{event.description}</p>
               </div>
             )}
 

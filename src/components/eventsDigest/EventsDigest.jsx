@@ -5,6 +5,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../AuthContext.jsx";
 import { useUserFilters } from "../useUserFilters.jsx";
 import { usePlatform } from "../../platform/usePlatform.js"
+import TelegramLoginWidget from '../TelegramLoginWidget/TelegramLoginWidget.jsx';
 
 import { Calendar, Clock, RussianRuble, MapPin, Users, Globe } from "lucide-react";
 
@@ -48,6 +49,9 @@ export default function EventsDigest() {
     isCheckingAuth,
     showInputCode,
     setShowInputCode,
+    setToken,
+    setIsAuthReady,
+    refreshUserData,
   } = useAuth();
   const { openLink, expandApp } = usePlatform();
   const { filters } = useUserFilters();
@@ -78,6 +82,7 @@ export default function EventsDigest() {
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
   const [code, setCode] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [widgetReady, setWidgetReady] = useState(false);
   const [totalEvents, setTotalEvents] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const searchIdRef = useRef(0);
@@ -343,6 +348,25 @@ export default function EventsDigest() {
       <div className="events">
         <div className="login-container">
           <h2>Вход</h2>
+
+          <TelegramLoginWidget
+            onSuccess={({ access_token, refresh_token }) => {
+              localStorage.setItem('access_token', access_token);
+              localStorage.setItem('refresh_token', refresh_token);
+              setToken(access_token);
+              refreshUserData().then((user) => {
+                if (user) {
+                  setIsAuthReady(true);
+                  setShowInputCode(false);
+                }
+              });
+            }}
+            onError={(msg) => setLoginError(msg)}
+            onStatusChange={(s) => setWidgetReady(s === 'ready')}
+          />
+
+          {widgetReady && <p className="login-divider">— или —</p>}
+
           <p>Получите код, написав <b>/login</b> боту <b>@ritmevents_bot</b>, и введите его ниже</p>
           <input
             type="text"
