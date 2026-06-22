@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Placeholder } from '@telegram-apps/telegram-ui';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Clock, MapPin, RussianRuble } from 'lucide-react';
@@ -55,14 +55,60 @@ function FeaturedCard({ event, onClick }) {
 }
 
 function FeaturedCarousel({ title, items, onCardClick }) {
+  const carouselRef = useRef(null);
+  const rafRef = useRef(null);
+  const scrollEndTimerRef = useRef(null);
+
+  useEffect(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+
+    const applyScale = (withTransition) => {
+      const cards = el.querySelectorAll('.featured-card');
+      const centerX = el.scrollLeft + el.offsetWidth / 2;
+
+      cards.forEach((card) => {
+        const cardMidX = card.offsetLeft + card.offsetWidth / 2;
+        const dist = Math.abs(cardMidX - centerX);
+        const progress = Math.max(0, Math.min(1, 1 - dist / (card.offsetWidth * 1.5)));
+        const scale = 0.92 + 0.08 * progress;
+        const opacity = 0.8 + 0.2 * progress;
+
+        card.style.transition = withTransition
+          ? 'transform 0.2s ease, opacity 0.2s ease'
+          : 'none';
+        card.style.transform = `scale(${scale})`;
+        card.style.opacity = opacity;
+      });
+    };
+
+    applyScale(false);
+
+    const onScroll = () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => applyScale(false));
+
+      clearTimeout(scrollEndTimerRef.current);
+      scrollEndTimerRef.current = setTimeout(() => applyScale(true), 150);
+    };
+
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      el.removeEventListener('scroll', onScroll);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      clearTimeout(scrollEndTimerRef.current);
+    };
+  }, [items]);
+
   if (!items || items.length === 0) return null;
+
   return (
     <div className="featured-section">
       <div className="featured-section__header">
         <span className="featured-section__title">{title}</span>
         <span className="featured-section__count">{items.length} событий</span>
       </div>
-      <div className="featured-carousel">
+      <div className="featured-carousel" ref={carouselRef}>
         {items.map(event => (
           <FeaturedCard key={event.id} event={event} onClick={() => onCardClick(event.id)} />
         ))}

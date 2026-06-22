@@ -73,7 +73,7 @@ describe('Featured page', () => {
     });
     renderFeatured();
     expect(await screen.findByText('Highload++ 2025')).toBeInTheDocument();
-    expect(screen.getByText('Для вас')).toBeInTheDocument();
+    expect(screen.getByText('Что-то для тебя')).toBeInTheDocument();
     expect(screen.getByText('1 событий')).toBeInTheDocument();
   });
 
