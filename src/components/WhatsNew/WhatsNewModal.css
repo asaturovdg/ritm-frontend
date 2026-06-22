@@ -1,7 +1,7 @@
 .whats-new-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -12,17 +12,18 @@
 .whats-new-card {
   background: #ffffff;
   border-radius: 20px;
+  border: 1px solid #e8e8e8;
   padding: 28px 24px 24px;
   max-width: 360px;
   width: 100%;
   font-family: 'Montserrat', sans-serif;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
 }
 
 .whats-new-title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
-  color: #000;
+  color: #1032A1;
   margin-bottom: 16px;
 }
 
@@ -47,17 +48,17 @@
   content: '•';
   position: absolute;
   left: 0;
-  color: #000;
+  color: #1032A1;
 }
 
 .whats-new-btn {
   width: 100%;
-  padding: 14px;
-  background: #000;
+  padding: 12px;
+  background: #1032A1;
   color: #fff;
   border-radius: 12px;
   font-family: 'Montserrat', sans-serif;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
 }
