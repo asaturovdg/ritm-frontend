@@ -9,6 +9,8 @@ import App from './App/App'
 import { AuthProvider } from './components/AuthContext.jsx'
 import { FiltersProvider } from './components/FiltersContext.jsx'
 import { ToastProvider } from './components/Toast/ToastContext.jsx'
+import { WhatsNewProvider } from './components/WhatsNew/WhatsNewContext.jsx'
+import WhatsNewModal from './components/WhatsNew/WhatsNewModal.jsx'
 
 
 const meta = document.createElement('meta');
@@ -20,13 +22,16 @@ createRoot(document.getElementById('root')).render(
   <BrowserRouter basename="/">
     <StrictMode>
       <AppRoot platform="base">
-        <AuthProvider>
-          <ToastProvider>
-            <FiltersProvider>
-              <App />
-            </FiltersProvider>
-          </ToastProvider>
-        </AuthProvider>
+        <WhatsNewProvider>
+          <AuthProvider>
+            <ToastProvider>
+              <FiltersProvider>
+                <App />
+              </FiltersProvider>
+            </ToastProvider>
+          </AuthProvider>
+          <WhatsNewModal />
+        </WhatsNewProvider>
       </AppRoot>
     </StrictMode>
   </BrowserRouter>
