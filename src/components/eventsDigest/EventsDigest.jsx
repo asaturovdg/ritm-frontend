@@ -14,31 +14,6 @@ const ITEMS_PER_PAGE = 20;
 const formatTime = (t) => t ? t.substring(0, 5) : '';
 const formatDate = (d) => d ? d.split('-').reverse().join('.') : '';
 
-const isEventPassed = (eventDate, eventTime) => {
-  if (!eventDate) return true; 
-  
-  const eventDateTime = new Date(eventDate);
-  const now = new Date();
-  
-  if (eventTime && eventTime.trim() !== '') {
-    let hours = 0, minutes = 0;
-    if (eventTime.includes(':')) {
-      const timeParts = eventTime.split(':');
-      hours = parseInt(timeParts[0], 10);
-      minutes = parseInt(timeParts[1], 10);
-    }
-    eventDateTime.setHours(hours, minutes, 0, 0);
-    return eventDateTime < now;
-  }
-  
-  const eventDateOnly = new Date(eventDate);
-  eventDateOnly.setHours(0, 0, 0, 0);
-  
-  const todayDateOnly = new Date();
-  todayDateOnly.setHours(0, 0, 0, 0);
-  
-  return eventDateOnly < todayDateOnly;
-};
 
 const getWeekRange = (offset = 0) => {
   const today = new Date();
@@ -160,10 +135,7 @@ export default function EventsDigest() {
 
       if (res.ok) {
         const data = await res.json();
-        const filteredEvents = (data.items || [])
-          .filter((event) => !isEventPassed(event.start_date, event.start_time));
-
-        setEvents(filteredEvents);
+        setEvents(data.items || []);
         setTotalEvents(data.total || 0);
         setTotalPages(Math.ceil((data.total || 0) / ITEMS_PER_PAGE));
       }
@@ -201,10 +173,7 @@ export default function EventsDigest() {
 
       if (res.ok) {
         const data = await res.json();
-        const validEvents = (Array.isArray(data) ? data : []).filter(
-          event => event && !isEventPassed(event.start_date, event.start_time)
-        );
-        setEvents(validEvents);
+        setEvents(Array.isArray(data) ? data : []);
       } else {
         setEvents([]);
       }
