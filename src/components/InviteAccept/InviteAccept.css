@@ -58,7 +58,7 @@
   border-radius: 10px;
   font-size: 15px;
   font-weight: 500;
-  font-family: 'Montserrat', sans-serif;
+
   cursor: pointer;
 }
 
@@ -75,7 +75,7 @@
   border: none;
   border-radius: 10px;
   font-size: 15px;
-  font-family: 'Montserrat', sans-serif;
+
   cursor: pointer;
 }
 
@@ -131,7 +131,7 @@
   border: none;
   border-radius: 10px;
   font-size: 14px;
-  font-family: 'Montserrat', sans-serif;
+
   cursor: pointer;
 }
 

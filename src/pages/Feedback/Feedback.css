@@ -115,7 +115,7 @@
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-family: 'Montserrat', sans-serif;
+
   color: var(--gray-text, #666666);
 }
 
@@ -137,7 +137,7 @@
   border: 2px solid var(--gray-border, #e0e0e0);
   border-radius: 12px;
   font-size: 15px;
-  font-family: 'Montserrat', sans-serif;
+
   resize: vertical;
   transition: border-color 0.2s;
   background: var(--white, #ffffff);
@@ -173,7 +173,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
-  font-family: 'Montserrat', sans-serif;
+
 }
 
 .submit-btn:hover:not(:disabled) {
@@ -243,7 +243,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s;
-  font-family: 'Montserrat', sans-serif;
+
 }
 
 .feedback-button:hover {
