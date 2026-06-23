@@ -147,9 +147,8 @@
 .tab-btn{
     cursor: pointer;
     padding: 2px 0;
-    font-family: 'Montserrat', sans-serif;
     font-size: 16px;
-    
+
 }
 
 .event__cta{
@@ -346,7 +345,6 @@ a.organizer-chip:active {
   color: #1032A1;
   padding: 0 0 12px 0;
   cursor: pointer;
-  font-family: 'Montserrat', sans-serif;
 }
 
 

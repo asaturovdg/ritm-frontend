@@ -14,7 +14,7 @@
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  font-family: 'Montserrat', sans-serif;
+
   transition: background-color 0.2s ease;
 }
 
@@ -32,7 +32,7 @@
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 13px;
-  font-family: 'Montserrat', sans-serif;
+
 }
 
 .profile-tag-city {
@@ -191,7 +191,7 @@
   border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
-  font-family: 'Montserrat', sans-serif;
+
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -285,7 +285,7 @@
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-family: 'Montserrat';
+
 }
 
 .profile_chip-active {
@@ -342,7 +342,7 @@
   border: 1px solid #d0d5e8;
   background: #f0f2f8;
   font-size: 14px;
-  font-family: 'Montserrat';
+
   outline: none;
 }
 
@@ -352,7 +352,7 @@
   color: white;
   border-radius: 10px;
   font-size: 14px;
-  font-family: 'Montserrat';
+
   cursor: pointer;
   white-space: nowrap;
 }
@@ -445,7 +445,7 @@
     margin-top: 12px; 
     font-size: 12px;
     padding: 6px 12px;
-    font-family: 'Montserrat', sans-serif;
+  
     font-weight: 600;
     background-color: #1032A1;
     color: #ffffff;
@@ -831,7 +831,7 @@
   border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
-  font-family: 'Montserrat', sans-serif;
+
   cursor: pointer;
   margin-bottom: 16px;
 }
@@ -863,7 +863,7 @@
   border: none;
   border-radius: 8px;
   font-size: 13px;
-  font-family: 'Montserrat', sans-serif;
+
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;

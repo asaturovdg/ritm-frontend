@@ -7,13 +7,22 @@ import { useUserFilters } from "../useUserFilters.jsx";
 import { usePlatform } from "../../platform/usePlatform.js"
 import TelegramLoginWidget from '../TelegramLoginWidget/TelegramLoginWidget.jsx';
 
-import { Calendar, Clock, RussianRuble, MapPin, Users, Globe } from "lucide-react";
+import { Calendar, Clock, RussianRuble, MapPin, Users, Globe, ChevronLeft, ChevronRight, ChevronsLeft } from "lucide-react";
 
 
 const ITEMS_PER_PAGE = 20;
 
 const formatTime = (t) => t ? t.substring(0, 5) : '';
 const formatDate = (d) => d ? d.split('-').reverse().join('.') : '';
+
+const pluralEvents = (n) => {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod100 >= 11 && mod100 <= 14) return 'событий';
+  if (mod10 === 1) return 'событие';
+  if (mod10 >= 2 && mod10 <= 4) return 'события';
+  return 'событий';
+};
 
 
 const getWeekRange = (offset = 0) => {
@@ -201,6 +210,11 @@ export default function EventsDigest() {
       setCurrentWeekOffset(prev => prev - 1);
       setCurrentPage(0);
     }
+  };
+
+  const goToFirstWeek = () => {
+    setCurrentWeekOffset(0);
+    setCurrentPage(0);
   };
 
   useEffect(() => {
@@ -407,26 +421,37 @@ export default function EventsDigest() {
       {(hasFilters || isSearchMode) && !isLoadingEvents && (
         <div className="week-nav-section">
           <div className="week-navigation">
+            {currentWeekOffset >= 2 && (
+              <button
+                className="week-nav-btn"
+                onClick={goToFirstWeek}
+                title="К текущей неделе"
+              >
+                <ChevronsLeft size={16} />
+              </button>
+            )}
             <button
-              className="week-nav-btn prev"
+              className="week-nav-btn"
               onClick={prevWeek}
               disabled={currentWeekOffset === 0}
+              title="Предыдущая неделя"
             >
-              Предыдущая неделя
+              <ChevronLeft size={16} />
             </button>
             <span className="week-range">
               {weekRange.start} – {weekRange.end}
             </span>
             <button
-              className="week-nav-btn next"
+              className="week-nav-btn"
               onClick={nextWeek}
+              title="Следующая неделя"
             >
-              Следующая неделя
+              <ChevronRight size={16} />
             </button>
           </div>
-          {events.length > 0 && (
+          {totalEvents > 0 && (
             <p className="events__found-subtitle">
-              Найдено {events.length} мероприятий
+              {totalEvents} {pluralEvents(totalEvents)} по твоим фильтрам
             </p>
           )}
         </div>
