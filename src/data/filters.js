@@ -6,8 +6,7 @@ export const CITIES = [
     "Екатеринбург",
     "Сочи",
     "Онлайн",
-    
-];
+].sort((a, b) => a.localeCompare(b, "ru"));
 
 export const CATEGORIES = [
     "ИИ",
@@ -29,7 +28,7 @@ export const CATEGORIES = [
     "Мобильная разработка",
     "Тестирование",
     "DevOps",
-];
+].sort((a, b) => a.localeCompare(b, "ru"));
 
 export const EVENT_TYPES = [
     "Конференция",
@@ -49,7 +48,7 @@ export const EVENT_TYPES = [
     "День открытых дверей",
     "Фестиваль",
     "Выставка",
-];
+].sort((a, b) => a.localeCompare(b, "ru"));
 
 export const PARTICIPATION_TYPES = [
     "Слушатель",
@@ -57,7 +56,7 @@ export const PARTICIPATION_TYPES = [
     "Спонсор",
     "Эксперт",
     "Волонтер",
-];
+].sort((a, b) => a.localeCompare(b, "ru"));
 
 export const FILTER_SECTIONS = [
     { title: "Город", key: "cities", items: CITIES },
