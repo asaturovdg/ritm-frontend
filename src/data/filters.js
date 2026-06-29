@@ -26,6 +26,9 @@ export const CATEGORIES = [
     "Наука",
     "Маркетинг",
     "Дизайн",
+    "Мобильная разработка",
+    "Тестирование",
+    "DevOps",
 ];
 
 export const EVENT_TYPES = [
