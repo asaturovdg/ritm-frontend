@@ -32,7 +32,7 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const prefersReduced = useReducedMotion();
-  const { userId } = useAuth();
+  const { userId, isAuthReady } = useAuth();
 
   const hasFeatured = FEATURED_ALLOWLIST.has(Number(userId));
   const TABS = hasFeatured ? [FEATURED_TAB, ...BASE_TABS] : BASE_TABS;
@@ -221,7 +221,7 @@ export default function App() {
             </div>
 
             <AnimatePresence>
-              {!isEventPage && (
+              {!isEventPage && isAuthReady && (
                 <motion.nav
                   className="bottom-nav"
                   initial={{ y: '100%' }}
