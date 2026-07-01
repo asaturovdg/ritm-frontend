@@ -6,6 +6,8 @@ import { useAuth } from "../AuthContext.jsx";
 import { useUserFilters } from "../useUserFilters.jsx";
 import { usePlatform } from "../../platform/usePlatform.js"
 import TelegramLoginWidget from '../TelegramLoginWidget/TelegramLoginWidget.jsx';
+import BookmarkButton from '../BookmarkButton/BookmarkButton.jsx';
+import { CALENDAR_ALLOWLIST, hasFeature } from '../../data/featureFlags.js';
 
 import { Calendar, Clock, RussianRuble, MapPin, Users, Globe, ChevronLeft, ChevronRight, ChevronsLeft } from "lucide-react";
 
@@ -64,6 +66,7 @@ export default function EventsDigest() {
   } = useAuth();
   const { openLink, expandApp } = usePlatform();
   const { filters } = useUserFilters();
+  const hasCalendar = hasFeature(CALENDAR_ALLOWLIST, userId);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -480,9 +483,10 @@ export default function EventsDigest() {
           </div>
         ) : events.length > 0 ? (
           events.map(event => (
-            <button
+            <div
               key={event.id}
-              type="button"
+              role="button"
+              tabIndex={0}
               className="digest__item"
               onClick={() => {
                 fetch(`https://ritmevents.ru/api/v1/events/${event.id}/view`, {
@@ -503,6 +507,7 @@ export default function EventsDigest() {
                   },
                 });
               }}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click(); }}
             >
               <div className="digest__header">
                 <p className="digest__type">
@@ -569,8 +574,11 @@ export default function EventsDigest() {
                   ))}
                 </div>
               )}
-              <span className="digest__knowMore">ПОДРОБНЕЕ</span>
-            </button>
+              <div className="digest__bottom-row">
+                <span className="digest__knowMore">ПОДРОБНЕЕ</span>
+                {hasCalendar && <BookmarkButton event={event} />}
+              </div>
+            </div>
           ))
         ) : (
           <Placeholder

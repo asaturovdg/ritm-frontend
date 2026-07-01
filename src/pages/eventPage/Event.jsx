@@ -9,13 +9,16 @@ import './Event.css';
 import { useAuth } from "../../components/AuthContext.jsx";
 import { useCalendar } from "../../components/useCalendar.jsx";
 import { usePlatform } from "../../platform/usePlatform.js";
+import BookmarkButton from "../../components/BookmarkButton/BookmarkButton.jsx";
+import { CALENDAR_ALLOWLIST, hasFeature } from "../../data/featureFlags.js";
 
 export default function Event({ embeddedId, isPreview = false, status }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { id: paramId } = useParams();
   const id = embeddedId || paramId;
-  const { token, isCheckingAuth } = useAuth();
+  const { token, isCheckingAuth, userId } = useAuth();
+  const hasCalendar = hasFeature(CALENDAR_ALLOWLIST, userId);
   const { isProcessing, handleAddToCalendar, addEventToCalendar } = useCalendar();
   const { openLink, showAlert, shareEvent, platform } = usePlatform();
 
@@ -336,6 +339,9 @@ export default function Event({ embeddedId, isPreview = false, status }) {
 
         {(event.registration_url || (!isPreview && !fromProfileEvents && event.start_date)) && (
           <div className="event__cta" style={{ position: 'relative' }}>
+            {!isPreview && !fromProfileEvents && hasCalendar && (
+              <BookmarkButton event={event} />
+            )}
             {event.registration_url && (
               <a
                 href={event.registration_url}

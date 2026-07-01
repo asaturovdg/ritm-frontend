@@ -1,0 +1,101 @@
+.bookmark-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.save-calendar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 7px;
+  border: 1.5px solid #1032A1;
+  background: transparent;
+  color: #1032A1;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.save-calendar-btn:hover {
+  background: #1032A1;
+  color: #fff;
+}
+
+.save-calendar-btn--saved {
+  background: #e8edf9;
+  border-color: #1032A1;
+  color: #1032A1;
+}
+
+/* External calendar prompt */
+.external-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: #f5f7ff;
+  border-radius: 8px;
+  border: 1px solid #c5d0f5;
+}
+
+.external-prompt__label {
+  font-size: 12px;
+  color: #555;
+  margin: 0;
+}
+
+.external-prompt__actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.external-prompt__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid #c5d0f5;
+  background: #fff;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  color: #222;
+  transition: background 0.15s;
+}
+
+.external-prompt__btn:hover:not(:disabled) {
+  background: #e8edf9;
+}
+
+.external-prompt__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.external-prompt__icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.external-prompt__skip {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  color: #888;
+}
+
+.external-prompt__skip:hover {
+  color: #555;
+}

@@ -17,7 +17,7 @@ import { useTabSwipe } from '../hooks/useTabSwipe';
 import { useAuth } from '../components/AuthContext.jsx';
 import './App.css';
 
-const FEATURED_ALLOWLIST = new Set([5, 88]);
+import { FEATURED_ALLOWLIST } from '../data/featureFlags.js';
 
 const BASE_TAB_PATHS = ['/', '/profile', '/feedback', '/submissions'];
 const BASE_TABS = [
