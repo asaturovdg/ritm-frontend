@@ -23,6 +23,13 @@
     box-shadow: 0 5px 15px rgba(79, 119, 241, 0.15);
 }
 
+.digest__header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
 .digest__title {
     font-size: 18px; 
     color: #1032A1;
@@ -113,10 +120,16 @@
 .digest__tag:nth-child(3n+3){ background-color: #84a0f5; }
 
 
-.digest__knowMore {
-    align-self: flex-start;
-    display: inline-block;
+.digest__bottom-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-top: 12px;
+    gap: 8px;
+}
+
+.digest__knowMore {
+    display: inline-block;
     font-size: 12px;
     padding: 6px 12px;
     font-weight: 600;

@@ -1,11 +1,16 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import ReactCalendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 import './Profile.css';
 import { useAuth } from "../../components/AuthContext.jsx";
 import { useCalendar } from "../../components/useCalendar.jsx";
 import { usePlatform } from "../../platform/usePlatform.js";
 import { useUserFilters } from "../../components/useUserFilters.jsx";
+import { useSavedEvents } from "../../components/SavedEventsContext.jsx";
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js";
+import { CALENDAR_ALLOWLIST, hasFeature } from "../../data/featureFlags.js";
+import { Calendar, Clock, RussianRuble, MapPin, Users } from "lucide-react";
 
 import dateIcon from "../../assets/icons/DateRange.svg";
 import timeIcon from "../../assets/icons/time.svg";
@@ -14,10 +19,12 @@ import placeIcon from "../../assets/icons/Place.svg";
 import partType from "../../assets/icons/partType.svg"
 
 export function Profile() {
-  const { token, userData, isCheckingAuth } = useAuth();
+  const { token, userData, isCheckingAuth, userId } = useAuth();
   const { connectCalendar, waitForCalendarConnection } = useCalendar();
   const { openLink } = usePlatform();
   const { filters, setFilters, saveFilters, flushPendingSave, isSaving } = useUserFilters();
+  const { savedEvents, loading: savedLoading } = useSavedEvents();
+  const hasCalendar = hasFeature(CALENDAR_ALLOWLIST, userId);
   const navigate = useNavigate();
 
   // Только нужные состояния для помощников
@@ -31,6 +38,7 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   // Остальные состояния
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState('myFilters');
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date());
   const [isConnectingCalendar, setIsConnectingCalendar] = useState(false);
   const [error, setError] = useState(null);
   const [digestPeriod, setDigestPeriod] = useState('daily');
@@ -498,7 +506,7 @@ const copyInviteLink = () => {
   return (
     <div className="profile-container">
       <div className="profileTabs">
-        {['myFilters', 'myCalendars', 'myEvents'].map((tab) => (
+        {['myFilters', ...(hasCalendar ? ['myEvents'] : []), 'myCalendars'].map((tab) => (
           <button
             key={tab}
             className={`profile-tab ${activeTab === tab ? 'active' : ''}`}
@@ -506,8 +514,8 @@ const copyInviteLink = () => {
             style={{color: '#000000'}}
           >
             {tab === 'myFilters' ? 'Фильтры'
-              : tab === 'myCalendars' ? 'Календари'
-              : 'События'}
+              : tab === 'myEvents' ? 'Мои события'
+              : 'Синхронизация'}
           </button>
         ))}
       </div>
@@ -754,106 +762,124 @@ const copyInviteLink = () => {
           </div>
         )}
 
-        {/* мои события */}
-        {activeTab === 'myEvents' && (
-          <div className="profile__events-section">
-            {loadingExtra.calendarEvents ? (
-              <div className="profile-loading-small">
-                <div className="spinner-small"></div>
-                <p>Загрузка событий...</p>
-              </div>
-            ) : upcomingEvents.length > 0 ? (
-              <div className="profile-events-list">
-                {upcomingEvents.map((item) => {
-                  const event = item.eventDetails;
-                  return (
-                    <div key={item.id} className="profile-event-card">
-                      {item.provider && item.eventDetails?.start_date && (
-                        <button
-                          className="calendar-badge calendar-badge-btn"
-                          onClick={() => openLink(getCalendarOpenUrl(item.provider, item.eventDetails.start_date))}
-                          title="Открыть в календаре"
-                        >
-                          {item.provider === 'google' ? 'Google Календарь' : 'Яндекс Календарь'}
-                          {' '}↗
-                        </button>
-                      )}
-                      <div className="digest__header">
-                        <p className="digest__type">{event.event_type?.join(', ')}</p>
-                        <h3 className="digest__title">{event.title}</h3>
-                      </div>
-                      <div className="digest__mainInfo">
-                        <div className="digest__date-row">
-                          {event.start_date && (
-                            <div className="digest__day">
-                              <img src={dateIcon} alt="icon" /> {formatDate(event.start_date)}
+        {/* мои события — встроенный календарь */}
+        {activeTab === 'myEvents' && (() => {
+          const toDateStr = (d) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+          };
+          const selectedStr = toDateStr(selectedCalendarDate);
+
+          const eventDates = new Set(
+            savedEvents.map(e => e.start_date).filter(Boolean)
+          );
+
+          const eventsForDay = savedEvents.filter(e => e.start_date === selectedStr);
+
+          return (
+            <div className="profile__events-section">
+              {savedLoading ? (
+                <div className="profile-loading-small">
+                  <div className="spinner-small"></div>
+                  <p>Загрузка событий...</p>
+                </div>
+              ) : (
+                <>
+                  <ReactCalendar
+                    locale="ru-RU"
+                    value={selectedCalendarDate}
+                    onChange={setSelectedCalendarDate}
+                    className="profile-react-calendar"
+                    tileContent={({ date, view }) => {
+                      if (view !== 'month') return null;
+                      const ds = toDateStr(date);
+                      return eventDates.has(ds)
+                        ? <div className="calendar-event-dot" />
+                        : null;
+                    }}
+                  />
+
+                  <div className="profile-calendar-day-events">
+                    {eventsForDay.length === 0 ? (
+                      savedEvents.length === 0 ? (
+                        <p className="profile-empty-hint">
+                          Нажми закладку на событии, чтобы добавить его сюда
+                        </p>
+                      ) : (
+                        <p className="profile-calendar-no-events">Нет событий в этот день</p>
+                      )
+                    ) : (
+                      eventsForDay.map((event) => (
+                        <div key={event.id} className="profile-event-card">
+                          <div className="digest__header">
+                            <p className="digest__type">{event.event_type?.join(', ')}</p>
+                            <h3 className="digest__title">{event.title}</h3>
+                          </div>
+                          <div className="digest__mainInfo">
+                            <div className="digest__date-row">
+                              {event.start_date && (
+                                <div className="digest__day">
+                                  <Calendar size={14} color="#1032A1" strokeWidth={1.5} /> {formatDate(event.start_date)}
+                                </div>
+                              )}
+                              {event.start_time && (
+                                <div className="digest__time">
+                                  <Clock size={14} color="#1032A1" strokeWidth={1.5} /> {formatTime(event.start_time)}
+                                </div>
+                              )}
+                            </div>
+                            {typeof event.price === 'number' && (
+                              <div className="digest__price">
+                                <RussianRuble size={14} color="#1032A1" strokeWidth={1.5} />
+                                {event.price === 0 ? 'Бесплатно' : event.price}
+                              </div>
+                            )}
+                            {event.participation_type && (
+                              <div className="digest__partType">
+                                <Users size={14} color="#1032A1" strokeWidth={1.5} />
+                                {event.participation_type?.join?.(', ') ?? event.participation_type}
+                              </div>
+                            )}
+                            <div className="digest__location">
+                              <MapPin size={14} color="#1032A1" strokeWidth={1.5} />
+                              {event.city?.join(', ') || event.address || 'Онлайн'}
+                            </div>
+                          </div>
+                          {event.tags?.length > 0 && (
+                            <div className="digest__tags">
+                              {event.tags.map((tag, i) => (
+                                <span key={i} className="digest__tag">#{tag}</span>
+                              ))}
                             </div>
                           )}
-                          {event.start_time && (
-                            <div className="digest__time">
-                              <img src={timeIcon} alt="icon" /> {formatTime(event.start_time)}
-                            </div>
-                          )}
+                          <Link
+                            to={`/events/${event.id}`}
+                            className="digest__link"
+                            state={{ token, userId: userData?.id, from: 'profile-events' }}
+                            onClick={() => {
+                              fetch(`https://ritmevents.ru/api/v1/events/${event.id}/view`, {
+                                method: 'POST',
+                                headers: {
+                                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ source: 'profile' }),
+                              });
+                            }}
+                          >
+                            <button className="btn digest__knowMore">ПОДРОБНЕЕ</button>
+                          </Link>
                         </div>
-                        {typeof event.price === 'number' && (
-                          <div className="digest__price">
-                            <img src={priceIcon} alt="ruble icon" />
-                            {event.price === 0 ? "Бесплатно" : event.price}
-                          </div>
-                        )}
-                        {event.participation_type && (
-                          <div className="event__partType">
-                            <img src={partType} alt="person speaking icon"/> 
-                            {event.participation_type}
-                          </div>
-                        )}
-                        <div className="digest__location">
-                          <img src={placeIcon} alt="icon" />
-                          {event.city?.join(', ') || event.address || 'Онлайн'}
-                        </div>
-                      </div>
-                      {event.tags && event.tags.length > 0 && (
-                        <div className="digest__tags">
-                          {event.tags.map((tag, index) => (
-                            <span key={index} className="digest__tag">#{tag}</span>
-                          ))}
-                        </div>
-                      )}
-                      <Link
-                        to={`/events/${event.id}`}
-                        className="digest__link"
-                        state={{
-                          token: token,
-                          userId: userData?.id,
-                          from: 'profile-events'
-                        }}
-                        onClick={() => {
-                          fetch(`https://ritmevents.ru/api/v1/events/${event.id}/view`, {
-                            method: 'POST',
-                            headers: {
-                              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                              'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ source: 'profile' }),
-                          });
-                        }}
-                      >
-                        <button className="btn digest__knowMore">ПОДРОБНЕЕ</button>
-                      </Link>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="profile-empty-events">
-                {/* <p className="profile-empty-value">Нет предстоящих событий в календаре</p> */}
-                <p className="profile-empty-hint">
-                  События, которые вы добавили в календарь появятся здесь
-                </p>
-              </div>
-            )}
-          </div>
-        )}
+                      ))
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Помощники */}
         {activeTab === 'myHelpers' && (

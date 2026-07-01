@@ -1,3 +1,86 @@
+/* ── react-calendar overrides ── */
+.profile-react-calendar {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  background: #fff;
+  font-family: inherit;
+  box-shadow: 0 1px 6px rgba(16, 50, 161, 0.08);
+  margin-bottom: 16px;
+}
+
+.profile-react-calendar .react-calendar__tile {
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.calendar-event-dot {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #1032A1;
+}
+
+.profile-react-calendar .react-calendar__tile--active {
+  background: #1032A1 !important;
+  color: #fff !important;
+  border-radius: 8px;
+}
+
+.profile-react-calendar .react-calendar__tile--now {
+  background: #e8edf9;
+  border-radius: 8px;
+}
+
+.profile-react-calendar .react-calendar__navigation button {
+  font-size: 14px;
+  font-family: inherit;
+}
+
+/* ── Calendar day events list ── */
+.profile-calendar-day-events {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-calendar-no-events {
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+  padding: 16px 0;
+}
+
+.profile-empty-hint {
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+  padding: 24px 0;
+}
+
+/* ── Event card in calendar ── */
+.profile-event-card .digest__knowMore {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: #1032A1;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ── Bookmark on Event page ── */
+.event__bookmark-btn {
+  margin-bottom: 8px;
+}
+
 .profile-section-header {
   display: flex;
   justify-content: space-between;

@@ -11,6 +11,7 @@ import { FiltersProvider } from './components/FiltersContext.jsx'
 import { ToastProvider } from './components/Toast/ToastContext.jsx'
 import { WhatsNewProvider } from './components/WhatsNew/WhatsNewContext.jsx'
 import WhatsNewModal from './components/WhatsNew/WhatsNewModal.jsx'
+import { SavedEventsProvider } from './components/SavedEventsContext.jsx'
 
 
 const meta = document.createElement('meta');
@@ -24,11 +25,13 @@ createRoot(document.getElementById('root')).render(
       <AppRoot platform="base">
         <WhatsNewProvider>
           <AuthProvider>
-            <ToastProvider>
-              <FiltersProvider>
-                <App />
-              </FiltersProvider>
-            </ToastProvider>
+            <SavedEventsProvider>
+              <ToastProvider>
+                <FiltersProvider>
+                  <App />
+                </FiltersProvider>
+              </ToastProvider>
+            </SavedEventsProvider>
           </AuthProvider>
           <WhatsNewModal />
         </WhatsNewProvider>
