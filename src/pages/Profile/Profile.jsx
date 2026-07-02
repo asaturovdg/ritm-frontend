@@ -8,6 +8,7 @@ import { useCalendar } from "../../components/useCalendar.jsx";
 import { usePlatform } from "../../platform/usePlatform.js";
 import { useUserFilters } from "../../components/useUserFilters.jsx";
 import { useSavedEvents } from "../../components/SavedEventsContext.jsx";
+import { useCalendarPromptPreference } from "../../components/useCalendarPromptPreference.jsx";
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js";
 import { CALENDAR_ALLOWLIST, hasFeature } from "../../data/featureFlags.js";
 import { Calendar, Clock, RussianRuble, MapPin, Users } from "lucide-react";
@@ -24,6 +25,7 @@ export function Profile() {
   const { openLink } = usePlatform();
   const { filters, setFilters, saveFilters, flushPendingSave, isSaving } = useUserFilters();
   const { savedEvents, loading: savedLoading } = useSavedEvents();
+  const { skipPrompt, setSkipPrompt } = useCalendarPromptPreference();
   const hasCalendar = hasFeature(CALENDAR_ALLOWLIST, userId);
   const navigate = useNavigate();
 
@@ -713,6 +715,16 @@ const copyInviteLink = () => {
         {/* календари */}
         {activeTab === 'myCalendars' && (
           <div className="profile__calendars-section">
+            <div className="calendar-subsection">
+              <label className="calendar-prompt-toggle">
+                <input
+                  type="checkbox"
+                  checked={!skipPrompt}
+                  onChange={(e) => setSkipPrompt(!e.target.checked)}
+                />
+                Предлагать добавить во внешний календарь при сохранении события
+              </label>
+            </div>
             <div className="calendar-subsection">
               {loadingExtra.calendars ? (
                 <div className="profile-loading-small">

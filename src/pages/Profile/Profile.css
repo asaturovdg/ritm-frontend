@@ -568,6 +568,21 @@
   border-bottom: none;
 }
 
+.calendar-prompt-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.calendar-prompt-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 .profile-calendars-list {
   display: flex;
   flex-direction: column;
