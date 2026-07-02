@@ -102,3 +102,19 @@
 .external-prompt__skip:hover {
   color: #555;
 }
+
+.external-prompt__remember {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  color: #888;
+  text-decoration: underline;
+}
+
+.external-prompt__remember:hover {
+  color: #555;
+}

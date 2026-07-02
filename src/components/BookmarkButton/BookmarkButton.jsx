@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSavedEvents } from '../SavedEventsContext.jsx';
 import { useCalendar } from '../useCalendar.jsx';
 import { usePlatform } from '../../platform/usePlatform.js';
+import { useCalendarPromptPreference } from '../useCalendarPromptPreference.jsx';
 import google from '../../assets/icons/Google.svg';
 import yandex from '../../assets/icons/Yandex.svg';
 import './BookmarkButton.css';
@@ -10,6 +11,7 @@ export default function BookmarkButton({ event, className = '' }) {
   const { isSaved, saveEvent, unsaveEvent } = useSavedEvents();
   const { handleAddToCalendar, isProcessing } = useCalendar();
   const { showAlert } = usePlatform();
+  const { skipPrompt, setSkipPrompt } = useCalendarPromptPreference();
   const [showExternalPrompt, setShowExternalPrompt] = useState(false);
 
   const eventId = event?.id;
@@ -23,7 +25,7 @@ export default function BookmarkButton({ event, className = '' }) {
       setShowExternalPrompt(false);
     } else {
       saveEvent(event);
-      if (event?.start_date) {
+      if (event?.start_date && !skipPrompt) {
         setShowExternalPrompt(true);
       }
     }
@@ -44,6 +46,13 @@ export default function BookmarkButton({ event, className = '' }) {
   const handleSkip = (e) => {
     e.stopPropagation();
     setShowExternalPrompt(false);
+  };
+
+  const handleRemember = (e) => {
+    e.stopPropagation();
+    setShowExternalPrompt(false);
+    setSkipPrompt(true);
+    showAlert('Ты можешь изменить эту настройку в профиле');
   };
 
   return (
@@ -77,6 +86,9 @@ export default function BookmarkButton({ event, className = '' }) {
             </button>
             <button className="external-prompt__skip" onClick={handleSkip}>
               Нет
+            </button>
+            <button className="external-prompt__remember" onClick={handleRemember}>
+              Нет, запомнить мой выбор
             </button>
           </div>
         </div>
