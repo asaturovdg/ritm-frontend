@@ -136,6 +136,8 @@
     background-color: #1032A1;
     color: #ffffff;
     border-radius: 7px;
+    border: 1.5px solid transparent;
+    box-sizing: border-box;
     cursor: pointer;
     text-decoration: none;
     transition: opacity 0.3s ease;
