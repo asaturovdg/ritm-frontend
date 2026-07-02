@@ -1,20 +1,18 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useAuth } from './AuthContext.jsx';
 
 const API_URL = 'https://ritmevents.ru/api/v1';
 
 export function useCalendarPromptPreference() {
   const { token, userId, userData, refreshUserData } = useAuth();
-  const [skipPrompt, setSkipPromptState] = useState(
-    Boolean(userData?.skip_external_calendar_prompt)
-  );
+  const [override, setOverride] = useState(null);
 
-  useEffect(() => {
-    setSkipPromptState(Boolean(userData?.skip_external_calendar_prompt));
-  }, [userData]);
+  const skipPrompt = override !== null
+    ? override
+    : Boolean(userData?.skip_external_calendar_prompt);
 
   const setSkipPrompt = useCallback(async (value) => {
-    setSkipPromptState(value);
+    setOverride(value);
     if (!token || !userId) return;
     try {
       const res = await fetch(`${API_URL}/users/${userId}/calendar-preferences`, {
@@ -24,6 +22,7 @@ export function useCalendarPromptPreference() {
       });
       if (res.ok) {
         await refreshUserData();
+        setOverride(null);
       } else {
         console.error('Ошибка сохранения настройки календаря:', res.status);
       }
