@@ -359,7 +359,7 @@ export default function Event({ embeddedId, isPreview = false, status }) {
               </a>
             )}
 
-            {!isPreview && !fromProfileEvents && event.start_date && (
+            {!isPreview && !fromProfileEvents && event.start_date && !hasCalendar && (
               <div className="calendar-wrapper" style={{ paddingBottom: addToCalendar ? '110px' : '0' }}>
                 <button
                   onClick={() => setAddToCalendar(!addToCalendar)}
