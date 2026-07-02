@@ -153,8 +153,17 @@
 
 .event__cta{
     display: flex;
-    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
     margin-bottom: 16px;
+}
+
+.event__cta > .event-register--btn,
+.event__cta > .bookmark-wrapper,
+.event__cta > .calendar-wrapper {
+    flex: 0 0 calc(50% - 6px);
+    max-width: calc(50% - 6px);
+    box-sizing: border-box;
 }
 
 .tab-btn.active{
@@ -171,8 +180,10 @@
     padding: 6px 8px;
     display: flex;
     align-items: center;
-    gap:8px; 
+    justify-content: center;
+    gap:8px;
     position: relative;
+    width: 100%;
 
 }
 
@@ -183,8 +194,12 @@
     font-weight: 400;
     font-size: 16px;
     border-radius:10px;
-    align-self: flex-start;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 
