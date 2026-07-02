@@ -575,7 +575,7 @@ export default function EventsDigest() {
                 </div>
               )}
               <div className="digest__bottom-row">
-                <span className="digest__knowMore">ПОДРОБНЕЕ</span>
+                <span className="digest__knowMore">Подробнее</span>
                 {hasCalendar && <BookmarkButton event={event} />}
               </div>
             </div>
