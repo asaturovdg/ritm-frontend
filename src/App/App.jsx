@@ -148,7 +148,9 @@ export default function App() {
       feedback: '/feedback',
       submissions: '/submissions',
     };
-    navigate(paths[tab] ?? '/');
+    const targetPath = paths[tab] ?? '/';
+    if (targetPath === location.pathname) return;
+    navigate(targetPath);
   };
 
   const activeTab = getActiveTab();
