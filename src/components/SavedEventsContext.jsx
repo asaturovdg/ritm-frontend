@@ -5,10 +5,12 @@ import { CALENDAR_ALLOWLIST, hasFeature } from '../data/featureFlags.js';
 const defaultContext = {
   savedEvents: [],
   savedIds: new Set(),
+  pendingIds: new Set(),
   loading: false,
   saveEvent: () => {},
   unsaveEvent: () => {},
   isSaved: () => false,
+  isPending: () => false,
   isInExternalCalendar: () => false,
 };
 
@@ -19,6 +21,7 @@ export function SavedEventsProvider({ children }) {
   const [savedEvents, setSavedEvents] = useState([]);   // full event objects
   const [savedIds, setSavedIds] = useState(new Set());  // fast lookup
   const [externalIds, setExternalIds] = useState(new Set()); // event_ids in Google/Yandex
+  const [pendingIds, setPendingIds] = useState(new Set());   // in-flight requests
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async () => {
@@ -80,6 +83,8 @@ export function SavedEventsProvider({ children }) {
 
   const saveEvent = useCallback(async (eventObj) => {
     const eventId = eventObj.id ?? eventObj;
+    if (pendingIds.has(eventId)) return;
+    setPendingIds(prev => new Set([...prev, eventId]));
     setSavedIds(prev => new Set([...prev, eventId]));
     if (eventObj.id) {
       setSavedEvents(prev => prev.some(e => (e.id ?? e.event_id) === eventId) ? prev : [...prev, eventObj]);
@@ -96,10 +101,14 @@ export function SavedEventsProvider({ children }) {
     } catch {
       setSavedIds(prev => { const s = new Set(prev); s.delete(eventId); return s; });
       setSavedEvents(prev => prev.filter(e => (e.id ?? e.event_id) !== eventId));
+    } finally {
+      setPendingIds(prev => { const s = new Set(prev); s.delete(eventId); return s; });
     }
-  }, [token]);
+  }, [token, pendingIds]);
 
   const unsaveEvent = useCallback(async (eventId) => {
+    if (pendingIds.has(eventId)) return;
+    setPendingIds(prev => new Set([...prev, eventId]));
     setSavedIds(prev => { const s = new Set(prev); s.delete(eventId); return s; });
     setSavedEvents(prev => prev.filter(e => (e.id ?? e.event_id) !== eventId));
     try {
@@ -108,25 +117,29 @@ export function SavedEventsProvider({ children }) {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) {
-        // Revert: reload from server to get full object back
         load();
       }
     } catch {
       load();
+    } finally {
+      setPendingIds(prev => { const s = new Set(prev); s.delete(eventId); return s; });
     }
-  }, [token, load]);
+  }, [token, pendingIds, load]);
 
   const isSaved = useCallback((eventId) => savedIds.has(eventId), [savedIds]);
+  const isPending = useCallback((eventId) => pendingIds.has(eventId), [pendingIds]);
   const isInExternalCalendar = useCallback((eventId) => externalIds.has(eventId), [externalIds]);
 
   return (
     <SavedEventsContext.Provider value={{
       savedEvents,
       savedIds,
+      pendingIds,
       loading,
       saveEvent,
       unsaveEvent,
       isSaved,
+      isPending,
       isInExternalCalendar,
     }}>
       {children}

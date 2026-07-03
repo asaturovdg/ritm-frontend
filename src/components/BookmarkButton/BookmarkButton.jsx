@@ -8,7 +8,7 @@ import yandex from '../../assets/icons/Yandex.svg';
 import './BookmarkButton.css';
 
 export default function BookmarkButton({ event, className = '' }) {
-  const { isSaved, saveEvent, unsaveEvent } = useSavedEvents();
+  const { isSaved, isPending, saveEvent, unsaveEvent } = useSavedEvents();
   const { handleAddToCalendar, isProcessing } = useCalendar();
   const showToast = useToast();
   const { skipPrompt, setSkipPrompt } = useCalendarPromptPreference();
@@ -16,6 +16,7 @@ export default function BookmarkButton({ event, className = '' }) {
 
   const eventId = event?.id;
   const saved = isSaved(eventId);
+  const pending = isPending(eventId);
 
   const handleClick = (e) => {
     e.stopPropagation();
@@ -60,6 +61,7 @@ export default function BookmarkButton({ event, className = '' }) {
       <button
         className={`save-calendar-btn ${saved ? 'save-calendar-btn--saved' : ''}`}
         onClick={handleClick}
+        disabled={pending}
       >
         {saved ? '✓ В моём календаре' : '+ В мой календарь'}
       </button>

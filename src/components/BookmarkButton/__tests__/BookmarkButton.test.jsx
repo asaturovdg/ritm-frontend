@@ -13,6 +13,7 @@ let mockSkipPrompt = false;
 vi.mock('../../SavedEventsContext.jsx', () => ({
   useSavedEvents: () => ({
     isSaved: mockIsSaved,
+    isPending: () => false,
     saveEvent: mockSaveEvent,
     unsaveEvent: mockUnsaveEvent,
   }),
@@ -25,8 +26,8 @@ vi.mock('../../useCalendar.jsx', () => ({
   }),
 }));
 
-vi.mock('../../../platform/usePlatform.js', () => ({
-  usePlatform: () => ({ showAlert: mockShowAlert }),
+vi.mock('../../Toast/ToastContext.jsx', () => ({
+  useToast: () => mockShowAlert,
 }));
 
 vi.mock('../../useCalendarPromptPreference.jsx', () => ({

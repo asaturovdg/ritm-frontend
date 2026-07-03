@@ -25,6 +25,10 @@
   background-color: #1032A1;
 }
 
+.profile-react-calendar .react-calendar__tile--active .calendar-event-dot {
+  background-color: rgba(255, 255, 255, 0.85);
+}
+
 .profile-react-calendar .react-calendar__tile--active {
   background: #1032A1 !important;
   color: #fff !important;
