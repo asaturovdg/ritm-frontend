@@ -558,8 +558,8 @@ const copyInviteLink = () => {
             style={{color: '#000000'}}
           >
             {tab === 'myFilters' ? 'Фильтры'
-              : tab === 'myEvents' ? 'Мои события'
-              : 'Синхронизация'}
+              : tab === 'myEvents' ? 'События'
+              : 'Календари'}
           </button>
         ))}
       </div>
