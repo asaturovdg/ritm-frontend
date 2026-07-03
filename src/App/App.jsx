@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { Newspaper, User, MessageCircle, FilePlus, Sparkles } from 'lucide-react';
 
 import InviteAccept from '../components/InviteAccept/InviteAccept';
 import EventsDigest from '../components/eventsDigest/EventsDigest';
@@ -15,28 +14,15 @@ import { TransitionContext } from '../components/TransitionContext';
 
 import { useTabSwipe } from '../hooks/useTabSwipe';
 import { useAuth } from '../components/AuthContext.jsx';
+import { useAppTabs } from '../hooks/useAppTabs';
 import './App.css';
-
-import { FEATURED_ALLOWLIST } from '../data/featureFlags.js';
-
-const BASE_TAB_PATHS = ['/', '/profile', '/feedback', '/submissions'];
-const BASE_TABS = [
-  { id: 'events',      label: 'Дайджест',          Icon: Newspaper,      path: '/' },
-  { id: 'profile',     label: 'Профиль',           Icon: User,           path: '/profile' },
-  { id: 'feedback',    label: 'Обратная связь',    Icon: MessageCircle,  path: '/feedback' },
-  { id: 'submissions', label: 'Заявка',            Icon: FilePlus,       path: '/submissions' },
-];
-const FEATURED_TAB = { id: 'featured', label: 'Подборки', Icon: Sparkles, path: '/featured' };
 
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const prefersReduced = useReducedMotion();
-  const { userId, isAuthReady } = useAuth();
-
-  const hasFeatured = FEATURED_ALLOWLIST.has(Number(userId));
-  const TABS = hasFeatured ? [FEATURED_TAB, ...BASE_TABS] : BASE_TABS;
-  const TAB_PATHS = hasFeatured ? ['/featured', ...BASE_TAB_PATHS] : BASE_TAB_PATHS;
+  const { isAuthReady } = useAuth();
+  const { TABS, TAB_PATHS, hasFeatured } = useAppTabs();
 
   const prevPathRef = useRef(location.pathname);
   const transitionConfigRef = useRef({ direction: 0, type: 'tab' });
