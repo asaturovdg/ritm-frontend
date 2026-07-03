@@ -51,7 +51,7 @@ const renderProfile = () =>
     </MemoryRouter>
   );
 
-describe('Profile — "Синхронизация" calendar prompt toggle', () => {
+describe('Profile — "Календари" calendar prompt toggle', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockSkipPrompt = false;
@@ -59,7 +59,7 @@ describe('Profile — "Синхронизация" calendar prompt toggle', () =
 
   it('shows a checked toggle when the prompt is enabled (skipPrompt=false)', () => {
     renderProfile();
-    fireEvent.click(screen.getByText('Синхронизация'));
+    fireEvent.click(screen.getByText('Календари'));
     const checkbox = screen.getByLabelText('Предлагать добавить во внешний календарь при сохранении события');
     expect(checkbox.checked).toBe(true);
   });
@@ -67,14 +67,14 @@ describe('Profile — "Синхронизация" calendar prompt toggle', () =
   it('shows an unchecked toggle when the prompt is disabled (skipPrompt=true)', () => {
     mockSkipPrompt = true;
     renderProfile();
-    fireEvent.click(screen.getByText('Синхронизация'));
+    fireEvent.click(screen.getByText('Календари'));
     const checkbox = screen.getByLabelText('Предлагать добавить во внешний календарь при сохранении события');
     expect(checkbox.checked).toBe(false);
   });
 
   it('unchecking the toggle calls setSkipPrompt(true)', () => {
     renderProfile();
-    fireEvent.click(screen.getByText('Синхронизация'));
+    fireEvent.click(screen.getByText('Календари'));
     const checkbox = screen.getByLabelText('Предлагать добавить во внешний календарь при сохранении события');
     fireEvent.click(checkbox);
     expect(mockSetSkipPrompt).toHaveBeenCalledWith(true);
@@ -83,7 +83,7 @@ describe('Profile — "Синхронизация" calendar prompt toggle', () =
   it('checking the toggle calls setSkipPrompt(false)', () => {
     mockSkipPrompt = true;
     renderProfile();
-    fireEvent.click(screen.getByText('Синхронизация'));
+    fireEvent.click(screen.getByText('Календари'));
     const checkbox = screen.getByLabelText('Предлагать добавить во внешний календарь при сохранении события');
     fireEvent.click(checkbox);
     expect(mockSetSkipPrompt).toHaveBeenCalledWith(false);

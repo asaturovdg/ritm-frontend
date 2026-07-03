@@ -304,6 +304,18 @@
   gap: 0;
 }
 
+.profile__tabs-content {
+  display: grid;
+  overflow-x: hidden;
+  touch-action: pan-y;
+}
+
+.profile-subtab-panel {
+  grid-area: 1 / 1;
+  width: 100%;
+  min-width: 0;
+}
+
 
 .profile__filters-section{
   border-radius: 20px;
