@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useSavedEvents } from '../SavedEventsContext.jsx';
 import { useCalendar } from '../useCalendar.jsx';
-import { usePlatform } from '../../platform/usePlatform.js';
 import { useCalendarPromptPreference } from '../useCalendarPromptPreference.jsx';
+import { useToast } from '../Toast/ToastContext.jsx';
 import google from '../../assets/icons/Google.svg';
 import yandex from '../../assets/icons/Yandex.svg';
 import './BookmarkButton.css';
@@ -10,7 +10,7 @@ import './BookmarkButton.css';
 export default function BookmarkButton({ event, className = '' }) {
   const { isSaved, saveEvent, unsaveEvent } = useSavedEvents();
   const { handleAddToCalendar, isProcessing } = useCalendar();
-  const { showAlert } = usePlatform();
+  const showToast = useToast();
   const { skipPrompt, setSkipPrompt } = useCalendarPromptPreference();
   const [showExternalPrompt, setShowExternalPrompt] = useState(false);
 
@@ -36,10 +36,10 @@ export default function BookmarkButton({ event, className = '' }) {
     setShowExternalPrompt(false);
     await handleAddToCalendar(eventId, provider, {
       onSuccess: (label, alreadyExists) =>
-        showAlert(alreadyExists
+        showToast(alreadyExists
           ? `Уже добавлено в ${label} Календарь`
           : `Добавлено в ${label} Календарь`),
-      onError: (msg) => showAlert(`Ошибка: ${msg}`),
+      onError: (msg) => showToast(`Ошибка: ${msg}`),
     });
   };
 
@@ -52,7 +52,7 @@ export default function BookmarkButton({ event, className = '' }) {
     e.stopPropagation();
     setShowExternalPrompt(false);
     setSkipPrompt(true);
-    showAlert('Ты можешь изменить эту настройку в профиле');
+    showToast('Ты можешь изменить эту настройку в профиле');
   };
 
   return (
