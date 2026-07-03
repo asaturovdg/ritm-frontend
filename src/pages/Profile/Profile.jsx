@@ -41,7 +41,7 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState('myFilters');
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date());
-  const [isConnectingCalendar, setIsConnectingCalendar] = useState(false);
+  const [calendarPendingProvider, setCalendarPendingProvider] = useState(null);
   const [error, setError] = useState(null);
   const [digestPeriod, setDigestPeriod] = useState('daily');
   const [digestDay, setDigestDay] = useState(null);
@@ -131,7 +131,7 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
       return;
     }
 
-    setIsConnectingCalendar(true);
+    setCalendarPendingProvider(provider);
     setError(null);
 
     try {
@@ -145,7 +145,7 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
       console.error('Ошибка:', err);
       setError(err.message);
     } finally {
-      setIsConnectingCalendar(false);
+      setCalendarPendingProvider(null);
     }
   };
 
@@ -445,17 +445,18 @@ const copyInviteLink = () => {
   };
 
   const deleteCalendar = async (provider) => {
-    if (!token) return;
-    
+    if (!token || calendarPendingProvider === provider) return;
+
     const calendarExists = calendars.some(cal => cal.provider === provider);
     if (!calendarExists) {
       await fetchAllExtraData(userData.id);
       return;
     }
-    
-    const providerName = provider === 'google' ? 'google' : 
+
+    const providerName = provider === 'google' ? 'google' :
                          provider === 'yandex' ? 'yandex' : provider;
-    
+
+    setCalendarPendingProvider(provider);
     try {
       const response = await fetch(
         `https://ritmevents.ru/api/v1/calendars/${providerName}`,
@@ -482,9 +483,11 @@ const copyInviteLink = () => {
       }
     } catch (err) {
       console.error('Ошибка при удалении календаря:', err);
+    } finally {
+      setCalendarPendingProvider(null);
     }
   };
-  
+
   const hasAllFilters = filters.cities.length > 0 &&
                         filters.categories.length > 0 &&
                         filters.eventTypes.length > 0 &&
@@ -752,17 +755,18 @@ const copyInviteLink = () => {
                             <button
                               className="calendar-delete-btn"
                               onClick={() => deleteCalendar(calendar.id)}
+                              disabled={calendarPendingProvider === calendar.id}
                             >
-                              Удалить
+                              {calendarPendingProvider === calendar.id ? 'Удаление...' : 'Удалить'}
                             </button>
                           </div>
                         ) : (
                           <button
                             className="calendar-connect-btn"
                             onClick={() => handleConnectCalendar(calendar.id)}
-                            disabled={isConnectingCalendar}
+                            disabled={calendarPendingProvider === calendar.id}
                           >
-                            {isConnectingCalendar ? 'Подключение...' : 'Подключить'}
+                            {calendarPendingProvider === calendar.id ? 'Подключение...' : 'Подключить'}
                           </button>
                         )}
                       </div>
