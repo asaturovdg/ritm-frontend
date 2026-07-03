@@ -304,14 +304,22 @@
   gap: 0;
 }
 
+/* Fill the scroll viewport so the swipe surface has no dead zone below
+   short subtabs (matches App's flex:1 .app-content). */
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
 .profile__tabs-content {
-  display: grid;
+  position: relative;
+  flex: 1;
   overflow-x: hidden;
   touch-action: pan-y;
 }
 
 .profile-subtab-panel {
-  grid-area: 1 / 1;
   width: 100%;
   min-width: 0;
 }

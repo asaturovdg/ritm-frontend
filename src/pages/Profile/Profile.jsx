@@ -595,7 +595,7 @@ const copyInviteLink = () => {
   </div>
 )}
 
-        <AnimatePresence initial={false} custom={subtabDirection}>
+        <AnimatePresence initial={false} mode="popLayout" custom={subtabDirection}>
           <motion.div
             key={activeTab}
             className="profile-subtab-panel"
