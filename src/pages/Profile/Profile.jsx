@@ -25,7 +25,7 @@ export function Profile() {
   const { openLink } = usePlatform();
   const { filters, setFilters, saveFilters, flushPendingSave, isSaving } = useUserFilters();
   const { savedEvents, loading: savedLoading } = useSavedEvents();
-  const { skipPrompt, setSkipPrompt } = useCalendarPromptPreference();
+  const { skipPrompt, setSkipPrompt, isPending: isCalendarPromptPending } = useCalendarPromptPreference();
   const hasCalendar = hasFeature(CALENDAR_ALLOWLIST, userId);
   const navigate = useNavigate();
 
@@ -724,6 +724,7 @@ const copyInviteLink = () => {
                   type="checkbox"
                   checked={!skipPrompt}
                   onChange={(e) => setSkipPrompt(!e.target.checked)}
+                  disabled={isCalendarPromptPending}
                 />
                 Предлагать добавить во внешний календарь при сохранении события
               </label>
