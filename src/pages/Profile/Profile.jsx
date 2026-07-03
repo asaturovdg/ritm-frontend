@@ -12,6 +12,9 @@ import { useCalendarPromptPreference } from "../../components/useCalendarPromptP
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js";
 import { CALENDAR_ALLOWLIST, hasFeature } from "../../data/featureFlags.js";
 import { Calendar, Clock, RussianRuble, MapPin, Users } from "lucide-react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useSwipeNavigation } from "../../hooks/useSwipeNavigation.js";
+import { useAppTabs } from "../../hooks/useAppTabs.js";
 
 import dateIcon from "../../assets/icons/DateRange.svg";
 import timeIcon from "../../assets/icons/time.svg";
@@ -28,6 +31,9 @@ export function Profile() {
   const { skipPrompt, setSkipPrompt, isPending: isCalendarPromptPending } = useCalendarPromptPreference();
   const hasCalendar = hasFeature(CALENDAR_ALLOWLIST, userId);
   const navigate = useNavigate();
+  const tabs = ['myFilters', ...(hasCalendar ? ['myEvents'] : []), 'myCalendars'];
+  const prefersReducedMotion = useReducedMotion();
+  const { TAB_PATHS } = useAppTabs();
 
   // Только нужные состояния для помощников
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -40,6 +46,7 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   // Остальные состояния
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState('myFilters');
+  const [subtabDirection, setSubtabDirection] = useState(1);
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date());
   const [calendarPendingProvider, setCalendarPendingProvider] = useState(null);
   const [error, setError] = useState(null);
@@ -236,6 +243,38 @@ const applyFilters = async () => {
     setCustomCityOptions(updatedOptions);
     localStorage.setItem('user_custom_cities', JSON.stringify(updatedOptions));
     setFilters({ ...filters, cities: filters.cities.filter(c => c !== city) });
+  };
+
+  const goToTab = (tab) => {
+    const fromIndex = tabs.indexOf(activeTab);
+    const toIndex = tabs.indexOf(tab);
+    setSubtabDirection(toIndex > fromIndex ? 1 : -1);
+    setActiveTab(tab);
+  };
+
+  const bindSubtabSwipe = useSwipeNavigation({
+    currentIndex: tabs.indexOf(activeTab),
+    itemCount: tabs.length,
+    onSwipe: ({ direction, targetIndex, inBounds }) => {
+      if (inBounds) {
+        setSubtabDirection(direction);
+        setActiveTab(tabs[targetIndex]);
+        return;
+      }
+      const profileIndex = TAB_PATHS.indexOf('/profile');
+      const escapeIndex = profileIndex + direction;
+      if (profileIndex !== -1 && escapeIndex >= 0 && escapeIndex < TAB_PATHS.length) {
+        navigate(TAB_PATHS[escapeIndex]);
+      }
+    },
+  });
+
+  const subtabVariants = {
+    initial: (direction) =>
+      prefersReducedMotion ? { opacity: 0 } : { x: `${direction > 0 ? 100 : -100}%`, opacity: 0 },
+    animate: { x: '0%', opacity: 1 },
+    exit: (direction) =>
+      prefersReducedMotion ? { opacity: 0 } : { x: `${direction > 0 ? -100 : 100}%`, opacity: 0 },
   };
 
   // Удаление помощника
@@ -511,11 +550,11 @@ const copyInviteLink = () => {
   return (
     <div className="profile-container">
       <div className="profileTabs">
-        {['myFilters', ...(hasCalendar ? ['myEvents'] : []), 'myCalendars'].map((tab) => (
+        {tabs.map((tab) => (
           <button
             key={tab}
             className={`profile-tab ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => goToTab(tab)}
             style={{color: '#000000'}}
           >
             {tab === 'myFilters' ? 'Фильтры'
@@ -525,7 +564,7 @@ const copyInviteLink = () => {
         ))}
       </div>
 
-      <div className="profile__tabs-content">
+      <div className="profile__tabs-content" {...bindSubtabSwipe()}>
          {showFilterSuccessModal && (
             <div className="filter-success-modal">
               <div className="filter-success-content">
@@ -555,7 +594,18 @@ const copyInviteLink = () => {
     </div>
   </div>
 )}
-        
+
+        <AnimatePresence initial={false} custom={subtabDirection}>
+          <motion.div
+            key={activeTab}
+            className="profile-subtab-panel"
+            custom={subtabDirection}
+            variants={subtabVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: prefersReducedMotion ? 0 : 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
         {/* фильтры */}
         {activeTab === 'myFilters' && (
           <div className="profile__filters-section">
@@ -978,6 +1028,8 @@ const copyInviteLink = () => {
             )}
           </div>
         )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
