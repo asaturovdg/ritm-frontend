@@ -12,7 +12,7 @@ import Submissions from '../pages/Submissions/Submissions';
 import { ThemeWrapper } from '../components/ThemeWrapper';
 import { TransitionContext } from '../components/TransitionContext';
 
-import { useTabSwipe } from '../hooks/useTabSwipe';
+import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
 import { useAuth } from '../components/AuthContext.jsx';
 import { useAppTabs } from '../hooks/useAppTabs';
 import './App.css';
@@ -153,7 +153,14 @@ export default function App() {
 
   const activeTab = getActiveTab();
   const isEventPage = location.pathname.startsWith('/events/');
-  const bindSwipe = useTabSwipe(location.pathname, !isEventPage);
+  const bindSwipe = useSwipeNavigation({
+    currentIndex: TAB_PATHS.indexOf(location.pathname),
+    itemCount: TAB_PATHS.length,
+    onSwipe: ({ targetIndex, inBounds }) => {
+      if (inBounds) navigate(TAB_PATHS[targetIndex]);
+    },
+    enabled: !isEventPage && activeTab !== 'profile',
+  });
 
   // Page slide variants — direction-aware for tabs, fade for event transitions
   const pageVariants = {
