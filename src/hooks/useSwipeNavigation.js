@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useDrag } from '@use-gesture/react';
 
 const SWIPE_DISTANCE = 50;  // px
@@ -16,10 +17,21 @@ export function resolveSwipeTarget(currentIndex, itemCount, mx, vx) {
   };
 }
 
-export function useSwipeNavigation({ currentIndex, itemCount, onSwipe, enabled = true }) {
+// `ignoreSelector` lets a nested native scroller (e.g. a horizontal
+// carousel) opt out of this gesture. touch-action alone can't do this:
+// it only tells the browser whether to hand the touch to JS at all, but
+// once handed over, the touchmove still bubbles up to this handler
+// regardless of touch-action on the inner element. So we check where the
+// drag started and skip navigation if it began inside the excluded area.
+export function useSwipeNavigation({ currentIndex, itemCount, onSwipe, enabled = true, ignoreSelector }) {
+  const ignoreDragRef = useRef(false);
+
   return useDrag(
-    ({ last, movement: [mx], velocity: [vx] }) => {
-      if (!last || !enabled) return;
+    ({ first, last, movement: [mx], velocity: [vx], event }) => {
+      if (first) {
+        ignoreDragRef.current = !!(ignoreSelector && event.target.closest?.(ignoreSelector));
+      }
+      if (!last || !enabled || ignoreDragRef.current) return;
       const result = resolveSwipeTarget(currentIndex, itemCount, mx, vx);
       if (result) onSwipe(result);
     },

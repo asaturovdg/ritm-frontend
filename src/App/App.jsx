@@ -162,6 +162,7 @@ export default function App() {
       if (inBounds) navigate(TAB_PATHS[targetIndex]);
     },
     enabled: !isEventPage && activeTab !== 'profile',
+    ignoreSelector: '.featured-carousel',
   });
 
   // Page slide variants — direction-aware for tabs, fade for event transitions
