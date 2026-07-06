@@ -67,6 +67,8 @@
 }
 
 .featured-card__header {
+  width: 100%;
+  box-sizing: border-box;
   background: linear-gradient(135deg, #1032A1, #4F77F1);
   padding: 12px 14px;
 }
