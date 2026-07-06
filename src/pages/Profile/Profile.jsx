@@ -564,7 +564,7 @@ const copyInviteLink = () => {
         ))}
       </div>
 
-      <motion.div className="profile__tabs-content" layout transition={{ layout: { duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] } }}>
+      <div className="profile__tabs-content">
          {showFilterSuccessModal && (
             <div className="filter-success-modal">
               <div className="filter-success-content">
@@ -595,7 +595,7 @@ const copyInviteLink = () => {
   </div>
 )}
 
-        <AnimatePresence initial={false} mode="popLayout" custom={subtabDirection}>
+        <AnimatePresence initial={false} custom={subtabDirection}>
           <motion.div
             key={activeTab}
             className="profile-subtab-panel"
@@ -1030,7 +1030,7 @@ const copyInviteLink = () => {
         )}
           </motion.div>
         </AnimatePresence>
-      </motion.div>
+      </div>
     </div>
   );
 }
