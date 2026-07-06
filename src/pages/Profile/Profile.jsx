@@ -838,6 +838,7 @@ const copyInviteLink = () => {
             return `${y}-${m}-${day}`;
           };
           const selectedStr = toDateStr(selectedCalendarDate);
+          const todayStr = toDateStr(new Date());
 
           const eventDates = new Set(
             savedEvents.map(e => e.start_date).filter(Boolean)
@@ -862,9 +863,24 @@ const copyInviteLink = () => {
                     tileContent={({ date, view }) => {
                       if (view !== 'month') return null;
                       const ds = toDateStr(date);
-                      return eventDates.has(ds)
-                        ? <div className="calendar-event-dot" />
-                        : null;
+                      const isSelected = ds === selectedStr;
+                      const isToday = ds === todayStr;
+                      return (
+                        <>
+                          {(isSelected || isToday) && (
+                            <div
+                              key={`highlight-${ds}`}
+                              className={`calendar-tile-highlight ${isSelected ? 'calendar-tile-highlight--active' : 'calendar-tile-highlight--now'}`}
+                            />
+                          )}
+                          {eventDates.has(ds) && (
+                            <div
+                              key={`dot-${ds}`}
+                              className={`calendar-event-dot ${isSelected ? 'calendar-event-dot--active' : ''}`}
+                            />
+                          )}
+                        </>
+                      );
                     }}
                   />
 

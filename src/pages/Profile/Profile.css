@@ -14,6 +14,42 @@
   padding-bottom: 20px;
 }
 
+/* iOS WKWebView (Max) can fail to repaint a tile's background when
+   react-calendar toggles --active/--now on a persistent <button> (a WebKit
+   dirty-rect bug), leaving stale highlights bled across tiles. To avoid
+   relying on that repaint at all, the highlight is its own DOM node
+   (rendered via tileContent, keyed by date) that React mounts/unmounts
+   as the selected day changes, instead of a class toggle on a fixed node. */
+.profile-react-calendar .react-calendar__tile--active,
+.profile-react-calendar .react-calendar__tile--now {
+  background: transparent;
+}
+
+.profile-react-calendar .react-calendar__tile--active {
+  color: #fff !important;
+}
+
+.profile-react-calendar .react-calendar__tile abbr {
+  position: relative;
+  z-index: 1;
+}
+
+.calendar-tile-highlight {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.calendar-tile-highlight--active {
+  background: #1032A1;
+}
+
+.calendar-tile-highlight--now {
+  background: #e8edf9;
+}
+
 .calendar-event-dot {
   position: absolute;
   bottom: 5px;
@@ -23,21 +59,11 @@
   height: 6px;
   border-radius: 50%;
   background-color: #1032A1;
+  z-index: 1;
 }
 
-.profile-react-calendar .react-calendar__tile--active .calendar-event-dot {
+.calendar-event-dot--active {
   background-color: rgba(255, 255, 255, 0.85);
-}
-
-.profile-react-calendar .react-calendar__tile--active {
-  background: #1032A1 !important;
-  color: #fff !important;
-  border-radius: 8px;
-}
-
-.profile-react-calendar .react-calendar__tile--now {
-  background: #e8edf9;
-  border-radius: 8px;
 }
 
 .profile-react-calendar .react-calendar__navigation button {
