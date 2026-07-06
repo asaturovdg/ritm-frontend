@@ -26,7 +26,6 @@ export function useSwipeNavigation({ currentIndex, itemCount, onSwipe, enabled =
     {
       axis: 'x',
       filterTaps: true,
-      pointer: { touch: true },
     }
   );
 }
