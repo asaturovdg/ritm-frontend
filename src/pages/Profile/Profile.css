@@ -317,12 +317,19 @@
 .profile__tabs-content {
   position: relative;
   flex: 1;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
+/* Mirrors .page-wrapper: absolutely positioned regardless of enter/exit
+   state, so the container's box never depends on panel content — each
+   panel scrolls its own content instead of resizing the container. */
 .profile-subtab-panel {
+  position: absolute;
+  inset: 0;
   width: 100%;
   min-width: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 
