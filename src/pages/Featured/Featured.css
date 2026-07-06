@@ -34,6 +34,10 @@
   padding-left: 16px;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  /* Override the ancestor .app-content's touch-action:pan-y so a drag
+     starting on the carousel scrolls it natively instead of being
+     captured by the bottom-nav tab-swipe gesture. */
+  touch-action: pan-x;
 }
 
 .featured-carousel::after {
@@ -63,6 +67,8 @@
 }
 
 .featured-card__header {
+  width: 100%;
+  box-sizing: border-box;
   background: linear-gradient(135deg, #1032A1, #4F77F1);
   padding: 12px 14px;
 }
