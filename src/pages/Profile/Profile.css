@@ -20,8 +20,23 @@
    relying on that repaint at all, the highlight is its own DOM node
    (rendered via tileContent, keyed by date) that React mounts/unmounts
    as the selected day changes, instead of a class toggle on a fixed node. */
+.profile-react-calendar .react-calendar__tile,
+.profile-react-calendar .react-calendar__tile:enabled:hover,
+.profile-react-calendar .react-calendar__tile:enabled:focus,
 .profile-react-calendar .react-calendar__tile--active,
-.profile-react-calendar .react-calendar__tile--now {
+.profile-react-calendar .react-calendar__tile--active:enabled:hover,
+.profile-react-calendar .react-calendar__tile--active:enabled:focus,
+.profile-react-calendar .react-calendar__tile--now,
+.profile-react-calendar .react-calendar__tile--now:enabled:hover,
+.profile-react-calendar .react-calendar__tile--now:enabled:focus,
+.profile-react-calendar .react-calendar__tile--hasActive,
+.profile-react-calendar .react-calendar__tile--hasActive:enabled:hover,
+.profile-react-calendar .react-calendar__tile--hasActive:enabled:focus {
+  /* react-calendar's own stylesheet paints hover/focus backgrounds on the
+     tile button itself (e.g. a lighter blue on --active:focus). Since the
+     highlight is now a separate rounded overlay div (see above), the
+     button's own square corners could peek out from under it. The button
+     must never paint its own background — only the overlay div does. */
   background: transparent;
 }
 
