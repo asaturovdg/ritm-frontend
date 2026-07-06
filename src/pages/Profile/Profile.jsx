@@ -548,7 +548,7 @@ const copyInviteLink = () => {
   }
 
   return (
-    <div className="profile-container">
+    <div className="profile-container" {...bindSubtabSwipe()}>
       <div className="profileTabs">
         {tabs.map((tab) => (
           <button
@@ -564,7 +564,7 @@ const copyInviteLink = () => {
         ))}
       </div>
 
-      <div className="profile__tabs-content" {...bindSubtabSwipe()}>
+      <div className="profile__tabs-content">
          {showFilterSuccessModal && (
             <div className="filter-success-modal">
               <div className="filter-success-content">
