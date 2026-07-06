@@ -564,7 +564,7 @@ const copyInviteLink = () => {
         ))}
       </div>
 
-      <div className="profile__tabs-content">
+      <motion.div className="profile__tabs-content" layout transition={{ layout: { duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] } }}>
          {showFilterSuccessModal && (
             <div className="filter-success-modal">
               <div className="filter-success-content">
@@ -1030,7 +1030,7 @@ const copyInviteLink = () => {
         )}
           </motion.div>
         </AnimatePresence>
-      </div>
+      </motion.div>
     </div>
   );
 }
