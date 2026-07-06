@@ -15,12 +15,13 @@
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
   user-select: none;
-  /* iOS WKWebView (Max) sometimes fails to repaint a tile's background when
-     it loses --active/--now, leaving the old highlight visually stuck.
-     Forcing each tile onto its own compositing layer makes it repaint
-     correctly on every class change. */
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
+  /* react-calendar renders each tile as a native <button>. Safari/WKWebView
+     (iOS Max) keeps its own -webkit-appearance chrome underneath unless it's
+     explicitly reset, which can bleed through when --active/--now toggle
+     off, leaving the old highlight visually stuck on the tile. */
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: transparent;
 }
 
 .calendar-event-dot {
