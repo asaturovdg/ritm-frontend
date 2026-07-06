@@ -12,6 +12,9 @@
 .profile-react-calendar .react-calendar__tile {
   position: relative;
   padding-bottom: 20px;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .calendar-event-dot {
