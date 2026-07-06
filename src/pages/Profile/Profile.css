@@ -12,23 +12,6 @@
 .profile-react-calendar .react-calendar__tile {
   position: relative;
   padding-bottom: 20px;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-user-select: none;
-  user-select: none;
-  /* react-calendar renders each tile as a native <button>. Safari/WKWebView
-     (iOS Max) keeps its own -webkit-appearance chrome underneath unless it's
-     explicitly reset, which can bleed through when --active/--now toggle
-     off, leaving the old highlight visually stuck on the tile. */
-  -webkit-appearance: none;
-  appearance: none;
-  background-color: transparent;
-  /* On iOS WKWebView (Max), removing --active from a tile can leave a stale
-     fragment of its old background bleeding into the neighboring tile
-     (a WebKit dirty-rect/paint-invalidation bug). `contain: paint` forces
-     each tile to be its own isolated repaint region so a state change on
-     one tile can't visually leak into another. */
-  contain: paint;
-  isolation: isolate;
 }
 
 .calendar-event-dot {
