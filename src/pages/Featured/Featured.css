@@ -25,6 +25,76 @@
 }
 
 /* ── Carousel ── */
+.featured-carousel-wrap {
+  position: relative;
+}
+
+.featured-carousel__fade {
+  position: absolute;
+  top: 6px;
+  bottom: 12px;
+  right: 0;
+  width: 40px;
+  pointer-events: none;
+  /* A fade-to-background-color reads as invisible against the card's own
+     white body — this needs to work regardless of what's peeking behind it,
+     so it's a darkening vignette instead of a background-color match. */
+  background: linear-gradient(to right, rgba(16, 50, 161, 0), rgba(16, 50, 161, 0.16));
+  transition: opacity 0.2s ease;
+}
+
+.featured-carousel-wrap--end .featured-carousel__fade {
+  opacity: 0;
+}
+
+/* ── Swipe hint ── */
+.featured-swipe-hint {
+  position: absolute;
+  top: 50%;
+  left: 130px;
+  z-index: 2;
+  pointer-events: none;
+  animation: featured-swipe-hint-move 1.6s ease-in-out 2;
+}
+
+.featured-swipe-hint__badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(16, 50, 161, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes featured-swipe-hint-move {
+  0% {
+    opacity: 0;
+    transform: translate(0, -50%);
+  }
+  15% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 1;
+    transform: translate(-56px, -50%);
+  }
+  85% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-56px, -50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featured-swipe-hint {
+    display: none;
+  }
+}
+
 .featured-carousel {
   display: flex;
   gap: 12px;
