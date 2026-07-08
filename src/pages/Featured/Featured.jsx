@@ -16,19 +16,21 @@ const VARIANT_ICON_COLOR = {
 
 const getIconColor = (variant) => VARIANT_ICON_COLOR[variant] || VARIANT_ICON_COLOR.default;
 
-const SWIPE_HINT_STORAGE_KEY = 'featured_swipe_hint_seen';
+const SWIPE_HINT_STORAGE_KEY = 'featured_swipe_hint_last_shown_at';
+const SWIPE_HINT_REAPPEAR_MS = 7 * 24 * 60 * 60 * 1000; // раз в 14 дней, даже если уже свайпал
 
-const readHintSeen = () => {
+const shouldShowHint = () => {
   try {
-    return window.localStorage.getItem(SWIPE_HINT_STORAGE_KEY) === '1';
+    const lastShown = Number(window.localStorage.getItem(SWIPE_HINT_STORAGE_KEY));
+    return !lastShown || Date.now() - lastShown > SWIPE_HINT_REAPPEAR_MS;
   } catch {
     return false;
   }
 };
 
-const markHintSeen = () => {
+const recordHintShown = () => {
   try {
-    window.localStorage.setItem(SWIPE_HINT_STORAGE_KEY, '1');
+    window.localStorage.setItem(SWIPE_HINT_STORAGE_KEY, String(Date.now()));
   } catch {
     /* storage unavailable (e.g. restricted webview) — hint may reappear next visit */
   }
@@ -91,16 +93,16 @@ function FeaturedCarousel({ title, items, onCardClick, variant = 'default', show
   const dismissHint = () => {
     hintVisibleRef.current = false;
     setHintVisible(false);
-    markHintSeen();
   };
 
   useEffect(() => {
     if (!showHint) return;
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) return;
-    if (readHintSeen()) return;
+    if (!shouldShowHint()) return;
 
     hintVisibleRef.current = true;
     setHintVisible(true);
+    recordHintShown();
   }, [showHint]);
 
   useEffect(() => {
