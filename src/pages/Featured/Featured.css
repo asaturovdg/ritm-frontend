@@ -51,7 +51,10 @@
 .featured-swipe-hint {
   position: absolute;
   top: 50%;
-  right: 24px;
+  /* Clear of .featured-carousel__fade's 40px band — the badge used to
+     overlap it, so sliding away exposed the fade's hard rectangular edge
+     right where the hand had been sitting, looking like a stray square. */
+  right: 50px;
   z-index: 2;
   pointer-events: none;
   transform: translateY(-50%);
