@@ -55,6 +55,14 @@
   z-index: 2;
   pointer-events: none;
   transform: translateY(-50%);
+  /* The left-right motion animates `right` (a layout property), not
+     `transform` — see history of this block. Every previous attempt that
+     animated `transform` on this element (with or without a filled
+     background) showed a persistent square artifact on real devices;
+     animating a layout property instead avoids the continuous GPU-layer
+     promotion that `transform`/`opacity` animation triggers, which was the
+     one variable common to every failing version. */
+  animation: featured-swipe-hint-shift 1.6s ease-in-out 0.3s infinite;
 }
 
 .featured-swipe-hint__badge {
@@ -62,16 +70,11 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
-  /* No background box/circle/glow behind the icon on purpose (see history
-     of this block) — every filled shape tried here (box-shadow,
-     border-radius circle, SVG circle, drop-shadow glow) has real
-     rectangular bounding geometry, and on real devices something about
-     that geometry kept rendering as a visible square regardless of what
-     was drawn inside it. The bare icon has no fill/box for anything to
-     misrender. */
-  animation:
-    featured-swipe-hint-in 0.3s ease-out forwards,
-    featured-swipe-hint-move 1.6s ease-in-out 0.3s infinite;
+  /* Single soft glow for legibility against the card's own colors — kept
+     much lighter than the earlier triple drop-shadow, which was dense
+     enough to itself look like a filled circle. */
+  filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.85));
+  animation: featured-swipe-hint-in 0.3s ease-out forwards;
 }
 
 @keyframes featured-swipe-hint-in {
@@ -80,13 +83,13 @@
   }
 }
 
-@keyframes featured-swipe-hint-move {
+@keyframes featured-swipe-hint-shift {
   0%,
   100% {
-    transform: translateX(0);
+    right: 50px;
   }
   50% {
-    transform: translateX(-40px);
+    right: 90px;
   }
 }
 
