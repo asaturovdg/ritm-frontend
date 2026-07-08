@@ -70,10 +70,9 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
-  /* Single soft glow for legibility against the card's own colors — kept
-     much lighter than the earlier triple drop-shadow, which was dense
-     enough to itself look like a filled circle. */
-  filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.85));
+  /* No drop-shadow here either — even a single soft glow read as an
+     unwanted white background around the icon. Bare icon, no fill/box of
+     any kind. */
   animation: featured-swipe-hint-in 0.3s ease-out forwards;
 }
 
