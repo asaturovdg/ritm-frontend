@@ -66,16 +66,15 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
-  animation:
-    featured-swipe-hint-in 0.3s ease-out forwards,
-    featured-swipe-hint-move 1.6s ease-in-out 0.3s infinite;
+  /* No continuous transform animation here on purpose (see history of this
+     block) — animating translateX forced this element onto its own GPU
+     compositing layer, and that layer's texture edges rendered as a visible
+     square on real devices across web/Android/iOS, regardless of what shape
+     (box-shadow, border-radius, SVG circle) was drawn inside it. A one-shot
+     opacity fade doesn't need layer promotion, so it doesn't have the bug. */
+  animation: featured-swipe-hint-in 0.3s ease-out forwards;
 }
 
-/* The circle is drawn as an SVG shape rather than CSS border-radius: some
-   Android WebViews (Telegram/Max mini-app) fail to clip border-radius on a
-   transform-animated layer and render it as a square instead — an SVG
-   circle is rasterized as its own bitmap and isn't subject to that clipping
-   bug. */
 .featured-swipe-hint__badge-circle {
   position: absolute;
   top: 0;
@@ -89,16 +88,6 @@
 @keyframes featured-swipe-hint-in {
   to {
     opacity: 1;
-  }
-}
-
-@keyframes featured-swipe-hint-move {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(-40px);
   }
 }
 
