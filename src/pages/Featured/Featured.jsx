@@ -179,6 +179,9 @@ function FeaturedCarousel({ title, items, onCardClick, variant = 'default', show
         {hintVisible && (
           <div className="featured-swipe-hint" aria-hidden="true">
             <div className="featured-swipe-hint__badge">
+              <svg className="featured-swipe-hint__badge-circle" width="38" height="38" viewBox="0 0 38 38">
+                <circle cx="19" cy="19" r="18.25" fill="#fff" stroke="rgba(16, 50, 161, 0.18)" strokeWidth="1.5" />
+              </svg>
               <Hand size={18} color={getIconColor(variant)} strokeWidth={1.75} />
             </div>
           </div>
