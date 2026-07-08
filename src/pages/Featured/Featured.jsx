@@ -8,9 +8,16 @@ import './Featured.css';
 const formatDate = (d) => d ? d.split('-').reverse().join('.') : '';
 const formatTime = (t) => t ? t.substring(0, 5) : '';
 
-function FeaturedCard({ event, onClick }) {
+const VARIANT_ICON_COLOR = {
+  default: '#1032A1',
+  sber: '#0A8043',
+  foryou: '#8A3FFC',
+};
+
+function FeaturedCard({ event, onClick, variant = 'default' }) {
+  const iconColor = VARIANT_ICON_COLOR[variant] || VARIANT_ICON_COLOR.default;
   return (
-    <button className="featured-card" onClick={onClick}>
+    <button className={`featured-card featured-card--${variant}`} onClick={onClick}>
       <div className="featured-card__header">
         <div className="featured-card__type">
           {event.event_type?.join(', ')}
@@ -20,11 +27,11 @@ function FeaturedCard({ event, onClick }) {
       <div className="featured-card__body">
         {event.start_date && (
           <div className="featured-card__meta-row">
-            <Calendar size={12} color="#1032A1" strokeWidth={1.5} />
+            <Calendar size={12} color={iconColor} strokeWidth={1.5} />
             {formatDate(event.start_date)}
             {event.start_time && (
               <>
-                <Clock size={12} color="#1032A1" strokeWidth={1.5} />
+                <Clock size={12} color={iconColor} strokeWidth={1.5} />
                 {formatTime(event.start_time)}
               </>
             )}
@@ -32,13 +39,13 @@ function FeaturedCard({ event, onClick }) {
         )}
         {event.city?.length > 0 && (
           <div className="featured-card__meta-row">
-            <MapPin size={12} color="#1032A1" strokeWidth={1.5} />
+            <MapPin size={12} color={iconColor} strokeWidth={1.5} />
             {event.city.join(', ')}
           </div>
         )}
         {typeof event.price === 'number' && (
           <div className="featured-card__meta-row">
-            <RussianRuble size={12} color="#1032A1" strokeWidth={1.5} />
+            <RussianRuble size={12} color={iconColor} strokeWidth={1.5} />
             {event.price === 0 ? 'Бесплатно' : event.price}
           </div>
         )}
@@ -54,7 +61,7 @@ function FeaturedCard({ event, onClick }) {
   );
 }
 
-function FeaturedCarousel({ title, items, onCardClick }) {
+function FeaturedCarousel({ title, items, onCardClick, variant = 'default' }) {
   const carouselRef = useRef(null);
   const rafRef = useRef(null);
   const scrollEndTimerRef = useRef(null);
@@ -110,7 +117,7 @@ function FeaturedCarousel({ title, items, onCardClick }) {
       </div>
       <div className="featured-carousel" ref={carouselRef}>
         {items.map(event => (
-          <FeaturedCard key={event.id} event={event} onClick={() => onCardClick(event.id)} />
+          <FeaturedCard key={event.id} event={event} onClick={() => onCardClick(event.id)} variant={variant} />
         ))}
       </div>
     </div>
@@ -203,6 +210,7 @@ export default function Featured() {
           title="Что-то для тебя"
           items={data?.for_you?.items}
           onCardClick={handleCardClick}
+          variant="foryou"
         />
       )}
       <FeaturedCarousel
@@ -214,6 +222,7 @@ export default function Featured() {
         title="Открывая Сбер"
         items={data?.sber?.items}
         onCardClick={handleCardClick}
+        variant="sber"
       />
     </div>
   );
