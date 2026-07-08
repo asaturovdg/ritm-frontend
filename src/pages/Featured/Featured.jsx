@@ -17,7 +17,7 @@ const VARIANT_ICON_COLOR = {
 const getIconColor = (variant) => VARIANT_ICON_COLOR[variant] || VARIANT_ICON_COLOR.default;
 
 const SWIPE_HINT_STORAGE_KEY = 'featured_swipe_hint_last_shown_at';
-const SWIPE_HINT_REAPPEAR_MS = 7 * 24 * 60 * 60 * 1000; // раз в 14 дней, даже если уже свайпал
+const SWIPE_HINT_REAPPEAR_MS = 7 * 24 * 60 * 60 * 1000; // раз в 7 дней, даже если уже свайпал
 
 const shouldShowHint = () => {
   try {
