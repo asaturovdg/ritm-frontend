@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Placeholder } from '@telegram-apps/telegram-ui';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, MapPin, RussianRuble } from 'lucide-react';
+import { Calendar, Clock, MapPin, RussianRuble, Hand } from 'lucide-react';
 import { useAuth } from '../../components/AuthContext.jsx';
 import './Featured.css';
 
@@ -14,8 +14,29 @@ const VARIANT_ICON_COLOR = {
   foryou: '#8A3FFC',
 };
 
+const getIconColor = (variant) => VARIANT_ICON_COLOR[variant] || VARIANT_ICON_COLOR.default;
+
+const SWIPE_HINT_STORAGE_KEY = 'featured_swipe_hint_seen';
+const SWIPE_HINT_DURATION_MS = 3300;
+
+const readHintSeen = () => {
+  try {
+    return window.localStorage.getItem(SWIPE_HINT_STORAGE_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
+const markHintSeen = () => {
+  try {
+    window.localStorage.setItem(SWIPE_HINT_STORAGE_KEY, '1');
+  } catch {
+    /* storage unavailable (e.g. restricted webview) — hint may reappear next visit */
+  }
+};
+
 function FeaturedCard({ event, onClick, variant = 'default' }) {
-  const iconColor = VARIANT_ICON_COLOR[variant] || VARIANT_ICON_COLOR.default;
+  const iconColor = getIconColor(variant);
   return (
     <button className={`featured-card featured-card--${variant}`} onClick={onClick}>
       <div className="featured-card__header">
@@ -61,14 +82,50 @@ function FeaturedCard({ event, onClick, variant = 'default' }) {
   );
 }
 
-function FeaturedCarousel({ title, items, onCardClick, variant = 'default' }) {
+function FeaturedCarousel({ title, items, onCardClick, variant = 'default', showHint = false }) {
   const carouselRef = useRef(null);
   const rafRef = useRef(null);
   const scrollEndTimerRef = useRef(null);
+  const hintVisibleRef = useRef(false);
+  const [hintVisible, setHintVisible] = useState(false);
+
+  const dismissHint = () => {
+    hintVisibleRef.current = false;
+    setHintVisible(false);
+    markHintSeen();
+  };
+
+  useEffect(() => {
+    if (!showHint) return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) return;
+    if (readHintSeen()) return;
+
+    hintVisibleRef.current = true;
+    setHintVisible(true);
+    const timer = setTimeout(() => {
+      hintVisibleRef.current = false;
+      setHintVisible(false);
+      // Only burn the one-time "seen" flag if the tab was actually visible —
+      // a backgrounded tab shouldn't silently use up the only chance to show this.
+      if (document.visibilityState === 'visible') markHintSeen();
+    }, SWIPE_HINT_DURATION_MS);
+    return () => clearTimeout(timer);
+  }, [showHint]);
+
+  useEffect(() => {
+    hintVisibleRef.current = hintVisible;
+  }, [hintVisible]);
 
   useEffect(() => {
     const el = carouselRef.current;
     if (!el) return;
+
+    const wrapEl = el.parentElement;
+
+    const updateEdgeFade = () => {
+      const atEnd = el.scrollWidth - el.clientWidth - el.scrollLeft < 4;
+      wrapEl?.classList.toggle('featured-carousel-wrap--end', atEnd);
+    };
 
     const applyScale = (withTransition) => {
       const cards = el.querySelectorAll('.featured-card');
@@ -87,11 +144,15 @@ function FeaturedCarousel({ title, items, onCardClick, variant = 'default' }) {
         card.style.transform = `scale(${scale})`;
         card.style.opacity = opacity;
       });
+
+      updateEdgeFade();
     };
 
     applyScale(false);
 
     const onScroll = () => {
+      if (hintVisibleRef.current) dismissHint();
+
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(() => applyScale(false));
 
@@ -115,10 +176,20 @@ function FeaturedCarousel({ title, items, onCardClick, variant = 'default' }) {
         <span className="featured-section__title">{title}</span>
         <span className="featured-section__count">{items.length} событий</span>
       </div>
-      <div className="featured-carousel" ref={carouselRef}>
-        {items.map(event => (
-          <FeaturedCard key={event.id} event={event} onClick={() => onCardClick(event.id)} variant={variant} />
-        ))}
+      <div className="featured-carousel-wrap">
+        <div className="featured-carousel" ref={carouselRef}>
+          {items.map(event => (
+            <FeaturedCard key={event.id} event={event} onClick={() => onCardClick(event.id)} variant={variant} />
+          ))}
+        </div>
+        <div className="featured-carousel__fade" aria-hidden="true" />
+        {hintVisible && (
+          <div className="featured-swipe-hint" aria-hidden="true">
+            <div className="featured-swipe-hint__badge">
+              <Hand size={18} color={getIconColor(variant)} strokeWidth={1.75} />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -189,6 +260,13 @@ export default function Featured() {
     );
   }
 
+  let hintAssigned = false;
+  const claimHint = (items) => {
+    if (hintAssigned || !items || items.length === 0) return false;
+    hintAssigned = true;
+    return true;
+  };
+
   return (
     <div className="featured">
       {data?.for_you === null ? (
@@ -211,18 +289,21 @@ export default function Featured() {
           items={data?.for_you?.items}
           onCardClick={handleCardClick}
           variant="foryou"
+          showHint={claimHint(data?.for_you?.items)}
         />
       )}
       <FeaturedCarousel
         title="Главное за месяц"
         items={data?.top_month?.items}
         onCardClick={handleCardClick}
+        showHint={claimHint(data?.top_month?.items)}
       />
       <FeaturedCarousel
         title="Открывая Сбер"
         items={data?.sber?.items}
         onCardClick={handleCardClick}
         variant="sber"
+        showHint={claimHint(data?.sber?.items)}
       />
     </div>
   );
