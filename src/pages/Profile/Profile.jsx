@@ -27,7 +27,7 @@ export function Profile() {
   const { connectCalendar, waitForCalendarConnection } = useCalendar();
   const { openLink } = usePlatform();
   const { filters, setFilters, saveFilters, flushPendingSave, isSaving } = useUserFilters();
-  const { savedEvents, loading: savedLoading } = useSavedEvents();
+  const { savedEvents, loading: savedLoading, unsaveEvent } = useSavedEvents();
   const { skipPrompt, setSkipPrompt, isPending: isCalendarPromptPending } = useCalendarPromptPreference();
   const hasCalendar = hasFeature(CALENDAR_ALLOWLIST, userId);
   const navigate = useNavigate();
@@ -896,6 +896,14 @@ const copyInviteLink = () => {
                     ) : (
                       eventsForDay.map((event) => (
                         <div key={event.id} className="profile-event-card">
+                          <button
+                            type="button"
+                            className="profile-event-card__remove"
+                            aria-label="Удалить из календаря"
+                            onClick={() => unsaveEvent(event.id)}
+                          >
+                            ×
+                          </button>
                           <div className="digest__header">
                             <p className="digest__type">{event.event_type?.join(', ')}</p>
                             <h3 className="digest__title">{event.title}</h3>
