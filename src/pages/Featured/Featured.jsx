@@ -17,7 +17,6 @@ const VARIANT_ICON_COLOR = {
 const getIconColor = (variant) => VARIANT_ICON_COLOR[variant] || VARIANT_ICON_COLOR.default;
 
 const SWIPE_HINT_STORAGE_KEY = 'featured_swipe_hint_seen';
-const SWIPE_HINT_DURATION_MS = 3300;
 
 const readHintSeen = () => {
   try {
@@ -102,14 +101,6 @@ function FeaturedCarousel({ title, items, onCardClick, variant = 'default', show
 
     hintVisibleRef.current = true;
     setHintVisible(true);
-    const timer = setTimeout(() => {
-      hintVisibleRef.current = false;
-      setHintVisible(false);
-      // Only burn the one-time "seen" flag if the tab was actually visible —
-      // a backgrounded tab shouldn't silently use up the only chance to show this.
-      if (document.visibilityState === 'visible') markHintSeen();
-    }, SWIPE_HINT_DURATION_MS);
-    return () => clearTimeout(timer);
   }, [showHint]);
 
   useEffect(() => {
