@@ -62,20 +62,31 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
-  /* No background box/circle behind the icon on purpose (see history of
-     this block) — every filled shape tried here (box-shadow, border-radius
-     circle, SVG circle) has real rectangular bounding geometry, and on real
-     devices something about that geometry kept rendering as a visible
-     square regardless of what was drawn inside it, even fully static.
-     A drop-shadow filter follows the icon's own alpha silhouette instead of
-     a box, so there's no rectangular geometry left to misrender. */
-  filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 3px #fff) drop-shadow(0 0 3px #fff);
-  animation: featured-swipe-hint-in 0.3s ease-out forwards;
+  /* No background box/circle/glow behind the icon on purpose (see history
+     of this block) — every filled shape tried here (box-shadow,
+     border-radius circle, SVG circle, drop-shadow glow) has real
+     rectangular bounding geometry, and on real devices something about
+     that geometry kept rendering as a visible square regardless of what
+     was drawn inside it. The bare icon has no fill/box for anything to
+     misrender. */
+  animation:
+    featured-swipe-hint-in 0.3s ease-out forwards,
+    featured-swipe-hint-move 1.6s ease-in-out 0.3s infinite;
 }
 
 @keyframes featured-swipe-hint-in {
   to {
     opacity: 1;
+  }
+}
+
+@keyframes featured-swipe-hint-move {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-40px);
   }
 }
 
