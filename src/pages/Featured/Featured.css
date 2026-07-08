@@ -70,6 +70,11 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
+  /* Without its own compositing layer, some Android WebViews leave a stale
+     rectangular repaint trail from the box-shadow's bounding box on every
+     animation frame instead of clearing it — force layer promotion. */
+  will-change: transform;
+  backface-visibility: hidden;
   animation:
     featured-swipe-hint-in 0.3s ease-out forwards,
     featured-swipe-hint-move 1.6s ease-in-out 0.3s infinite;
