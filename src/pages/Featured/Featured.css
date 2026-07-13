@@ -50,11 +50,15 @@
 /* ── Swipe hint ── */
 .featured-swipe-hint {
   position: absolute;
-  top: 50%;
+  /* Fixed offset into the card header (not 50%/vertical-center) — centering
+     on the whole card put the bare icon right on top of the meta-row icons
+     (calendar/pin/ruble), and the two overlapping strokes read as a single
+     solid/opaque glyph. The header is plain gradient + text, so a fixed
+     top lands the badge somewhere with nothing behind it to collide with. */
+  top: 34px;
   right: 50px;
   z-index: 2;
   pointer-events: none;
-  transform: translateY(-50%);
   /* The left-right motion animates `right` (a layout property), not
      `transform` — see history of this block. Every previous attempt that
      animated `transform` on this element (with or without a filled
@@ -66,14 +70,33 @@
 }
 
 .featured-swipe-hint__badge {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  /* No drop-shadow here either — even a single soft glow read as an
-     unwanted white background around the icon. Bare icon, no fill/box of
-     any kind. */
   animation: featured-swipe-hint-in 0.3s ease-out forwards;
+  /* The opacity animation still promotes this element to its own compositor
+     layer, and some Android/iOS mini-app WebViews rasterize a promoted
+     layer onto an opaque (usually white) backing instead of a transparent
+     one — the badge container itself stays transparent so only the SVG
+     circle below paints a background. */
+  background: transparent;
+}
+
+.featured-swipe-hint__badge-circle {
+  position: absolute;
+  /* The badge only sizes itself to the 22px icon (the absolutely
+     positioned circle doesn't contribute to that layout), so top/left: 0
+     anchored the 34px circle to the badge's corner instead of its center.
+     Centering explicitly on the badge's own center point instead. */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* Positioned elements paint after in-flow siblings by default, which
+     would put the circle on top of the (non-positioned) Hand icon —
+     negative z-index moves it behind. */
+  z-index: -1;
 }
 
 @keyframes featured-swipe-hint-in {

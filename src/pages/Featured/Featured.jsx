@@ -179,7 +179,16 @@ function FeaturedCarousel({ title, items, onCardClick, variant = 'default', show
         {hintVisible && (
           <div className="featured-swipe-hint" aria-hidden="true">
             <div className="featured-swipe-hint__badge">
-              <Hand size={22} color={getIconColor(variant)} strokeWidth={2} />
+              {/* Circle drawn as its own SVG shape rather than a CSS
+                  border-radius background — see project history: on some
+                  Android WebViews (Telegram/Max mini-app) border-radius on
+                  an animated layer fails to clip and renders as a square.
+                  An SVG circle rasterizes as its own bitmap and isn't
+                  subject to that bug. */}
+              <svg className="featured-swipe-hint__badge-circle" width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
+                <circle cx="17" cy="17" r="16.25" fill="#fff" stroke={getIconColor(variant)} strokeOpacity="0.18" strokeWidth="1.5" />
+              </svg>
+              <Hand size={22} color={getIconColor(variant)} fill="#fff" strokeWidth={2} />
             </div>
           </div>
         )}
