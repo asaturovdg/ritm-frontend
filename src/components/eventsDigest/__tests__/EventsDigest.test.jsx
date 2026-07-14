@@ -158,3 +158,51 @@ describe('EventsDigest — filter behaviour', () => {
     expect(mockSetFilters).not.toHaveBeenCalled();
   });
 });
+
+describe('EventsDigest — sort by importance toggle', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    sessionStorage.clear();
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ items: [], total: 0 }),
+    });
+  });
+
+  const lastFetchedUrl = () => new URL(global.fetch.mock.calls.at(-1)[0]);
+
+  it('defaults to sort=date and switch is off', async () => {
+    renderDigest();
+
+    await screen.findByText('Сначала важные');
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'false');
+    expect(lastFetchedUrl().searchParams.get('sort')).toBe('date');
+  });
+
+  it('switches to sort=importance and resets page to 1 on toggle', async () => {
+    renderDigest();
+    await screen.findByText('Сначала важные');
+
+    fireEvent.click(screen.getByRole('switch'));
+
+    await vi.waitFor(() => expect(lastFetchedUrl().searchParams.get('sort')).toBe('importance'));
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true');
+    expect(lastFetchedUrl().searchParams.get('offset')).toBe('0');
+    expect(sessionStorage.getItem('events_sort_importance')).toBe('true');
+  });
+
+  it('restores sort=date after toggling importance off again', async () => {
+    renderDigest();
+    await screen.findByText('Сначала важные');
+
+    const toggle = screen.getByRole('switch');
+    fireEvent.click(toggle);
+    await vi.waitFor(() => expect(lastFetchedUrl().searchParams.get('sort')).toBe('importance'));
+
+    fireEvent.click(toggle);
+    await vi.waitFor(() => expect(lastFetchedUrl().searchParams.get('sort')).toBe('date'));
+
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+  });
+});
