@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { WhatsNewProvider, useWhatsNew } from '../WhatsNewContext.jsx';
+import changelog from '../../../data/changelog.json';
 
 function Consumer() {
   const { visible, dismiss } = useWhatsNew();
@@ -13,6 +14,7 @@ function Consumer() {
 }
 
 const STORAGE_KEY = 'whats_new_seen';
+const LATEST_VERSION = changelog.releases[0].version;
 
 describe('WhatsNewContext', () => {
   let store = {};
@@ -33,7 +35,7 @@ describe('WhatsNewContext', () => {
   });
 
   it('hides popup when saved version matches current version', () => {
-    store[STORAGE_KEY] = '2026-06-22';
+    store[STORAGE_KEY] = LATEST_VERSION;
     render(<WhatsNewProvider><Consumer /></WhatsNewProvider>);
     expect(screen.getByTestId('visible').textContent).toBe('false');
   });
@@ -48,6 +50,6 @@ describe('WhatsNewContext', () => {
     render(<WhatsNewProvider><Consumer /></WhatsNewProvider>);
     fireEvent.click(screen.getByRole('button', { name: 'dismiss' }));
     expect(screen.getByTestId('visible').textContent).toBe('false');
-    expect(store[STORAGE_KEY]).toBe('2026-06-22');
+    expect(store[STORAGE_KEY]).toBe(LATEST_VERSION);
   });
 });

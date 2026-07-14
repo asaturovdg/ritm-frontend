@@ -9,7 +9,7 @@ import TelegramLoginWidget from '../TelegramLoginWidget/TelegramLoginWidget.jsx'
 import BookmarkButton from '../BookmarkButton/BookmarkButton.jsx';
 import { CALENDAR_ALLOWLIST, hasFeature } from '../../data/featureFlags.js';
 
-import { Calendar, Clock, RussianRuble, MapPin, Users, Globe, ChevronLeft, ChevronRight, ChevronsLeft } from "lucide-react";
+import { Calendar, Clock, RussianRuble, MapPin, Users, Globe, ChevronLeft, ChevronRight, ChevronsLeft, Star } from "lucide-react";
 
 
 const ITEMS_PER_PAGE = 20;
@@ -88,7 +88,11 @@ export default function EventsDigest() {
     if (location.state?.searchQuery !== undefined) return location.state.searchQuery;
     return sessionStorage.getItem('events_search_query') || '';
   });
-  
+
+  const [sortByImportance, setSortByImportance] = useState(() => {
+    return sessionStorage.getItem('events_sort_importance') === 'true';
+  });
+
   const [weekRange, setWeekRange] = useState({ start: '', end: '' });
   const [events, setEvents] = useState([]);
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
@@ -113,7 +117,8 @@ export default function EventsDigest() {
     sessionStorage.setItem('events_week_offset', currentWeekOffset);
     sessionStorage.setItem('events_page', currentPage);
     sessionStorage.setItem('events_search_query', searchQuery);
-  }, [currentWeekOffset, currentPage, searchQuery]);
+    sessionStorage.setItem('events_sort_importance', sortByImportance);
+  }, [currentWeekOffset, currentPage, searchQuery, sortByImportance]);
 
   const handleInvalidToken = useCallback(() => {
     localStorage.removeItem('access_token');
@@ -146,6 +151,7 @@ export default function EventsDigest() {
       url.searchParams.append('date_to', endISO);
       url.searchParams.append('limit', ITEMS_PER_PAGE);
       url.searchParams.append('offset', page * ITEMS_PER_PAGE);
+      url.searchParams.append('sort', sortByImportance ? 'importance' : 'date');
 
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
       const res = await fetch(url.toString(), { headers });
@@ -167,7 +173,7 @@ export default function EventsDigest() {
     } finally {
       setIsLoadingEvents(false);
     }
-  }, [filters, token, hasFilters, isAuthReady, handleInvalidToken, currentPage, currentWeekOffset]);
+  }, [filters, token, hasFilters, isAuthReady, handleInvalidToken, currentPage, currentWeekOffset, sortByImportance]);
 
   const fetchAndSetEventsByIds = useCallback(async (ids, page, searchId) => {
     if (!ids || ids.length === 0 || !token) {
@@ -217,6 +223,11 @@ export default function EventsDigest() {
 
   const goToFirstWeek = () => {
     setCurrentWeekOffset(0);
+    setCurrentPage(0);
+  };
+
+  const toggleSortByImportance = () => {
+    setSortByImportance(prev => !prev);
     setCurrentPage(0);
   };
 
@@ -420,6 +431,26 @@ export default function EventsDigest() {
           />
         </div>
       </div>
+
+      {hasFilters && !isSearchMode && (
+        <label className="sort-importance-row">
+          <span className="sort-importance-row__label">
+            <Star size={14} />
+            Сначала важные
+          </span>
+          <span
+            className={`sort-importance-switch${sortByImportance ? ' is-on' : ''}`}
+            role="switch"
+            aria-checked={sortByImportance}
+          >
+            <input
+              type="checkbox"
+              checked={sortByImportance}
+              onChange={toggleSortByImportance}
+            />
+          </span>
+        </label>
+      )}
 
       {(hasFilters || isSearchMode) && !isLoadingEvents && (
         <div className="week-nav-section">
