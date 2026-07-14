@@ -4,10 +4,11 @@ import { WhatsNewProvider, useWhatsNew } from '../WhatsNewContext.jsx';
 import changelog from '../../../data/changelog.json';
 
 function Consumer() {
-  const { visible, dismiss } = useWhatsNew();
+  const { visible, dismiss, releases } = useWhatsNew();
   return (
     <div>
       <span data-testid="visible">{String(visible)}</span>
+      <span data-testid="releases">{JSON.stringify(releases.map((r) => r.version))}</span>
       <button onClick={dismiss}>dismiss</button>
     </div>
   );
@@ -51,5 +52,33 @@ describe('WhatsNewContext', () => {
     fireEvent.click(screen.getByRole('button', { name: 'dismiss' }));
     expect(screen.getByTestId('visible').textContent).toBe('false');
     expect(store[STORAGE_KEY]).toBe(LATEST_VERSION);
+  });
+
+  it('shows only the latest release when no saved version exists (first visit)', () => {
+    render(<WhatsNewProvider><Consumer /></WhatsNewProvider>);
+    expect(screen.getByTestId('releases').textContent).toBe(JSON.stringify([LATEST_VERSION]));
+  });
+
+  it('shows only the latest release when saved version is not found in changelog', () => {
+    store[STORAGE_KEY] = '1999-01-01';
+    render(<WhatsNewProvider><Consumer /></WhatsNewProvider>);
+    expect(screen.getByTestId('releases').textContent).toBe(JSON.stringify([LATEST_VERSION]));
+  });
+
+  it('shows all missed releases with non-empty items, newest first', () => {
+    store[STORAGE_KEY] = '2020-01-01';
+    render(<WhatsNewProvider><Consumer /></WhatsNewProvider>);
+    const shown = JSON.parse(screen.getByTestId('releases').textContent);
+    const expected = changelog.releases
+      .filter((r) => r.items.length > 0)
+      .slice(0, 5)
+      .map((r) => r.version);
+    expect(shown).toEqual(expected);
+  });
+
+  it('hides popup when saved version is the latest even if it is index 0', () => {
+    store[STORAGE_KEY] = changelog.releases[0].version;
+    render(<WhatsNewProvider><Consumer /></WhatsNewProvider>);
+    expect(screen.getByTestId('visible').textContent).toBe('false');
   });
 });
