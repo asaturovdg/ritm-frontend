@@ -15,6 +15,7 @@ import { Calendar, Clock, RussianRuble, MapPin, Users } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useSwipeNavigation } from "../../hooks/useSwipeNavigation.js";
 import { useAppTabs } from "../../hooks/useAppTabs.js";
+import { ProfileUserBadge } from "./ProfileUserBadge.jsx";
 
 import dateIcon from "../../assets/icons/DateRange.svg";
 import timeIcon from "../../assets/icons/time.svg";
@@ -549,6 +550,10 @@ const copyInviteLink = () => {
 
   return (
     <div className="profile-container" {...bindSubtabSwipe()}>
+      <div className="profile-header">
+        <h1 className="profile-header__title">Профиль</h1>
+        <ProfileUserBadge userData={userData} />
+      </div>
       <div className="profileTabs">
         {tabs.map((tab) => (
           <button
