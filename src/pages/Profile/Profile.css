@@ -1082,6 +1082,57 @@
   margin-bottom: 16px;
 }
 
+.profile-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.profile-user-badge__name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-user-badge__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8ecf8;
+}
+
+.profile-user-badge__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-user-badge__initials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1032A1 0%, #1a47c9 100%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.profile-user-badge__generic-icon {
+  color: #8892b0;
+}
+
 .profile__digest-settings-section {
   margin-top: 24px;
   padding-top: 20px;
