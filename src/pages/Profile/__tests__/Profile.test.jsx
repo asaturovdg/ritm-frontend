@@ -26,7 +26,15 @@ vi.mock('../../../components/useUserFilters.jsx', () => ({
 
 vi.mock('../../../components/AuthContext.jsx', () => {
   // Stable object reference — prevents useEffect([userData]) from looping on every render
-  const userData = { id: '42', digest_period: 'daily', digest_day_of_week: null };
+  const userData = {
+    id: '42',
+    digest_period: 'daily',
+    digest_day_of_week: null,
+    first_name: 'Иван',
+    last_name: 'Иванов',
+    photo_url: null,
+    username: 'ivan_petrov',
+  };
   return {
     useAuth: () => ({ token: 'test-token', userData, isCheckingAuth: false }),
   };
@@ -82,5 +90,18 @@ describe('Profile — "Сбросить всё" button', () => {
       participationTypes: [],
     });
     expect(mockSetFilters).not.toHaveBeenCalled();
+  });
+});
+
+describe('Profile — user identification header', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('shows the page title and the user name from userData', () => {
+    renderProfile();
+
+    expect(screen.getByText('Профиль')).toBeInTheDocument();
+    expect(screen.getByText('Иван Иванов')).toBeInTheDocument();
   });
 });
