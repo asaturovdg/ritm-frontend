@@ -229,14 +229,14 @@ export default function Featured() {
       .finally(() => setLoading(false));
   }, [isAuthReady, token, setShowInputCode]);
 
-  const handleCardClick = (id) => {
+  const handleCardClick = (id, block) => {
     fetch(`https://ritmevents.ru/api/v1/events/${id}/view`, {
       method: 'POST',
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ source: 'featured' }),
+      body: JSON.stringify({ source: 'featured', ...(block ? { block } : {}) }),
     });
     navigate(`/events/${id}`);
   };
@@ -289,7 +289,7 @@ export default function Featured() {
         <FeaturedCarousel
           title="Что-то для тебя"
           items={data?.for_you?.items}
-          onCardClick={handleCardClick}
+          onCardClick={(id) => handleCardClick(id, 'for_you')}
           variant="foryou"
           showHint={claimHint(data?.for_you?.items)}
         />
@@ -297,13 +297,13 @@ export default function Featured() {
       <FeaturedCarousel
         title="Главное за месяц"
         items={data?.top_month?.items}
-        onCardClick={handleCardClick}
+        onCardClick={(id) => handleCardClick(id, 'top_month')}
         showHint={claimHint(data?.top_month?.items)}
       />
       <FeaturedCarousel
         title="Открывая Сбер"
         items={data?.sber?.items}
-        onCardClick={handleCardClick}
+        onCardClick={(id) => handleCardClick(id, 'sber')}
         variant="sber"
         showHint={claimHint(data?.sber?.items)}
       />
