@@ -167,11 +167,7 @@ const applyFilters = async () => {
   useEffect(() => {
     if (!userData) return;
     setDigestPeriod(userData.digest_period ?? 'daily');
-    setDigestDay(
-      userData.digest_period === 'monthly'
-        ? userData.digest_day_of_month ?? null
-        : userData.digest_day_of_week ?? null
-    );
+    setDigestDay(userData.digest_day_of_week ?? null);
     fetchAllExtraData(userData.id);
   }, [userData]);
 
@@ -184,7 +180,7 @@ const applyFilters = async () => {
 
 
   const saveDigestPeriod = async (period, day) => {
-    if ((period === 'weekly' || period === 'monthly') && day === null) {
+    if (period === 'weekly' && day === null) {
       setWeeklyDayError(true);
       return;
     }
@@ -196,11 +192,7 @@ const applyFilters = async () => {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(
-          period === 'monthly'
-            ? { period, day_of_month: day }
-            : { period, day_of_week: day }
-        )
+        body: JSON.stringify({ period, day_of_week: day })
       });
       setShowPeriodSuccessModal(true);
       setTimeout(() => setShowPeriodSuccessModal(false), 1500);
@@ -742,7 +734,7 @@ const copyInviteLink = () => {
                     className={`profile_chip ${digestPeriod === value ? 'profile_chip-active' : ''}`}
                     onClick={() => {
                       setDigestPeriod(value);
-                      if (value !== 'weekly' && value !== 'monthly') {
+                      if (value !== 'weekly') {
                         setDigestDay(null);
                         setWeeklyDayError(false);
                         saveDigestPeriod(value, null);
@@ -774,30 +766,6 @@ const copyInviteLink = () => {
                   </div>
                   {weeklyDayError && (
                     <p className="digest-day-picker__error">Выберите день недели</p>
-                  )}
-                </div>
-              )}
-
-              {digestPeriod === 'monthly' && (
-                <div className="digest-day-picker">
-                  <p className="digest-day-picker__label">День месяца</p>
-                  <div className="digest-monthdays">
-                    {Array.from({ length: 31 }, (_, i) => i + 1).map((dayOfMonth) => (
-                      <button
-                        key={dayOfMonth}
-                        className={`digest-monthday ${digestDay === dayOfMonth ? 'digest-monthday-active' : ''}`}
-                        onClick={() => {
-                          setDigestDay(dayOfMonth);
-                          setWeeklyDayError(false);
-                          saveDigestPeriod('monthly', dayOfMonth);
-                        }}
-                      >
-                        {dayOfMonth}
-                      </button>
-                    ))}
-                  </div>
-                  {weeklyDayError && (
-                    <p className="digest-day-picker__error">Выберите день месяца</p>
                   )}
                 </div>
               )}

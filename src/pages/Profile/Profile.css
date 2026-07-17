@@ -494,32 +494,6 @@
   flex-wrap: wrap;
 }
 
-.digest-monthdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-}
-
-.digest-monthday {
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 13px;
-  color: #000;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.digest-monthday.digest-monthday-active {
-  background: linear-gradient(135deg, #56ff71 0%, #adffc6 100%);
-  border-color: transparent;
-  font-weight: 600;
-}
-
 .profile_chip--custom {
   display: inline-flex;
   align-items: center;
