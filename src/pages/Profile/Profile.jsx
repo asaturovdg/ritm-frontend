@@ -167,7 +167,11 @@ const applyFilters = async () => {
   useEffect(() => {
     if (!userData) return;
     setDigestPeriod(userData.digest_period ?? 'daily');
-    setDigestDay(userData.digest_day_of_week ?? null);
+    setDigestDay(
+      userData.digest_period === 'monthly'
+        ? userData.digest_day_of_month ?? null
+        : userData.digest_day_of_week ?? null
+    );
     fetchAllExtraData(userData.id);
   }, [userData]);
 
@@ -180,7 +184,7 @@ const applyFilters = async () => {
 
 
   const saveDigestPeriod = async (period, day) => {
-    if (period === 'weekly' && day === null) {
+    if ((period === 'weekly' || period === 'monthly') && day === null) {
       setWeeklyDayError(true);
       return;
     }
@@ -192,7 +196,11 @@ const applyFilters = async () => {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ period, day_of_week: day })
+        body: JSON.stringify(
+          period === 'monthly'
+            ? { period, day_of_month: day }
+            : { period, day_of_week: day }
+        )
       });
       setShowPeriodSuccessModal(true);
       setTimeout(() => setShowPeriodSuccessModal(false), 1500);
@@ -726,13 +734,15 @@ const copyInviteLink = () => {
                   { value: 'daily', label: 'Каждый день' },
                   { value: 'every_2_days', label: 'Раз в 2 дня' },
                   { value: 'weekly', label: 'Раз в неделю' },
+                  { value: 'monthly', label: 'Раз в месяц' },
+                  { value: 'never', label: 'Никогда' },
                 ].map(({ value, label }) => (
                   <button
                     key={value}
                     className={`profile_chip ${digestPeriod === value ? 'profile_chip-active' : ''}`}
                     onClick={() => {
                       setDigestPeriod(value);
-                      if (value !== 'weekly') {
+                      if (value !== 'weekly' && value !== 'monthly') {
                         setDigestDay(null);
                         setWeeklyDayError(false);
                         saveDigestPeriod(value, null);
@@ -762,6 +772,29 @@ const copyInviteLink = () => {
                   {weeklyDayError && (
                     <p style={{ color: '#e74c3c', fontSize: '0.8rem', marginTop: '0.25rem' }}>
                       Выберите день недели
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {digestPeriod === 'monthly' && (
+                <div className="profile_chips-container" style={{ marginTop: '0.5rem' }}>
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map((dayOfMonth) => (
+                    <button
+                      key={dayOfMonth}
+                      className={`profile_chip ${digestDay === dayOfMonth ? 'profile_chip-active' : ''}`}
+                      onClick={() => {
+                        setDigestDay(dayOfMonth);
+                        setWeeklyDayError(false);
+                        saveDigestPeriod('monthly', dayOfMonth);
+                      }}
+                    >
+                      {dayOfMonth}
+                    </button>
+                  ))}
+                  {weeklyDayError && (
+                    <p style={{ color: '#e74c3c', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+                      Выберите день месяца
                     </p>
                   )}
                 </div>
