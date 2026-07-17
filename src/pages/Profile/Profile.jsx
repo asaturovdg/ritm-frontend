@@ -755,47 +755,49 @@ const copyInviteLink = () => {
               </div>
 
               {digestPeriod === 'weekly' && (
-                <div className="profile_chips-container" style={{ marginTop: '0.5rem' }}>
-                  {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((dayLabel, idx) => (
-                    <button
-                      key={idx}
-                      className={`profile_chip ${digestDay === idx ? 'profile_chip-active' : ''}`}
-                      onClick={() => {
-                        setDigestDay(idx);
-                        setWeeklyDayError(false);
-                        saveDigestPeriod('weekly', idx);
-                      }}
-                    >
-                      {dayLabel}
-                    </button>
-                  ))}
+                <div className="digest-day-picker">
+                  <p className="digest-day-picker__label">День недели</p>
+                  <div className="digest-weekdays">
+                    {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((dayLabel, idx) => (
+                      <button
+                        key={idx}
+                        className={`profile_chip ${digestDay === idx ? 'profile_chip-active' : ''}`}
+                        onClick={() => {
+                          setDigestDay(idx);
+                          setWeeklyDayError(false);
+                          saveDigestPeriod('weekly', idx);
+                        }}
+                      >
+                        {dayLabel}
+                      </button>
+                    ))}
+                  </div>
                   {weeklyDayError && (
-                    <p style={{ color: '#e74c3c', fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                      Выберите день недели
-                    </p>
+                    <p className="digest-day-picker__error">Выберите день недели</p>
                   )}
                 </div>
               )}
 
               {digestPeriod === 'monthly' && (
-                <div className="profile_chips-container" style={{ marginTop: '0.5rem' }}>
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map((dayOfMonth) => (
-                    <button
-                      key={dayOfMonth}
-                      className={`profile_chip ${digestDay === dayOfMonth ? 'profile_chip-active' : ''}`}
-                      onClick={() => {
-                        setDigestDay(dayOfMonth);
-                        setWeeklyDayError(false);
-                        saveDigestPeriod('monthly', dayOfMonth);
-                      }}
-                    >
-                      {dayOfMonth}
-                    </button>
-                  ))}
+                <div className="digest-day-picker">
+                  <p className="digest-day-picker__label">День месяца</p>
+                  <div className="digest-monthdays">
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((dayOfMonth) => (
+                      <button
+                        key={dayOfMonth}
+                        className={`digest-monthday ${digestDay === dayOfMonth ? 'digest-monthday-active' : ''}`}
+                        onClick={() => {
+                          setDigestDay(dayOfMonth);
+                          setWeeklyDayError(false);
+                          saveDigestPeriod('monthly', dayOfMonth);
+                        }}
+                      >
+                        {dayOfMonth}
+                      </button>
+                    ))}
+                  </div>
                   {weeklyDayError && (
-                    <p style={{ color: '#e74c3c', fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                      Выберите день месяца
-                    </p>
+                    <p className="digest-day-picker__error">Выберите день месяца</p>
                   )}
                 </div>
               )}
