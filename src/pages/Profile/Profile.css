@@ -467,6 +467,33 @@
   justify-content: space-between;
 }
 
+.digest-day-picker {
+  margin-top: 10px;
+  padding: 12px;
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+}
+
+.digest-day-picker__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  margin: 0 0 10px;
+}
+
+.digest-day-picker__error {
+  color: #e74c3c;
+  font-size: 12px;
+  margin: 10px 0 0;
+}
+
+.digest-weekdays {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .profile_chip--custom {
   display: inline-flex;
   align-items: center;
