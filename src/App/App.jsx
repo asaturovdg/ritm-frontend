@@ -9,6 +9,7 @@ import Event from '../pages/eventPage/Event';
 import { Profile } from '../pages/Profile/Profile';
 import Feedback from '../pages/Feedback/Feedback';
 import Submissions from '../pages/Submissions/Submissions';
+import Moderation from '../pages/Moderation/Moderation.jsx';
 import { ThemeWrapper } from '../components/ThemeWrapper';
 import { TransitionContext } from '../components/TransitionContext';
 
@@ -137,6 +138,7 @@ export default function App() {
     if (location.pathname === '/profile') return 'profile';
     if (location.pathname === '/feedback') return 'feedback';
     if (location.pathname === '/submissions') return 'submissions';
+    if (location.pathname === '/moderation') return 'moderation';
     return 'events';
   };
 
@@ -147,6 +149,7 @@ export default function App() {
       profile: '/profile',
       feedback: '/feedback',
       submissions: '/submissions',
+      moderation: '/moderation',
     };
     const targetPath = paths[tab] ?? '/';
     if (targetPath === location.pathname) return;
@@ -210,6 +213,7 @@ export default function App() {
                     <Route path='/profile' element={<Profile />} />
                     <Route path='/feedback' element={<Feedback />} />
                     <Route path='/submissions' element={<Submissions />} />
+                    <Route path='/moderation' element={<Moderation />} />
                     <Route path='/invite/assistant/:token' element={<InviteAccept />} />
                   </Routes>
                 </motion.div>
