@@ -10,16 +10,16 @@ vi.mock('../../components/AuthContext.jsx', () => ({
 }));
 
 describe('useAppTabs', () => {
-  it('returns the base tabs, without /featured or /moderation, for a non-admin non-allowlisted user', () => {
+  it('prepends /featured for a non-admin user', () => {
     mockUserId = '1';
     mockUserData = { is_admin: false };
     const { result } = renderHook(() => useAppTabs());
-    expect(result.current.hasFeatured).toBe(false);
-    expect(result.current.TAB_PATHS).toEqual(['/', '/profile', '/feedback', '/submissions']);
-    expect(result.current.TABS.map((t) => t.id)).toEqual(['events', 'profile', 'feedback', 'submissions']);
+    expect(result.current.hasFeatured).toBe(true);
+    expect(result.current.TAB_PATHS).toEqual(['/featured', '/', '/profile', '/feedback', '/submissions']);
+    expect(result.current.TABS.map((t) => t.id)).toEqual(['featured', 'events', 'profile', 'feedback', 'submissions']);
   });
 
-  it('prepends /featured for an allowlisted user', () => {
+  it('prepends /featured for any user', () => {
     mockUserId = '5';
     mockUserData = { is_admin: false };
     const { result } = renderHook(() => useAppTabs());
@@ -33,7 +33,7 @@ describe('useAppTabs', () => {
     mockUserData = { is_admin: true };
     const { result } = renderHook(() => useAppTabs());
     expect(result.current.isAdmin).toBe(true);
-    expect(result.current.TAB_PATHS).toEqual(['/', '/profile', '/feedback', '/submissions', '/moderation']);
+    expect(result.current.TAB_PATHS).toEqual(['/featured', '/', '/profile', '/feedback', '/submissions', '/moderation']);
     expect(result.current.TABS[result.current.TABS.length - 1].id).toBe('moderation');
   });
 
@@ -49,6 +49,6 @@ describe('useAppTabs', () => {
     mockUserData = null;
     const { result } = renderHook(() => useAppTabs());
     expect(result.current.isAdmin).toBe(false);
-    expect(result.current.TAB_PATHS).toEqual(['/', '/profile', '/feedback', '/submissions']);
+    expect(result.current.TAB_PATHS).toEqual(['/featured', '/', '/profile', '/feedback', '/submissions']);
   });
 });
