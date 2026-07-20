@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   FIELD_LABELS,
   FIELD_TYPES,
@@ -26,11 +27,12 @@ function buildInitialFieldState(suggestions) {
 }
 
 export default function ModerationCard({ event, index, total, onOpenList, onApprove, onReject }) {
+  // Relies on the caller mounting this component with `key={event.id}` so switching
+  // to a different card in the queue fully remounts it — a plain effect-based reset
+  // here left one render where `fields` still held the PREVIOUS event's suggestion
+  // keys while `suggestionKeys` already reflected the new event, crashing on
+  // `fields[newKey].value` whenever the two events' suggested fields didn't overlap.
   const [fields, setFields] = useState(() => buildInitialFieldState(event.suggestions));
-
-  useEffect(() => {
-    setFields(buildInitialFieldState(event.suggestions));
-  }, [event.id, event.suggestions]);
 
   const suggestionKeys = Object.keys(event.suggestions ?? {});
 
@@ -72,6 +74,10 @@ export default function ModerationCard({ event, index, total, onOpenList, onAppr
         </button>
         <span className="moderation-card__quality-badge">quality {event.quality_score}/5</span>
       </div>
+
+      <Link to={`/events/${event.id}`} className="moderation-card__original-link">
+        Открыть карточку события →
+      </Link>
 
       {suggestionKeys.map((key) => {
         const type = FIELD_TYPES[key] ?? 'text';

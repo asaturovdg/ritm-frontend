@@ -202,6 +202,7 @@ export default function Moderation() {
   return (
     <div className="moderation">
       <ModerationCard
+        key={currentEvent.id}
         event={currentEvent}
         index={currentIndex}
         total={total}

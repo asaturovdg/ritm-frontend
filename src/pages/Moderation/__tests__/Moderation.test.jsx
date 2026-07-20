@@ -184,6 +184,48 @@ describe('Moderation page', () => {
     expect(screen.getByText('Событие Г')).toBeInTheDocument();
   });
 
+  it('does not crash when switching via the sheet to a card whose suggested fields differ from the current one', async () => {
+    // Regression test: ModerationCard used to reset its internal per-field edit state via
+    // a useEffect that ran AFTER the render with the new event's props, so for one render
+    // pass `suggestionKeys` reflected the new card while `fields` still held the previous
+    // card's keys — crashing on `fields[newKey].value` whenever the two cards' suggested
+    // fields didn't overlap (the other tests all reuse queueItem()'s default `title`-only
+    // suggestions, so they never exercised this). Fixed by mounting ModerationCard with
+    // `key={event.id}` in Moderation.jsx so switching cards fully remounts it.
+    const items = [
+      queueItem({ id: 1, title: 'Событие А', suggestions: { title: 'Событие А (правка)' } }),
+      queueItem({
+        id: 2,
+        title: 'Событие Б',
+        city: ['Москва'],
+        start_date: '2026-06-15',
+        suggestions: { city: 'Санкт-Петербург', start_date: '2026-06-16' },
+      }),
+    ];
+    global.fetch.mockImplementation((url) => {
+      if (String(url).includes('moderation-queue')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ items, total: 2, limit: 20, offset: 0 }),
+        });
+      }
+      return Promise.reject(new Error(`unexpected fetch: ${url}`));
+    });
+    renderModeration();
+    expect(await screen.findByText('1 / 2')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByText('1 / 2'));
+    await userEvent.click(screen.getByText('Событие Б'));
+
+    // Card B's suggested fields (city, start_date) don't overlap with card A's (title) —
+    // this is the exact scenario that used to crash. Asserting the counter advanced and
+    // B's before/after values render confirms the switch completed without throwing.
+    expect(await screen.findByText('2 / 2')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Санкт-Петербург')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('2026-06-16')).toBeInTheDocument();
+  });
+
   it('keeps the correct card selected when a different card\'s in-flight request resolves after navigating away via the sheet', async () => {
     function deferred() {
       let resolve;

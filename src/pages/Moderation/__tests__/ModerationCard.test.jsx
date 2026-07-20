@@ -1,7 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import ModerationCard from '../ModerationCard.jsx';
+
+const renderCard = (props) => render(<ModerationCard {...props} />, { wrapper: MemoryRouter });
 
 const baseEvent = {
   id: 42,
@@ -19,9 +22,7 @@ const baseEvent = {
 
 describe('ModerationCard', () => {
   it('renders the counter, quality badge, and a before/after block per suggestion key', () => {
-    render(
-      <ModerationCard event={baseEvent} index={2} total={42} onOpenList={vi.fn()} onApprove={vi.fn()} onReject={vi.fn()} />
-    );
+    renderCard({ event: baseEvent, index: 2, total: 42, onOpenList: vi.fn(), onApprove: vi.fn(), onReject: vi.fn() });
     expect(screen.getByText('3 / 42')).toBeInTheDocument();
     expect(screen.getByText(/3\/5/)).toBeInTheDocument();
     expect(screen.getByText('Митап по бекенду')).toBeInTheDocument();
@@ -31,27 +32,21 @@ describe('ModerationCard', () => {
 
   it('calls onOpenList when the counter is clicked', async () => {
     const onOpenList = vi.fn();
-    render(
-      <ModerationCard event={baseEvent} index={2} total={42} onOpenList={onOpenList} onApprove={vi.fn()} onReject={vi.fn()} />
-    );
+    renderCard({ event: baseEvent, index: 2, total: 42, onOpenList: onOpenList, onApprove: vi.fn(), onReject: vi.fn() });
     await userEvent.click(screen.getByText('3 / 42'));
     expect(onOpenList).toHaveBeenCalledTimes(1);
   });
 
   it('calls onReject with the event id when "Пропустить" is clicked', async () => {
     const onReject = vi.fn();
-    render(
-      <ModerationCard event={baseEvent} index={0} total={1} onOpenList={vi.fn()} onApprove={vi.fn()} onReject={onReject} />
-    );
+    renderCard({ event: baseEvent, index: 0, total: 1, onOpenList: vi.fn(), onApprove: vi.fn(), onReject: onReject });
     await userEvent.click(screen.getByText('Пропустить'));
     expect(onReject).toHaveBeenCalledWith(42);
   });
 
   it('excludes an unchecked field and includes a manually edited value in the approve payload', async () => {
     const onApprove = vi.fn();
-    render(
-      <ModerationCard event={baseEvent} index={0} total={1} onOpenList={vi.fn()} onApprove={onApprove} onReject={vi.fn()} />
-    );
+    renderCard({ event: baseEvent, index: 0, total: 1, onOpenList: vi.fn(), onApprove: onApprove, onReject: vi.fn() });
 
     const startDateCheckbox = screen.getByLabelText('принять правку: Дата начала');
     await userEvent.click(startDateCheckbox); // uncheck
@@ -66,9 +61,7 @@ describe('ModerationCard', () => {
   });
 
   it('shows an unchanged-fields summary line for fields not in suggestions', () => {
-    render(
-      <ModerationCard event={baseEvent} index={0} total={1} onOpenList={vi.fn()} onApprove={vi.fn()} onReject={vi.fn()} />
-    );
+    renderCard({ event: baseEvent, index: 0, total: 1, onOpenList: vi.fn(), onApprove: vi.fn(), onReject: vi.fn() });
     expect(screen.getByText(/Москва/)).toBeInTheDocument();
     expect(screen.getByText(/Конференция/)).toBeInTheDocument();
   });
@@ -78,9 +71,7 @@ describe('ModerationCard', () => {
       ...baseEvent,
       suggestions: { city: 'Санкт-Петербург' },
     };
-    render(
-      <ModerationCard event={eventWithCitySuggestion} index={0} total={1} onOpenList={vi.fn()} onApprove={vi.fn()} onReject={vi.fn()} />
-    );
+    renderCard({ event: eventWithCitySuggestion, index: 0, total: 1, onOpenList: vi.fn(), onApprove: vi.fn(), onReject: vi.fn() });
     const select = screen.getByRole('combobox');
     expect(select).toHaveValue('Санкт-Петербург');
   });
@@ -93,13 +84,17 @@ describe('ModerationCard', () => {
         organizers: [{ name: 'Иван Петров', url: 'https://example.com' }],
       },
     };
-    render(
-      <ModerationCard event={eventWithOrganizersSuggestion} index={0} total={1} onOpenList={vi.fn()} onApprove={vi.fn()} onReject={vi.fn()} />
-    );
+    renderCard({ event: eventWithOrganizersSuggestion, index: 0, total: 1, onOpenList: vi.fn(), onApprove: vi.fn(), onReject: vi.fn() });
 
     expect(screen.getByText('Пётр Петров')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Иван Петров (https://example.com)')).toBeInTheDocument();
     expect(screen.queryByText(/\[object Object\]/)).not.toBeInTheDocument();
+  });
+
+  it('links to the original event page so the admin can see it in context', () => {
+    renderCard({ event: baseEvent, index: 0, total: 1, onOpenList: vi.fn(), onApprove: vi.fn(), onReject: vi.fn() });
+    const link = screen.getByText('Открыть карточку события →');
+    expect(link).toHaveAttribute('href', '/events/42');
   });
 
   it('excludes a checked-but-invalid field from the approve payload', async () => {
@@ -110,9 +105,7 @@ describe('ModerationCard', () => {
         ...baseEvent.suggestions,
       },
     };
-    render(
-      <ModerationCard event={eventWithBadDate} index={0} total={1} onOpenList={vi.fn()} onApprove={onApprove} onReject={vi.fn()} />
-    );
+    renderCard({ event: eventWithBadDate, index: 0, total: 1, onOpenList: vi.fn(), onApprove: onApprove, onReject: vi.fn() });
 
     const startDateInput = screen.getByDisplayValue('2026-06-16');
     await userEvent.clear(startDateInput);
