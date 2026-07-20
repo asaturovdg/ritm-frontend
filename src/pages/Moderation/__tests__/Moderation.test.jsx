@@ -184,6 +184,58 @@ describe('Moderation page', () => {
     expect(screen.getByText('Событие Г')).toBeInTheDocument();
   });
 
+  it('keeps the correct card selected when a different card\'s in-flight request resolves after navigating away via the sheet', async () => {
+    function deferred() {
+      let resolve;
+      const promise = new Promise((res) => { resolve = res; });
+      return { promise, resolve };
+    }
+
+    const items = [
+      queueItem({ id: 1, title: 'Событие А' }),
+      queueItem({ id: 2, title: 'Событие Б' }),
+      queueItem({ id: 3, title: 'Событие В' }),
+      queueItem({ id: 4, title: 'Событие Г' }),
+    ];
+    const rejectA = deferred();
+    global.fetch.mockImplementation((url) => {
+      if (String(url).includes('moderation-queue')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ items, total: 4, limit: 20, offset: 0 }),
+        });
+      }
+      if (String(url).includes('/events/1/reject-suggestions')) {
+        return rejectA.promise;
+      }
+      return Promise.reject(new Error(`unexpected fetch: ${url}`));
+    });
+
+    renderModeration();
+    expect(await screen.findByText('Событие А')).toBeInTheDocument();
+    expect(screen.getByText('1 / 4')).toBeInTheDocument();
+
+    // Fire the reject for card A (the currently-viewed card), but its request
+    // stays pending — the UI is not blocked, so the moderator can navigate away.
+    await userEvent.click(screen.getByText('Пропустить'));
+
+    // While A's request is still in flight, open the sheet and jump to card C.
+    await userEvent.click(screen.getByText('1 / 4'));
+    await userEvent.click(screen.getByText('Событие В'));
+    expect(await screen.findByText('Событие В')).toBeInTheDocument();
+    expect(screen.getByText('3 / 4')).toBeInTheDocument();
+
+    // Now A's request finally resolves. This must not disturb the currently-viewed
+    // card (C): removeCurrentFromQueue should re-derive currentIndex from C's id,
+    // not from a stale index captured back when A was selected.
+    rejectA.resolve({ ok: true, status: 200, json: async () => queueItem({ id: 1 }) });
+    await waitFor(() => expect(screen.queryByText('Событие А')).not.toBeInTheDocument());
+
+    expect(screen.getByText('Событие В')).toBeInTheDocument();
+    expect(screen.getByText('2 / 3')).toBeInTheDocument();
+  });
+
   it('shows a distinct error state (not the empty-queue placeholder) when the initial load fails with a non-401 error', async () => {
     global.fetch.mockResolvedValue({ ok: false, status: 500 });
     renderModeration();
