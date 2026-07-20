@@ -37,6 +37,19 @@ describe('QueueListSheet', () => {
     const onLoadMore = vi.fn();
     render(<QueueListSheet items={items} currentId={1} hasMore={true} onSelect={vi.fn()} onClose={vi.fn()} onLoadMore={onLoadMore} />);
     expect(screen.getByTestId('moderation-sheet-load-more')).toBeInTheDocument();
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not double-fire onLoadMore when the component re-renders with hasMore still true', () => {
+    const onLoadMore = vi.fn();
+    const { rerender } = render(<QueueListSheet items={items} currentId={1} hasMore={true} onSelect={vi.fn()} onClose={vi.fn()} onLoadMore={onLoadMore} />);
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
+
+    // Re-render with the same hasMore=true but slightly different props
+    rerender(<QueueListSheet items={items} currentId={2} hasMore={true} onSelect={vi.fn()} onClose={vi.fn()} onLoadMore={onLoadMore} />);
+
+    // onLoadMore should still only have been called once total (the firedRef guard prevents double-firing)
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
   });
 
   it('does not render the load-more sentinel when hasMore is false', () => {
