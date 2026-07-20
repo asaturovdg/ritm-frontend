@@ -50,9 +50,10 @@ export default function Moderation() {
     fetchPage(0)
       .then((data) => {
         if (!data) return;
-        setItems(data.items);
+        const loadedItems = Array.isArray(data.items) ? data.items : [];
+        setItems(loadedItems);
         setTotal(data.total);
-        setOffset(data.items.length);
+        setOffset(loadedItems.length);
         setCurrentIndex(0);
         setLoadError(false);
       })
@@ -69,12 +70,24 @@ export default function Moderation() {
     fetchPage(offset)
       .then((data) => {
         if (!data) return;
-        setItems((prev) => [...prev, ...data.items]);
-        setOffset((prev) => prev + data.items.length);
+        const newItems = Array.isArray(data.items) ? data.items : [];
+        setItems((prev) => [...prev, ...newItems]);
+        setOffset((prev) => prev + newItems.length);
       })
       .catch(() => showToast('Не удалось загрузить очередь'))
       .finally(() => setLoadingMore(false));
   }, [fetchPage, offset, items.length, total, loadingMore, showToast]);
+
+  // Auto-paginate the primary card-by-card flow: once the locally-loaded
+  // working set is running low (and more unmoderated items exist on the
+  // server), fetch the next page automatically instead of waiting for the
+  // admin to open the queue-list sheet.
+  useEffect(() => {
+    if (loading || loadingMore) return;
+    if (items.length < total && items.length - currentIndex <= 2) {
+      loadMore();
+    }
+  }, [items.length, currentIndex, total, loading, loadingMore, loadMore]);
 
   const removeCurrentFromQueue = useCallback((eventId) => {
     setItems((prev) => {
@@ -148,6 +161,19 @@ export default function Moderation() {
   }
 
   if (items.length === 0) {
+    // More unmoderated items may still exist on the server (just not fetched
+    // locally yet) — the effect above will already be fetching them. Show a
+    // loading state rather than telling the admin the queue is done.
+    if (total > 0) {
+      return (
+        <div className="moderation">
+          <div className="loading-container">
+            <div className="spinner"></div>
+            <p>Загрузка очереди...</p>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="moderation">
         <Placeholder header="Очередь пуста" description="Все события проверены" />

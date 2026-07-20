@@ -257,4 +257,72 @@ describe('Moderation page', () => {
     expect(await screen.findByText('Митап по бекенду')).toBeInTheDocument();
     expect(screen.queryByText('Не удалось загрузить')).not.toBeInTheDocument();
   });
+
+  it('auto-loads the next page as the local queue runs low, instead of showing the empty placeholder while more items remain on the server', async () => {
+    const page1 = [
+      queueItem({ id: 1, title: 'Событие А' }),
+      queueItem({ id: 2, title: 'Событие Б' }),
+      queueItem({ id: 3, title: 'Событие В' }),
+    ];
+    const page2 = [
+      queueItem({ id: 4, title: 'Событие Г' }),
+      queueItem({ id: 5, title: 'Событие Д' }),
+    ];
+    let queueCalls = 0;
+    global.fetch.mockImplementation((url) => {
+      const u = String(url);
+      if (u.includes('moderation-queue')) {
+        queueCalls += 1;
+        if (u.includes('offset=0')) {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: async () => ({ items: page1, total: 5, limit: 20, offset: 0 }),
+          });
+        }
+        if (u.includes('offset=3')) {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: async () => ({ items: page2, total: 5, limit: 20, offset: 3 }),
+          });
+        }
+        return Promise.reject(new Error(`unexpected queue offset: ${u}`));
+      }
+      if (u.includes('reject-suggestions')) {
+        return Promise.resolve({ ok: true, status: 200, json: async () => ({}) });
+      }
+      return Promise.reject(new Error(`unexpected fetch: ${u}`));
+    });
+
+    renderModeration();
+    expect(await screen.findByText('Событие А')).toBeInTheDocument();
+    expect(queueCalls).toBe(1);
+
+    // Reject the first card. Locally-loaded items drop to 2 (< total 5), and only
+    // 2 remain ahead of the current index — this should trigger an automatic fetch
+    // of the next page, without the admin opening the queue-list sheet.
+    await userEvent.click(screen.getByText('Пропустить'));
+    await waitFor(() => expect(queueCalls).toBe(2));
+
+    // Work through the rest of page 1 and confirm page 2's items become reachable
+    // instead of the queue prematurely reporting itself empty.
+    await waitFor(() => expect(screen.getByText('Событие Б')).toBeInTheDocument());
+    await userEvent.click(screen.getByText('Пропустить'));
+    await waitFor(() => expect(screen.getByText('Событие В')).toBeInTheDocument());
+    await userEvent.click(screen.getByText('Пропустить'));
+
+    await waitFor(() => expect(screen.getByText('Событие Г')).toBeInTheDocument());
+    expect(screen.queryByText('Очередь пуста')).not.toBeInTheDocument();
+  });
+
+  it('does not crash when the queue response is missing the items array', async () => {
+    global.fetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ total: 0, limit: 20, offset: 0 }),
+    });
+    renderModeration();
+    expect(await screen.findByText('Очередь пуста')).toBeInTheDocument();
+  });
 });
