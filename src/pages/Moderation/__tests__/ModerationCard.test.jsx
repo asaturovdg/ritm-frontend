@@ -84,4 +84,43 @@ describe('ModerationCard', () => {
     const select = screen.getByRole('combobox');
     expect(select).toHaveValue('Санкт-Петербург');
   });
+
+  it('renders human-readable text for people-typed fields instead of [object Object]', () => {
+    const eventWithOrganizersSuggestion = {
+      ...baseEvent,
+      organizers: [{ name: 'Пётр Петров', url: null }],
+      suggestions: {
+        organizers: [{ name: 'Иван Петров', url: 'https://example.com' }],
+      },
+    };
+    render(
+      <ModerationCard event={eventWithOrganizersSuggestion} index={0} total={1} onOpenList={vi.fn()} onApprove={vi.fn()} onReject={vi.fn()} />
+    );
+
+    expect(screen.getByText('Пётр Петров')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Иван Петров (https://example.com)')).toBeInTheDocument();
+    expect(screen.queryByText(/\[object Object\]/)).not.toBeInTheDocument();
+  });
+
+  it('excludes a checked-but-invalid field from the approve payload', async () => {
+    const onApprove = vi.fn();
+    const eventWithBadDate = {
+      ...baseEvent,
+      suggestions: {
+        ...baseEvent.suggestions,
+      },
+    };
+    render(
+      <ModerationCard event={eventWithBadDate} index={0} total={1} onOpenList={vi.fn()} onApprove={onApprove} onReject={vi.fn()} />
+    );
+
+    const startDateInput = screen.getByDisplayValue('2026-06-16');
+    await userEvent.clear(startDateInput);
+    await userEvent.type(startDateInput, 'not-a-date');
+
+    // checkbox stays checked (default), but value is invalid
+    await userEvent.click(screen.getByText('Принять выбранное'));
+
+    expect(onApprove).toHaveBeenCalledWith(42, { title: 'Митап по бэкенду: как мы...' });
+  });
 });

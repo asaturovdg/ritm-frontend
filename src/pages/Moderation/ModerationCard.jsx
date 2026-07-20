@@ -5,6 +5,7 @@ import {
   FIELD_OPTIONS,
   validateFieldValue,
   normalizeFieldValue,
+  serializePeople,
 } from './moderationFields.js';
 
 const UNCHANGED_SUMMARY_FIELDS = ['city', 'event_type'];
@@ -12,7 +13,9 @@ const UNCHANGED_SUMMARY_FIELDS = ['city', 'event_type'];
 function buildInitialFieldState(suggestions) {
   const state = {};
   Object.entries(suggestions ?? {}).forEach(([key, value]) => {
-    const initialValue = Array.isArray(value) ? value.join(', ') : String(value ?? '');
+    const initialValue = FIELD_TYPES[key] === 'people'
+      ? serializePeople(value ?? [])
+      : (Array.isArray(value) ? value.join(', ') : String(value ?? ''));
     state[key] = {
       checked: true,
       value: initialValue,
@@ -74,7 +77,9 @@ export default function ModerationCard({ event, index, total, onOpenList, onAppr
         const type = FIELD_TYPES[key] ?? 'text';
         const field = fields[key];
         const beforeRaw = event[key];
-        const beforeText = Array.isArray(beforeRaw) ? beforeRaw.join(', ') : String(beforeRaw ?? '—');
+        const beforeText = type === 'people'
+          ? serializePeople(beforeRaw ?? [])
+          : (Array.isArray(beforeRaw) ? beforeRaw.join(', ') : String(beforeRaw ?? '—'));
 
         return (
           <div className="moderation-card__field" key={key}>
@@ -91,6 +96,13 @@ export default function ModerationCard({ event, index, total, onOpenList, onAppr
                   <option key={option} value={option}>{option}</option>
                 ))}
               </select>
+            ) : type === 'text' || type === 'people' ? (
+              <textarea
+                className="moderation-card__input"
+                rows={1}
+                value={field.value}
+                onChange={(e) => handleValueChange(key, e.target.value)}
+              />
             ) : (
               <input
                 className="moderation-card__input"
