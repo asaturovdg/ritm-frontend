@@ -41,15 +41,39 @@ describe('QueueListSheet', () => {
   });
 
   it('does not double-fire onLoadMore when the component re-renders with hasMore still true', () => {
-    const onLoadMore = vi.fn();
-    const { rerender } = render(<QueueListSheet items={items} currentId={1} hasMore={true} onSelect={vi.fn()} onClose={vi.fn()} onLoadMore={onLoadMore} />);
-    expect(onLoadMore).toHaveBeenCalledTimes(1);
+    // Create two separate function mocks to exercise the firedRef guard
+    const onLoadMoreFirst = vi.fn();
+    const onLoadMoreSecond = vi.fn();
 
-    // Re-render with the same hasMore=true but slightly different props
-    rerender(<QueueListSheet items={items} currentId={2} hasMore={true} onSelect={vi.fn()} onClose={vi.fn()} onLoadMore={onLoadMore} />);
+    // Render with the first callback
+    const { rerender } = render(
+      <QueueListSheet
+        items={items}
+        currentId={1}
+        hasMore={true}
+        onSelect={vi.fn()}
+        onClose={vi.fn()}
+        onLoadMore={onLoadMoreFirst}
+      />
+    );
+    expect(onLoadMoreFirst).toHaveBeenCalledTimes(1);
 
-    // onLoadMore should still only have been called once total (the firedRef guard prevents double-firing)
-    expect(onLoadMore).toHaveBeenCalledTimes(1);
+    // Re-render with a different onLoadMore callback (simulating parent not memoizing)
+    // hasMore stays true, so LoadMoreSentinel stays mounted
+    rerender(
+      <QueueListSheet
+        items={items}
+        currentId={2}
+        hasMore={true}
+        onSelect={vi.fn()}
+        onClose={vi.fn()}
+        onLoadMore={onLoadMoreSecond}
+      />
+    );
+
+    // The firedRef guard prevents calling the second callback even though the effect re-ran due to onLoadMore dependency change
+    expect(onLoadMoreFirst).toHaveBeenCalledTimes(1);
+    expect(onLoadMoreSecond).toHaveBeenCalledTimes(0);
   });
 
   it('does not render the load-more sentinel when hasMore is false', () => {
