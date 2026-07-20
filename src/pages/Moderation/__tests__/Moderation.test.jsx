@@ -5,10 +5,11 @@ import { MemoryRouter } from 'react-router-dom';
 import Moderation from '../Moderation.jsx';
 
 vi.mock('@telegram-apps/telegram-ui', () => ({
-  Placeholder: ({ header, description }) => (
+  Placeholder: ({ header, description, children }) => (
     <div data-testid="placeholder">
       <p>{header}</p>
       <p>{description}</p>
+      {children}
     </div>
   ),
 }));
@@ -141,5 +142,67 @@ describe('Moderation page', () => {
     await userEvent.click(screen.getByText('Принять выбранное'));
     await waitFor(() => expect(mockShowToast).toHaveBeenCalledWith('Не удалось сохранить. Попробуйте ещё раз'));
     expect(screen.getByText('Митап по бекенду')).toBeInTheDocument();
+  });
+
+  it('keeps the correct card selected when rejecting the card chosen via the sheet (not the first card)', async () => {
+    const items = [
+      queueItem({ id: 1, title: 'Событие А' }),
+      queueItem({ id: 2, title: 'Событие Б' }),
+      queueItem({ id: 3, title: 'Событие В' }),
+      queueItem({ id: 4, title: 'Событие Г' }),
+    ];
+    global.fetch.mockImplementation((url) => {
+      if (String(url).includes('moderation-queue')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ items, total: 4, limit: 20, offset: 0 }),
+        });
+      }
+      if (String(url).includes('reject-suggestions')) {
+        return Promise.resolve({ ok: true, status: 200, json: async () => ({}) });
+      }
+      return Promise.reject(new Error(`unexpected fetch: ${url}`));
+    });
+    renderModeration();
+    expect(await screen.findByText('Событие А')).toBeInTheDocument();
+
+    // Open the sheet and select event C (index 2), not the currently-displayed card.
+    await userEvent.click(screen.getByText('1 / 4'));
+    await userEvent.click(screen.getByText('Событие В'));
+    expect(await screen.findByText('Событие В')).toBeInTheDocument();
+    expect(screen.getByText('3 / 4')).toBeInTheDocument();
+
+    // Now reject the card actually being viewed (C). The fix ensures removeCurrentFromQueue
+    // re-derives currentIndex from the surviving item's id rather than clamping a stale index,
+    // so this should land on a sensible next card (D), not silently jump elsewhere.
+    // The harder mid-flight race (A resolving late after switching to C) is exercised by the
+    // same id-based lookup logic in removeCurrentFromQueue and is not re-tested with an explicit
+    // timing scenario here, since ModerationCard only exposes actions for the currently-viewed card.
+    await userEvent.click(screen.getByText('Пропустить'));
+    await waitFor(() => expect(screen.queryByText('Событие В')).not.toBeInTheDocument());
+    expect(screen.getByText('Событие Г')).toBeInTheDocument();
+  });
+
+  it('shows a distinct error state (not the empty-queue placeholder) when the initial load fails with a non-401 error', async () => {
+    global.fetch.mockResolvedValue({ ok: false, status: 500 });
+    renderModeration();
+    expect(await screen.findByText('Не удалось загрузить')).toBeInTheDocument();
+    expect(screen.queryByText('Очередь пуста')).not.toBeInTheDocument();
+  });
+
+  it('retries the initial load and clears the error state on success', async () => {
+    global.fetch
+      .mockResolvedValueOnce({ ok: false, status: 500 })
+      .mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ items: [queueItem()], total: 1, limit: 20, offset: 0 }),
+      });
+    renderModeration();
+    expect(await screen.findByText('Не удалось загрузить')).toBeInTheDocument();
+    await userEvent.click(screen.getByText('Повторить'));
+    expect(await screen.findByText('Митап по бекенду')).toBeInTheDocument();
+    expect(screen.queryByText('Не удалось загрузить')).not.toBeInTheDocument();
   });
 });

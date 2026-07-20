@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Placeholder } from '@telegram-apps/telegram-ui';
 import { useAuth } from '../../components/AuthContext.jsx';
 import { useToast } from '../../components/Toast/ToastContext.jsx';
@@ -20,6 +20,10 @@ export default function Moderation() {
   const [loading, setLoading] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
+  const currentIndexRef = useRef(0);
+  currentIndexRef.current = currentIndex;
 
   const handleInvalidToken = useCallback(() => {
     localStorage.removeItem('access_token');
@@ -50,10 +54,14 @@ export default function Moderation() {
         setTotal(data.total);
         setOffset(data.items.length);
         setCurrentIndex(0);
+        setLoadError(false);
       })
-      .catch(() => showToast('Не удалось загрузить очередь'))
+      .catch(() => {
+        showToast('Не удалось загрузить очередь');
+        setLoadError(true);
+      })
       .finally(() => setLoading(false));
-  }, [isAuthReady, token, fetchPage, showToast]);
+  }, [isAuthReady, token, fetchPage, showToast, retryKey]);
 
   const loadMore = useCallback(() => {
     if (loadingMore || items.length >= total) return;
@@ -70,9 +78,16 @@ export default function Moderation() {
 
   const removeCurrentFromQueue = useCallback((eventId) => {
     setItems((prev) => {
+      const selectedId = prev[currentIndexRef.current]?.id;
       const next = prev.filter((item) => item.id !== eventId);
       setTotal((t) => Math.max(0, t - 1));
-      setCurrentIndex((idx) => Math.min(idx, Math.max(0, next.length - 1)));
+      setCurrentIndex((idx) => {
+        if (selectedId !== undefined && selectedId !== eventId) {
+          const selectedIdx = next.findIndex((item) => item.id === selectedId);
+          if (selectedIdx >= 0) return selectedIdx;
+        }
+        return Math.min(idx, Math.max(0, next.length - 1));
+      });
       return next;
     });
   }, []);
@@ -116,6 +131,18 @@ export default function Moderation() {
           <div className="spinner"></div>
           <p>Загрузка очереди...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="moderation">
+        <Placeholder header="Не удалось загрузить" description="Попробуйте ещё раз">
+          <button type="button" onClick={() => setRetryKey((k) => k + 1)}>
+            Повторить
+          </button>
+        </Placeholder>
       </div>
     );
   }
