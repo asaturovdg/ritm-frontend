@@ -325,4 +325,94 @@ describe('Moderation page', () => {
     renderModeration();
     expect(await screen.findByText('Очередь пуста')).toBeInTheDocument();
   });
+
+  it('stops auto-retrying and shows the retry UI when loadMore keeps returning zero items while total claims more exist', async () => {
+    const page1 = [
+      queueItem({ id: 1, title: 'Событие А' }),
+      queueItem({ id: 2, title: 'Событие Б' }),
+      queueItem({ id: 3, title: 'Событие В' }),
+    ];
+    let queueCalls = 0;
+    global.fetch.mockImplementation((url) => {
+      const u = String(url);
+      if (u.includes('moderation-queue')) {
+        queueCalls += 1;
+        if (u.includes('offset=0')) {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: async () => ({ items: page1, total: 10, limit: 20, offset: 0 }),
+          });
+        }
+        // Every subsequent page request returns an empty page while total still
+        // claims more items exist — this must not loop forever.
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ items: [], total: 10, limit: 20, offset: 3 }),
+        });
+      }
+      if (u.includes('reject-suggestions')) {
+        return Promise.resolve({ ok: true, status: 200, json: async () => ({}) });
+      }
+      return Promise.reject(new Error(`unexpected fetch: ${u}`));
+    });
+
+    renderModeration();
+    expect(await screen.findByText('Событие А')).toBeInTheDocument();
+    expect(queueCalls).toBe(1);
+
+    // Exhaust the three loaded items via reject; the last reject brings
+    // items.length - currentIndex to <= 2, triggering auto-pagination.
+    await userEvent.click(screen.getByText('Пропустить'));
+    await waitFor(() => expect(screen.getByText('Событие Б')).toBeInTheDocument());
+    await userEvent.click(screen.getByText('Пропустить'));
+    await waitFor(() => expect(screen.getByText('Событие В')).toBeInTheDocument());
+    await userEvent.click(screen.getByText('Пропустить'));
+
+    // The retry/error UI should appear instead of a permanent spinner.
+    await waitFor(() => expect(screen.getByText('Не удалось загрузить')).toBeInTheDocument());
+
+    // Give any lingering effects a chance to fire, then confirm fetch calls stabilized
+    // (bounded), i.e. no infinite refetch loop of the same offset.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const callsAfterSettling = queueCalls;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(queueCalls).toBe(callsAfterSettling);
+    expect(queueCalls).toBeLessThanOrEqual(3);
+  });
+
+  it('surfaces the retry UI (not just a toast) when loadMore fails with a network error', async () => {
+    const page1 = [
+      queueItem({ id: 1, title: 'Событие А' }),
+      queueItem({ id: 2, title: 'Событие Б' }),
+    ];
+    global.fetch.mockImplementation((url) => {
+      const u = String(url);
+      if (u.includes('moderation-queue')) {
+        if (u.includes('offset=0')) {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: async () => ({ items: page1, total: 10, limit: 20, offset: 0 }),
+          });
+        }
+        return Promise.reject(new Error('network error'));
+      }
+      if (u.includes('reject-suggestions')) {
+        return Promise.resolve({ ok: true, status: 200, json: async () => ({}) });
+      }
+      return Promise.reject(new Error(`unexpected fetch: ${u}`));
+    });
+
+    renderModeration();
+    expect(await screen.findByText('Событие А')).toBeInTheDocument();
+
+    // Exhaust the two loaded items via reject, triggering auto-pagination which fails.
+    await userEvent.click(screen.getByText('Пропустить'));
+    await waitFor(() => expect(screen.getByText('Событие Б')).toBeInTheDocument());
+    await userEvent.click(screen.getByText('Пропустить'));
+
+    await waitFor(() => expect(screen.getByText('Не удалось загрузить')).toBeInTheDocument());
+  });
 });
