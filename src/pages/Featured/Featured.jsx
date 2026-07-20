@@ -84,6 +84,7 @@ function FeaturedCard({ event, onClick, variant = 'default' }) {
 }
 
 function FeaturedCarousel({ title, items, onCardClick, variant = 'default', showHint = false }) {
+  const iconColor = getIconColor(variant);
   const carouselRef = useRef(null);
   const rafRef = useRef(null);
   const scrollEndTimerRef = useRef(null);
@@ -167,7 +168,12 @@ function FeaturedCarousel({ title, items, onCardClick, variant = 'default', show
     <div className="featured-section">
       <div className="featured-section__header">
         <span className="featured-section__title">{title}</span>
-        <span className="featured-section__count">{items.length} событий</span>
+        <span
+          className="featured-section__count"
+          style={{ color: iconColor, borderColor: iconColor }}
+        >
+          {items.length}
+        </span>
       </div>
       <div className="featured-carousel-wrap">
         <div className="featured-carousel" ref={carouselRef}>
