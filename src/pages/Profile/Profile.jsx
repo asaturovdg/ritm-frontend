@@ -173,6 +173,18 @@ const applyFilters = async () => {
 
   useEffect(() => () => flushPendingSave(), [flushPendingSave]);
 
+  useEffect(() => {
+    if (!savedEvents?.length) return;
+    fetch('https://ritmevents.ru/api/v1/events/impressions', {
+      method: 'POST',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ event_ids: savedEvents.map(e => e.id), source: 'profile' }),
+    });
+  }, [savedEvents, token]);
+
 
 
 

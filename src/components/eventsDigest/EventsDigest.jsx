@@ -236,6 +236,18 @@ export default function EventsDigest() {
     setWeekRange({ start: range.start, end: range.end });
   }, [currentWeekOffset]);
 
+  useEffect(() => {
+    if (!events?.length) return;
+    fetch('https://ritmevents.ru/api/v1/events/impressions', {
+      method: 'POST',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ event_ids: events.map(e => e.id), source: isSearchMode ? 'search' : 'list' }),
+    });
+  }, [events, isSearchMode, token]);
+
   const runSearch = useCallback(async (query, page = 0, searchId) => {
     setEvents([]);
     setIsLoadingEvents(true);
