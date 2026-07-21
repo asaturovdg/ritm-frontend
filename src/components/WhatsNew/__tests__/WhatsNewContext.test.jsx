@@ -66,7 +66,7 @@ describe('WhatsNewContext', () => {
   });
 
   it('shows all missed releases with non-empty items, newest first', () => {
-    store[STORAGE_KEY] = '2020-01-01';
+    store[STORAGE_KEY] = changelog.releases[changelog.releases.length - 1].version;
     render(<WhatsNewProvider><Consumer /></WhatsNewProvider>);
     const shown = JSON.parse(screen.getByTestId('releases').textContent);
     const expected = changelog.releases
