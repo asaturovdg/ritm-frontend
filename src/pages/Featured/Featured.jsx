@@ -230,10 +230,25 @@ export default function Featured() {
         if (!res.ok) throw new Error('network');
         const json = await res.json();
         setData(json);
+        reportImpressions(json?.for_you?.items, 'for_you');
+        reportImpressions(json?.top_month?.items, 'top_month');
+        reportImpressions(json?.sber?.items, 'sber');
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, [isAuthReady, token, setShowInputCode]);
+
+  const reportImpressions = (items, block) => {
+    if (!items?.length) return;
+    fetch('https://ritmevents.ru/api/v1/events/impressions', {
+      method: 'POST',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ event_ids: items.map(e => e.id), source: 'featured', block }),
+    });
+  };
 
   const handleCardClick = (id, block) => {
     fetch(`https://ritmevents.ru/api/v1/events/${id}/view`, {
