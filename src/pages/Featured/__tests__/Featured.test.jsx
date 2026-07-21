@@ -47,6 +47,7 @@ const sampleEvent = {
 const sampleData = {
   for_you: { items: [sampleEvent] },
   top_month: { items: [] },
+  top_half_year: { items: [] },
   sber: { items: [] },
 };
 

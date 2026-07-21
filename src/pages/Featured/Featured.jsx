@@ -232,6 +232,7 @@ export default function Featured() {
         setData(json);
         reportImpressions(json?.for_you?.items, 'for_you');
         reportImpressions(json?.top_month?.items, 'top_month');
+        reportImpressions(json?.top_half_year?.items, 'top_half_year');
         reportImpressions(json?.sber?.items, 'sber');
       })
       .catch(() => setError(true))
@@ -320,6 +321,12 @@ export default function Featured() {
         items={data?.top_month?.items}
         onCardClick={(id) => handleCardClick(id, 'top_month')}
         showHint={claimHint(data?.top_month?.items)}
+      />
+      <FeaturedCarousel
+        title="Главное за 6 месяцев"
+        items={data?.top_half_year?.items}
+        onCardClick={(id) => handleCardClick(id, 'top_half_year')}
+        showHint={claimHint(data?.top_half_year?.items)}
       />
       <FeaturedCarousel
         title="Открывая Сбер"
