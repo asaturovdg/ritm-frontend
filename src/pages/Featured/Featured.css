@@ -186,6 +186,10 @@
   background: linear-gradient(135deg, #6B21D8, #A263F5);
 }
 
+.featured-card--halfyear .featured-card__header {
+  background: linear-gradient(135deg, #C2410C, #F97316);
+}
+
 .featured-card--sber .featured-card__track {
   background: #E3F5EC;
   color: #0A8043;
@@ -194,6 +198,11 @@
 .featured-card--foryou .featured-card__track {
   background: #F1E7FE;
   color: #6B21D8;
+}
+
+.featured-card--halfyear .featured-card__track {
+  background: #FDEAE0;
+  color: #C2410C;
 }
 
 .featured-card__type {

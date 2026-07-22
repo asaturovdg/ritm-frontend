@@ -12,6 +12,7 @@ const VARIANT_ICON_COLOR = {
   default: '#1032A1',
   sber: '#0A8043',
   foryou: '#8A3FFC',
+  halfyear: '#C2410C',
 };
 
 const getIconColor = (variant) => VARIANT_ICON_COLOR[variant] || VARIANT_ICON_COLOR.default;
@@ -326,6 +327,7 @@ export default function Featured() {
         title="Главное за 6 месяцев"
         items={data?.top_half_year?.items}
         onCardClick={(id) => handleCardClick(id, 'top_half_year')}
+        variant="halfyear"
         showHint={claimHint(data?.top_half_year?.items)}
       />
       <FeaturedCarousel
