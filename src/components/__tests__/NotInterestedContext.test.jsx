@@ -154,7 +154,7 @@ describe('NotInterestedContext — hiddenEvents load()', () => {
   it('markNotInterested appends the full event object to hiddenEvents', async () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ([]) });
     const { result } = renderHook(() => useNotInterested(), { wrapper });
-    await vi.waitFor(() => expect(result.current.hiddenEvents).toEqual([]));
+    await vi.waitFor(() => expect(result.current.loading).toBe(false));
 
     await act(async () => {
       await result.current.markNotInterested({ id: 30, title: 'New Hide' });
@@ -166,7 +166,7 @@ describe('NotInterestedContext — hiddenEvents load()', () => {
   it('unmarkNotInterested removes the event from hiddenEvents, restores it on failure', async () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ([]) });
     const { result } = renderHook(() => useNotInterested(), { wrapper });
-    await vi.waitFor(() => expect(result.current.hiddenEvents).toEqual([]));
+    await vi.waitFor(() => expect(result.current.loading).toBe(false));
 
     await act(async () => {
       await result.current.markNotInterested({ id: 31, title: 'To Remove' });

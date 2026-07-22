@@ -102,11 +102,8 @@ export function NotInterestedProvider({ children }) {
     if (pendingIds.has(eventId)) return;
     setPendingIds(prev => new Set([...prev, eventId]));
     setNotInterestedIds(prev => { const s = new Set(prev); s.delete(eventId); return s; });
-    let removedEvent;
-    setHiddenEvents(prev => {
-      removedEvent = prev.find(e => (e.id ?? e.event_id) === eventId);
-      return prev.filter(e => (e.id ?? e.event_id) !== eventId);
-    });
+    const removedEvent = hiddenEvents.find(e => (e.id ?? e.event_id) === eventId);
+    setHiddenEvents(prev => prev.filter(e => (e.id ?? e.event_id) !== eventId));
     try {
       const res = await fetch(`https://ritmevents.ru/api/v1/events/${eventId}/not-interested`, {
         method: 'DELETE',
@@ -126,7 +123,7 @@ export function NotInterestedProvider({ children }) {
     } finally {
       setPendingIds(prev => { const s = new Set(prev); s.delete(eventId); return s; });
     }
-  }, [token, pendingIds]);
+  }, [token, pendingIds, hiddenEvents]);
 
   const isNotInterested = useCallback((eventId) => notInterestedIds.has(eventId), [notInterestedIds]);
   const isPending = useCallback((eventId) => pendingIds.has(eventId), [pendingIds]);
