@@ -24,6 +24,8 @@ vi.mock('../../../components/useUserFilters.jsx', () => ({
   }),
 }));
 
+let mockUserId = '42';
+
 vi.mock('../../../components/AuthContext.jsx', () => {
   // Stable object reference — prevents useEffect([userData]) from looping on every render
   const userData = {
@@ -36,7 +38,7 @@ vi.mock('../../../components/AuthContext.jsx', () => {
     username: 'ivan_petrov',
   };
   return {
-    useAuth: () => ({ token: 'test-token', userData, isCheckingAuth: false }),
+    useAuth: () => ({ token: 'test-token', userData, isCheckingAuth: false, userId: mockUserId }),
   };
 });
 
@@ -103,5 +105,31 @@ describe('Profile — user identification header', () => {
 
     expect(screen.getByText('Профиль')).toBeInTheDocument();
     expect(screen.getByText('Иван Иванов')).toBeInTheDocument();
+  });
+});
+
+describe('Profile — hidden events subtab', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUserId = '42';
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => [] });
+  });
+
+  it('does not show the Пойду/Скрытые toggle for non-allowlisted users', () => {
+    renderProfile();
+
+    fireEvent.click(screen.getByText('События'));
+
+    expect(screen.queryByText('Скрытые')).not.toBeInTheDocument();
+  });
+
+  it('shows the toggle and an empty hint for allowlisted users with no hidden events', () => {
+    mockUserId = '88';
+    renderProfile();
+
+    fireEvent.click(screen.getByText('События'));
+    fireEvent.click(screen.getByText('Скрытые'));
+
+    expect(screen.getByText('Скрытых событий нет')).toBeInTheDocument();
   });
 });

@@ -582,6 +582,44 @@
   background: rgba(79, 119, 241, 0.1);
 }
 
+.profile__events-subtabs {
+  margin-bottom: 12px;
+}
+
+.profile-event-card--hidden {
+  padding-right: 15px;
+}
+
+.profile-event-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.profile-event-card__actions .digest__knowMore {
+  margin-top: 0;
+}
+
+.profile-event-card__restore {
+  padding: 6px 12px;
+  border-radius: 7px;
+  border: 1.5px solid #1032A1;
+  background: transparent;
+  color: #1032A1;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.profile-event-card__restore:hover {
+  background: #1032A1;
+  color: #fff;
+}
+
 .calendar-badge {
   display: inline-block;
   background: var(--tg-theme-secondary-bg-color, #f0f0f0);
