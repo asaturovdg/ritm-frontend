@@ -142,6 +142,16 @@
     margin-left: 0;
 }
 
+.digest__actions:has(> :nth-child(2)) > * {
+    flex: 1 1 0;
+}
+
+.digest__actions:has(> :nth-child(2)) .save-calendar-btn,
+.digest__actions:has(> :nth-child(2)) .not-interested-btn {
+    width: 100%;
+    min-width: 0;
+}
+
 .digest__knowMore {
     display: inline-block;
     font-size: 12px;
