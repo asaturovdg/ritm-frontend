@@ -623,9 +623,13 @@ export default function EventsDigest() {
               )}
               <div className="digest__bottom-row">
                 <span className="digest__knowMore">Подробнее</span>
-                {hasCalendar && <BookmarkButton event={event} />}
-                {hasNotInterested && (
-                  <NotInterestedButton event={event} source={isSearchMode ? 'search' : 'list'} />
+                {(hasCalendar || hasNotInterested) && (
+                  <div className="digest__actions">
+                    {hasCalendar && <BookmarkButton event={event} />}
+                    {hasNotInterested && (
+                      <NotInterestedButton event={event} source={isSearchMode ? 'search' : 'list'} />
+                    )}
+                  </div>
                 )}
               </div>
             </div>
