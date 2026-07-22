@@ -236,7 +236,7 @@ describe('EventsDigest — not interested', () => {
   it('does not render the button for users outside the allowlist', async () => {
     renderDigest();
     await screen.findByText('Event One');
-    expect(screen.queryByText('Не интересно')).not.toBeInTheDocument();
+    expect(screen.queryByText('Скрыть')).not.toBeInTheDocument();
   });
 
   it('renders the button and hides the card on click for an allowlisted user', async () => {
@@ -244,7 +244,7 @@ describe('EventsDigest — not interested', () => {
     renderDigest();
     await screen.findByText('Event One');
 
-    const buttons = screen.getAllByText('Не интересно');
+    const buttons = screen.getAllByText('Скрыть');
     expect(buttons).toHaveLength(2);
 
     fireEvent.click(buttons[0]);

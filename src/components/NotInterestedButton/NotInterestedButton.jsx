@@ -36,7 +36,7 @@ export default function NotInterestedButton({ event, source = 'list', block }) {
       onClick={handleClick}
       disabled={pending || (!marked && alreadyGoing)}
     >
-      {marked ? '✓ Не интересно' : 'Не интересно'}
+      {marked ? '✓ Скрыто' : 'Скрыть'}
     </button>
   );
 }

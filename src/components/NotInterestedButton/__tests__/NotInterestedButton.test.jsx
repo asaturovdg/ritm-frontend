@@ -36,7 +36,7 @@ describe('NotInterestedButton', () => {
 
   it('marks the event not-interested and shows an undo toast on click', () => {
     render(<NotInterestedButton event={event} source="search" />);
-    fireEvent.click(screen.getByText('Не интересно'));
+    fireEvent.click(screen.getByText('Скрыть'));
 
     expect(mockMarkNotInterested).toHaveBeenCalledWith(event, { source: 'search', block: undefined });
     expect(mockShowToast).toHaveBeenCalledWith('Событие скрыто', expect.objectContaining({
@@ -47,7 +47,7 @@ describe('NotInterestedButton', () => {
 
   it('the toast action calls unmarkNotInterested', () => {
     render(<NotInterestedButton event={event} />);
-    fireEvent.click(screen.getByText('Не интересно'));
+    fireEvent.click(screen.getByText('Скрыть'));
 
     const [, options] = mockShowToast.mock.calls[0];
     options.action.onClick();
@@ -58,7 +58,7 @@ describe('NotInterestedButton', () => {
   it('clicking again while marked calls unmarkNotInterested directly (toggle)', () => {
     mockIsNotInterested.mockReturnValue(true);
     render(<NotInterestedButton event={event} />);
-    fireEvent.click(screen.getByText('✓ Не интересно'));
+    fireEvent.click(screen.getByText('✓ Скрыто'));
 
     expect(mockUnmarkNotInterested).toHaveBeenCalledWith(5);
     expect(mockMarkNotInterested).not.toHaveBeenCalled();
@@ -68,6 +68,6 @@ describe('NotInterestedButton', () => {
     mockIsSaved.mockReturnValue(true);
     render(<NotInterestedButton event={event} />);
 
-    expect(screen.getByText('Не интересно')).toBeDisabled();
+    expect(screen.getByText('Скрыть')).toBeDisabled();
   });
 });

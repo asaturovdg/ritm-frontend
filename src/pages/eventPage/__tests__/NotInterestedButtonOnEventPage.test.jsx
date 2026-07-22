@@ -56,11 +56,11 @@ describe('Event page — not interested button', () => {
     });
   });
 
-  it('renders "Не интересно" for an allowlisted user_id (88)', async () => {
+  it('renders "Скрыть" for an allowlisted user_id (88)', async () => {
     mockUserId = '88';
     renderEvent();
 
-    const button = await screen.findByText('Не интересно');
+    const button = await screen.findByText('Скрыть');
     expect(button).toBeInTheDocument();
   });
 
@@ -69,6 +69,6 @@ describe('Event page — not interested button', () => {
     renderEvent();
 
     await screen.findByText('HolyJS 2026');
-    expect(screen.queryByText('Не интересно')).not.toBeInTheDocument();
+    expect(screen.queryByText('Скрыть')).not.toBeInTheDocument();
   });
 });

@@ -122,34 +122,43 @@
 
 .digest__bottom-row {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 8px;
     margin-top: 12px;
-    gap: 8px;
 }
 
-.digest__actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-left: auto;
-}
-
-.digest__actions:has(> :nth-child(2)) {
-    flex-basis: 100%;
-    margin-left: 0;
-}
-
-.digest__actions:has(> :nth-child(2)) > * {
+.digest__bottom-row > * {
     flex: 1 1 0;
+    min-width: 0;
 }
 
-.digest__actions:has(> :nth-child(2)) .save-calendar-btn,
-.digest__actions:has(> :nth-child(2)) .not-interested-btn {
+.digest__bottom-row .bookmark-wrapper {
+    display: flex;
+}
+
+.digest__bottom-row .save-calendar-btn,
+.digest__bottom-row .not-interested-btn {
     width: 100%;
     min-width: 0;
+    background-color: #1032A1;
+    color: #ffffff;
+    border: 1.5px solid transparent;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.digest__bottom-row .save-calendar-btn:hover:not(:disabled),
+.digest__bottom-row .not-interested-btn:hover:not(:disabled) {
+    background-color: #0c2680;
+    color: #ffffff;
+}
+
+.digest__bottom-row .save-calendar-btn--saved,
+.digest__bottom-row .not-interested-btn--marked {
+    background-color: #3355c9;
+    border-color: transparent;
+    color: #ffffff;
 }
 
 .digest__knowMore {
@@ -164,6 +173,9 @@
     box-sizing: border-box;
     cursor: pointer;
     text-decoration: none;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
     transition: opacity 0.3s ease;
 }
 
