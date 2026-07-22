@@ -137,6 +137,11 @@
     margin-left: auto;
 }
 
+.digest__actions:has(> :nth-child(2)) {
+    flex-basis: 100%;
+    margin-left: 0;
+}
+
 .digest__knowMore {
     display: inline-block;
     font-size: 12px;
