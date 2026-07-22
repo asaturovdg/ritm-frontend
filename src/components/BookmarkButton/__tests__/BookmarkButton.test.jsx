@@ -48,7 +48,7 @@ describe('BookmarkButton — external calendar prompt', () => {
 
   it('shows the external prompt after saving when skipPrompt is false', () => {
     render(<BookmarkButton event={event} />);
-    fireEvent.click(screen.getByText('+ В мой календарь'));
+    fireEvent.click(screen.getByText('+ В календарь'));
     expect(mockSaveEvent).toHaveBeenCalledWith(event);
     expect(screen.getByText('Добавить также во внешний?')).toBeInTheDocument();
   });
@@ -56,14 +56,14 @@ describe('BookmarkButton — external calendar prompt', () => {
   it('does NOT show the external prompt after saving when skipPrompt is true', () => {
     mockSkipPrompt = true;
     render(<BookmarkButton event={event} />);
-    fireEvent.click(screen.getByText('+ В мой календарь'));
+    fireEvent.click(screen.getByText('+ В календарь'));
     expect(mockSaveEvent).toHaveBeenCalledWith(event);
     expect(screen.queryByText('Добавить также во внешний?')).not.toBeInTheDocument();
   });
 
   it('"Нет" hides the prompt without changing the remembered preference', () => {
     render(<BookmarkButton event={event} />);
-    fireEvent.click(screen.getByText('+ В мой календарь'));
+    fireEvent.click(screen.getByText('+ В календарь'));
     fireEvent.click(screen.getByText('Нет'));
     expect(screen.queryByText('Добавить также во внешний?')).not.toBeInTheDocument();
     expect(mockSetSkipPrompt).not.toHaveBeenCalled();
@@ -71,7 +71,7 @@ describe('BookmarkButton — external calendar prompt', () => {
 
   it('"Нет, запомнить мой выбор" hides the prompt, persists the choice, and alerts about Profile', () => {
     render(<BookmarkButton event={event} />);
-    fireEvent.click(screen.getByText('+ В мой календарь'));
+    fireEvent.click(screen.getByText('+ В календарь'));
     fireEvent.click(screen.getByText('Нет, запомнить мой выбор'));
 
     expect(screen.queryByText('Добавить также во внешний?')).not.toBeInTheDocument();
