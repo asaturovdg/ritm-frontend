@@ -10,7 +10,8 @@ import { useAuth } from "../../components/AuthContext.jsx";
 import { useCalendar } from "../../components/useCalendar.jsx";
 import { usePlatform } from "../../platform/usePlatform.js";
 import BookmarkButton from "../../components/BookmarkButton/BookmarkButton.jsx";
-import { CALENDAR_ALLOWLIST, hasFeature } from "../../data/featureFlags.js";
+import NotInterestedButton from "../../components/NotInterestedButton/NotInterestedButton.jsx";
+import { CALENDAR_ALLOWLIST, NOT_INTERESTED_ALLOWLIST, hasFeature } from "../../data/featureFlags.js";
 
 export default function Event({ embeddedId, isPreview = false, status }) {
   const location = useLocation();
@@ -19,6 +20,7 @@ export default function Event({ embeddedId, isPreview = false, status }) {
   const id = embeddedId || paramId;
   const { token, isCheckingAuth, userId } = useAuth();
   const hasCalendar = hasFeature(CALENDAR_ALLOWLIST, userId);
+  const hasNotInterested = hasFeature(NOT_INTERESTED_ALLOWLIST, userId);
   const { isProcessing, handleAddToCalendar, addEventToCalendar } = useCalendar();
   const { openLink, showAlert, shareEvent, platform } = usePlatform();
 
@@ -341,6 +343,9 @@ export default function Event({ embeddedId, isPreview = false, status }) {
           <div className="event__cta" style={{ position: 'relative' }}>
             {!isPreview && !fromProfileEvents && hasCalendar && (
               <BookmarkButton event={event} />
+            )}
+            {!isPreview && !fromProfileEvents && hasNotInterested && (
+              <NotInterestedButton event={event} source="list" />
             )}
             {event.registration_url && (
               <a
