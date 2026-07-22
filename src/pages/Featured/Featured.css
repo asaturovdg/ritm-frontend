@@ -139,10 +139,13 @@
   padding-left: 16px;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  /* Override the ancestor .app-content's touch-action:pan-y so a drag
-     starting on the carousel scrolls it natively instead of being
-     captured by the bottom-nav tab-swipe gesture. */
-  touch-action: pan-x;
+  /* Ancestor .app-content sets touch-action:pan-y, which would block native
+     horizontal scroll here. The tab-swipe gesture already ignores drags that
+     start inside .featured-carousel (see ignoreSelector in App.jsx), so we
+     only need to add pan-x, not replace pan-y with it — otherwise a drag
+     that starts on a card can't scroll the page vertically either, making
+     the sections below the first carousel undiscoverable. */
+  touch-action: pan-x pan-y;
 }
 
 .featured-carousel::after {
