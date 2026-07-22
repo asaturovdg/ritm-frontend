@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import EventsDigest from '../EventsDigest.jsx';
+import { ToastProvider } from '../../Toast/ToastContext.jsx';
+import { NotInterestedProvider } from '../../NotInterestedContext.jsx';
 
 vi.mock('../../TelegramLoginWidget/TelegramLoginWidget.jsx', () => ({
   default: () => null,
@@ -39,10 +41,12 @@ vi.mock('../../useUserFilters.jsx', () => ({
 
 const mockSetShowInputCode = vi.fn();
 
+let mockUserId = '42';
+
 vi.mock('../../AuthContext.jsx', () => ({
   useAuth: () => ({
     token: 'test-token',
-    userId: '42',
+    userId: mockUserId,
     isAuthReady: true,
     isCheckingAuth: false,
     showInputCode: false,
@@ -65,7 +69,11 @@ global.fetch = vi.fn().mockResolvedValue({
 const renderDigest = () =>
   render(
     <MemoryRouter>
-      <EventsDigest />
+      <NotInterestedProvider>
+        <ToastProvider>
+          <EventsDigest />
+        </ToastProvider>
+      </NotInterestedProvider>
     </MemoryRouter>
   );
 
@@ -204,5 +212,44 @@ describe('EventsDigest — sort by importance toggle', () => {
     await vi.waitFor(() => expect(lastFetchedUrl().searchParams.get('sort')).toBe('date'));
 
     expect(toggle).toHaveAttribute('aria-checked', 'false');
+  });
+});
+
+describe('EventsDigest — not interested', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    sessionStorage.clear();
+    mockUserId = '42';
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        items: [
+          { id: 1, title: 'Event One', start_date: '2099-01-01', city: ['Москва'], event_type: ['Конференция'] },
+          { id: 2, title: 'Event Two', start_date: '2099-01-02', city: ['Москва'], event_type: ['Конференция'] },
+        ],
+        total: 2,
+      }),
+    });
+  });
+
+  it('does not render the button for users outside the allowlist', async () => {
+    renderDigest();
+    await screen.findByText('Event One');
+    expect(screen.queryByText('Не интересно')).not.toBeInTheDocument();
+  });
+
+  it('renders the button and hides the card on click for an allowlisted user', async () => {
+    mockUserId = '88';
+    renderDigest();
+    await screen.findByText('Event One');
+
+    const buttons = screen.getAllByText('Не интересно');
+    expect(buttons).toHaveLength(2);
+
+    fireEvent.click(buttons[0]);
+
+    expect(screen.queryByText('Event One')).not.toBeInTheDocument();
+    expect(screen.getByText('Event Two')).toBeInTheDocument();
   });
 });
