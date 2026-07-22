@@ -154,14 +154,16 @@
 .event__cta{
     display: flex;
     align-items: flex-start;
+    flex-wrap: wrap;
     gap: 12px;
     margin-bottom: 16px;
 }
 
 .event__cta > .event-register--btn,
 .event__cta > .bookmark-wrapper,
-.event__cta > .calendar-wrapper {
-    flex: 0 0 calc(50% - 6px);
+.event__cta > .calendar-wrapper,
+.event__cta > .not-interested-btn {
+    flex: 1 1 calc(50% - 6px);
     max-width: calc(50% - 6px);
     box-sizing: border-box;
 }

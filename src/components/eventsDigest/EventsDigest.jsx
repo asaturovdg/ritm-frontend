@@ -7,7 +7,9 @@ import { useUserFilters } from "../useUserFilters.jsx";
 import { usePlatform } from "../../platform/usePlatform.js"
 import TelegramLoginWidget from '../TelegramLoginWidget/TelegramLoginWidget.jsx';
 import BookmarkButton from '../BookmarkButton/BookmarkButton.jsx';
-import { CALENDAR_ALLOWLIST, hasFeature } from '../../data/featureFlags.js';
+import NotInterestedButton from '../NotInterestedButton/NotInterestedButton.jsx';
+import { useNotInterested } from '../NotInterestedContext.jsx';
+import { CALENDAR_ALLOWLIST, NOT_INTERESTED_ALLOWLIST, hasFeature } from '../../data/featureFlags.js';
 
 import { Calendar, Clock, RussianRuble, MapPin, Users, Globe, ChevronLeft, ChevronRight, ChevronsLeft, Star } from "lucide-react";
 
@@ -67,6 +69,8 @@ export default function EventsDigest() {
   const { openLink, expandApp } = usePlatform();
   const { filters } = useUserFilters();
   const hasCalendar = hasFeature(CALENDAR_ALLOWLIST, userId);
+  const hasNotInterested = hasFeature(NOT_INTERESTED_ALLOWLIST, userId);
+  const { isNotInterested } = useNotInterested();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -525,7 +529,7 @@ export default function EventsDigest() {
             <p>Загрузка мероприятий...</p>
           </div>
         ) : events.length > 0 ? (
-          events.map(event => (
+          events.filter(event => !isNotInterested(event.id)).map(event => (
             <div
               key={event.id}
               role="button"
@@ -620,6 +624,9 @@ export default function EventsDigest() {
               <div className="digest__bottom-row">
                 <span className="digest__knowMore">Подробнее</span>
                 {hasCalendar && <BookmarkButton event={event} />}
+                {hasNotInterested && (
+                  <NotInterestedButton event={event} source={isSearchMode ? 'search' : 'list'} />
+                )}
               </div>
             </div>
           ))

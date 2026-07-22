@@ -63,7 +63,7 @@ export default function BookmarkButton({ event, className = '' }) {
         onClick={handleClick}
         disabled={pending}
       >
-        {saved ? '✓ В моём календаре' : '+ В мой календарь'}
+        {saved ? '✓ В календаре' : '+ В календарь'}
       </button>
 
       {showExternalPrompt && (
