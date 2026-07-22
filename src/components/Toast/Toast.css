@@ -8,12 +8,28 @@
   padding: 10px 20px;
   border-radius: 20px;
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 
   white-space: nowrap;
   z-index: 1000;
   box-shadow: 0 4px 16px rgba(16, 50, 161, 0.25);
   pointer-events: none;
-  animation: toast-in 0.2s ease, toast-out 0.25s ease 0.9s forwards;
+  animation: toast-in 0.2s ease, toast-out 0.25s ease var(--toast-out-delay, 0.9s) forwards;
+}
+
+.toast__action {
+  pointer-events: auto;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
 }
 
 @keyframes toast-in {
