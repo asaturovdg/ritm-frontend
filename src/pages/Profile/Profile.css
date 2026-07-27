@@ -605,9 +605,9 @@
 .profile-event-card__restore {
   padding: 6px 12px;
   border-radius: 7px;
-  border: 1.5px solid #1032A1;
-  background: transparent;
-  color: #1032A1;
+  border: 1.5px solid transparent;
+  background: #1032A1;
+  color: #fff;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -616,7 +616,7 @@
 }
 
 .profile-event-card__restore:hover {
-  background: #1032A1;
+  background: #0c2680;
   color: #fff;
 }
 
