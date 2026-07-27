@@ -85,20 +85,33 @@ describe('NotInterestedContext', () => {
     );
   });
 
-  it('rolls back the optimistic unmark when the DELETE fails', async () => {
+  it('rolls back the optimistic unmark when the DELETE fails by refetching from the server', async () => {
     const { result } = renderHook(() => useNotInterested(), { wrapper });
+    await vi.waitFor(() => expect(result.current.loading).toBe(false));
 
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ([]) });
     await act(async () => {
       await result.current.markNotInterested({ id: 14 });
     });
+    expect(result.current.isNotInterested(14)).toBe(true);
 
-    global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 404 });
+    global.fetch = vi.fn((url, options) => {
+      const u = String(url);
+      if (options?.method === 'DELETE') {
+        return Promise.resolve({ ok: false, status: 404 });
+      }
+      if (u.includes('/not-interested-events')) {
+        return Promise.resolve({ ok: true, json: async () => ([{ id: 14, title: 'Refetched Event' }]) });
+      }
+      return Promise.resolve({ ok: true, json: async () => ([]) });
+    });
 
     await act(async () => {
       await result.current.unmarkNotInterested(14);
     });
 
-    expect(result.current.isNotInterested(14)).toBe(true);
+    await vi.waitFor(() => expect(result.current.isNotInterested(14)).toBe(true));
+    expect(result.current.hiddenEvents).toContainEqual({ id: 14, title: 'Refetched Event' });
   });
 });
 
@@ -163,7 +176,7 @@ describe('NotInterestedContext — hiddenEvents load()', () => {
     expect(result.current.hiddenEvents).toContainEqual({ id: 30, title: 'New Hide' });
   });
 
-  it('unmarkNotInterested removes the event from hiddenEvents, restores it on failure', async () => {
+  it('unmarkNotInterested removes the event from hiddenEvents, restores it on failure via refetch', async () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ([]) });
     const { result } = renderHook(() => useNotInterested(), { wrapper });
     await vi.waitFor(() => expect(result.current.loading).toBe(false));
@@ -173,12 +186,21 @@ describe('NotInterestedContext — hiddenEvents load()', () => {
     });
     expect(result.current.hiddenEvents).toHaveLength(1);
 
-    global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 404 });
+    global.fetch = vi.fn((url, options) => {
+      const u = String(url);
+      if (options?.method === 'DELETE') {
+        return Promise.resolve({ ok: false, status: 404 });
+      }
+      if (u.includes('/not-interested-events')) {
+        return Promise.resolve({ ok: true, json: async () => ([{ id: 31, title: 'To Remove' }]) });
+      }
+      return Promise.resolve({ ok: true, json: async () => ([]) });
+    });
     await act(async () => {
       await result.current.unmarkNotInterested(31);
     });
 
-    expect(result.current.hiddenEvents).toContainEqual({ id: 31, title: 'To Remove' });
+    await vi.waitFor(() => expect(result.current.hiddenEvents).toContainEqual({ id: 31, title: 'To Remove' }));
     expect(result.current.isNotInterested(31)).toBe(true);
   });
 });

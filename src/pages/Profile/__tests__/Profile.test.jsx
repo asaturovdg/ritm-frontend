@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { Profile } from '../Profile.jsx';
+import { NotInterestedProvider } from '../../../components/NotInterestedContext.jsx';
 
 const mockSetFilters = vi.fn();
 const mockSaveFilters = vi.fn().mockResolvedValue(undefined);
@@ -38,7 +39,7 @@ vi.mock('../../../components/AuthContext.jsx', () => {
     username: 'ivan_petrov',
   };
   return {
-    useAuth: () => ({ token: 'test-token', userData, isCheckingAuth: false, userId: mockUserId }),
+    useAuth: () => ({ token: 'test-token', userData, isCheckingAuth: false, isAuthReady: true, userId: mockUserId }),
   };
 });
 
@@ -131,5 +132,42 @@ describe('Profile — hidden events subtab', () => {
     fireEvent.click(screen.getByText('Скрытые'));
 
     expect(screen.getByText('Скрытых событий нет')).toBeInTheDocument();
+  });
+
+  it('renders a populated hidden event and removes it when "Вернуть в дайджест" is clicked', async () => {
+    mockUserId = '88';
+    global.fetch = vi.fn((url, options) => {
+      const u = String(url);
+      if (options?.method === 'DELETE') {
+        return Promise.resolve({ ok: true });
+      }
+      if (u.includes('/not-interested-events')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ([{ id: 99, title: 'Hidden Test Event', start_date: '2026-09-01', event_type: ['Конференция'] }]),
+        });
+      }
+      return Promise.resolve({ ok: true, json: async () => ([]) });
+    });
+
+    render(
+      <MemoryRouter>
+        <NotInterestedProvider>
+          <Profile />
+        </NotInterestedProvider>
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByText('События'));
+    fireEvent.click(await screen.findByText('Скрытые'));
+
+    const title = await screen.findByText('Hidden Test Event');
+    expect(title).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Вернуть в дайджест'));
+
+    await vi.waitFor(() => {
+      expect(screen.queryByText('Hidden Test Event')).not.toBeInTheDocument();
+    });
   });
 });

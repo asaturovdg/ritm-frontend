@@ -49,6 +49,8 @@ export function NotInterestedProvider({ children }) {
             if (byIdsRes.ok) {
               const fullEvents = await byIdsRes.json();
               setHiddenEvents(Array.isArray(fullEvents) ? fullEvents : []);
+            } else {
+              setHiddenEvents(records);
             }
           }
         } else {
@@ -102,7 +104,6 @@ export function NotInterestedProvider({ children }) {
     if (pendingIds.has(eventId)) return;
     setPendingIds(prev => new Set([...prev, eventId]));
     setNotInterestedIds(prev => { const s = new Set(prev); s.delete(eventId); return s; });
-    const removedEvent = hiddenEvents.find(e => (e.id ?? e.event_id) === eventId);
     setHiddenEvents(prev => prev.filter(e => (e.id ?? e.event_id) !== eventId));
     try {
       const res = await fetch(`https://ritmevents.ru/api/v1/events/${eventId}/not-interested`, {
@@ -110,20 +111,14 @@ export function NotInterestedProvider({ children }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
-        setNotInterestedIds(prev => new Set([...prev, eventId]));
-        if (removedEvent) {
-          setHiddenEvents(prev => prev.some(e => (e.id ?? e.event_id) === eventId) ? prev : [...prev, removedEvent]);
-        }
+        load();
       }
     } catch {
-      setNotInterestedIds(prev => new Set([...prev, eventId]));
-      if (removedEvent) {
-        setHiddenEvents(prev => prev.some(e => (e.id ?? e.event_id) === eventId) ? prev : [...prev, removedEvent]);
-      }
+      load();
     } finally {
       setPendingIds(prev => { const s = new Set(prev); s.delete(eventId); return s; });
     }
-  }, [token, pendingIds, hiddenEvents]);
+  }, [token, pendingIds, load]);
 
   const isNotInterested = useCallback((eventId) => notInterestedIds.has(eventId), [notInterestedIds]);
   const isPending = useCallback((eventId) => pendingIds.has(eventId), [pendingIds]);

@@ -901,8 +901,10 @@ const copyInviteLink = () => {
                   <p className="profile-empty-hint">Скрытых событий нет</p>
                 ) : (
                   <div className="profile-calendar-day-events">
-                    {hiddenEvents.map((event) => (
-                      <div key={event.id} className="profile-event-card profile-event-card--hidden">
+                    {hiddenEvents.map((event) => {
+                      const eventId = event.id ?? event.event_id;
+                      return (
+                      <div key={eventId} className="profile-event-card profile-event-card--hidden">
                         <div className="digest__header">
                           <p className="digest__type">{event.event_type?.join(', ')}</p>
                           <h3 className="digest__title">{event.title}</h3>
@@ -946,11 +948,11 @@ const copyInviteLink = () => {
                         )}
                         <div className="profile-event-card__actions">
                           <Link
-                            to={`/events/${event.id}`}
+                            to={`/events/${eventId}`}
                             className="digest__link"
                             state={{ token, userId: userData?.id, from: 'profile-events' }}
                             onClick={() => {
-                              fetch(`https://ritmevents.ru/api/v1/events/${event.id}/view`, {
+                              fetch(`https://ritmevents.ru/api/v1/events/${eventId}/view`, {
                                 method: 'POST',
                                 headers: {
                                   ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -965,13 +967,14 @@ const copyInviteLink = () => {
                           <button
                             type="button"
                             className="profile-event-card__restore"
-                            onClick={() => unmarkNotInterested(event.id)}
+                            onClick={() => unmarkNotInterested(eventId)}
                           >
                             Вернуть в дайджест
                           </button>
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )
               ) : savedLoading ? (

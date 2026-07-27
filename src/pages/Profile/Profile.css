@@ -583,7 +583,7 @@
 }
 
 .profile__events-subtabs {
-  margin-bottom: 12px;
+  margin-block: 20px 12px;
 }
 
 .profile-event-card--hidden {

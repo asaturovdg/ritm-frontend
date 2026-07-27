@@ -529,7 +529,7 @@ export default function EventsDigest() {
             <p>Загрузка мероприятий...</p>
           </div>
         ) : events.length > 0 ? (
-          events.filter(event => !isNotInterested(event.id)).map(event => (
+          events.filter(event => !hasNotInterested || !isNotInterested(event.id)).map(event => (
             <div
               key={event.id}
               role="button"
