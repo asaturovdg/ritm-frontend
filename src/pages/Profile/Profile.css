@@ -107,20 +107,6 @@
   padding: 24px 0;
 }
 
-/* ── Event card in calendar ── */
-.profile-event-card .digest__knowMore {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 8px 16px;
-  background: #1032A1;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
 /* ── Bookmark on Event page ── */
 .event__bookmark-btn {
   margin-bottom: 8px;
@@ -598,10 +584,6 @@
   flex-wrap: wrap;
 }
 
-.profile-event-card__actions .digest__knowMore {
-  margin-top: 0;
-}
-
 .profile-event-card__restore {
   padding: 6px 12px;
   border-radius: 7px;
@@ -696,6 +678,11 @@
     border: none;
     cursor: pointer;
     transition: opacity 0.3s ease;
+}
+
+.profile-event-card__actions .digest__knowMore {
+  align-self: auto;
+  margin-top: 0;
 }
 
 

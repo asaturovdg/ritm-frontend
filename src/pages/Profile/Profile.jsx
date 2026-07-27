@@ -962,7 +962,7 @@ const copyInviteLink = () => {
                               });
                             }}
                           >
-                            <button className="btn digest__knowMore">ПОДРОБНЕЕ</button>
+                            <button className="btn digest__knowMore">Подробнее</button>
                           </Link>
                           <button
                             type="button"
@@ -1089,7 +1089,7 @@ const copyInviteLink = () => {
                               });
                             }}
                           >
-                            <button className="btn digest__knowMore">ПОДРОБНЕЕ</button>
+                            <button className="btn digest__knowMore">Подробнее</button>
                           </Link>
                         </div>
                       ))
