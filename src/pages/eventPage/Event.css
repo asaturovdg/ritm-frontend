@@ -168,6 +168,26 @@
     box-sizing: border-box;
 }
 
+.event__cta .save-calendar-btn,
+.event__cta .not-interested-btn {
+    background-color: #1032A1;
+    color: #ffffff;
+    border: 1.5px solid transparent;
+}
+
+.event__cta .save-calendar-btn:hover:not(:disabled),
+.event__cta .not-interested-btn:hover:not(:disabled) {
+    background-color: #0c2680;
+    color: #ffffff;
+}
+
+.event__cta .save-calendar-btn--saved,
+.event__cta .not-interested-btn--marked {
+    background-color: #3355c9;
+    border-color: transparent;
+    color: #ffffff;
+}
+
 .tab-btn.active{
     border-bottom: 3px #56FF71 solid;
     font-weight: 500;
