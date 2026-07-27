@@ -8,9 +8,10 @@ import { useCalendar } from "../../components/useCalendar.jsx";
 import { usePlatform } from "../../platform/usePlatform.js";
 import { useUserFilters } from "../../components/useUserFilters.jsx";
 import { useSavedEvents } from "../../components/SavedEventsContext.jsx";
+import { useNotInterested } from "../../components/NotInterestedContext.jsx";
 import { useCalendarPromptPreference } from "../../components/useCalendarPromptPreference.jsx";
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js";
-import { CALENDAR_ALLOWLIST, hasFeature } from "../../data/featureFlags.js";
+import { CALENDAR_ALLOWLIST, NOT_INTERESTED_ALLOWLIST, hasFeature } from "../../data/featureFlags.js";
 import { Calendar, Clock, RussianRuble, MapPin, Users } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useSwipeNavigation } from "../../hooks/useSwipeNavigation.js";
@@ -29,8 +30,10 @@ export function Profile() {
   const { openLink } = usePlatform();
   const { filters, setFilters, saveFilters, flushPendingSave, isSaving } = useUserFilters();
   const { savedEvents, loading: savedLoading, unsaveEvent } = useSavedEvents();
+  const { hiddenEvents, loading: hiddenLoading, unmarkNotInterested } = useNotInterested();
   const { skipPrompt, setSkipPrompt, isPending: isCalendarPromptPending } = useCalendarPromptPreference();
   const hasCalendar = hasFeature(CALENDAR_ALLOWLIST, userId);
+  const hasNotInterested = hasFeature(NOT_INTERESTED_ALLOWLIST, userId);
   const navigate = useNavigate();
   const tabs = ['myFilters', ...(hasCalendar ? ['myEvents'] : []), 'myCalendars'];
   const prefersReducedMotion = useReducedMotion();
@@ -49,6 +52,7 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   const [activeTab, setActiveTab] = useState('myFilters');
   const [subtabDirection, setSubtabDirection] = useState(1);
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date());
+  const [myEventsSubTab, setMyEventsSubTab] = useState('going');
   const [calendarPendingProvider, setCalendarPendingProvider] = useState(null);
   const [error, setError] = useState(null);
   const [digestPeriod, setDigestPeriod] = useState('daily');
@@ -868,7 +872,112 @@ const copyInviteLink = () => {
 
           return (
             <div className="profile__events-section">
-              {savedLoading ? (
+              {hasNotInterested && (
+                <div className="profileTabs profile__events-subtabs">
+                  <button
+                    type="button"
+                    className={`profile-tab ${myEventsSubTab === 'going' ? 'active' : ''}`}
+                    onClick={() => setMyEventsSubTab('going')}
+                  >
+                    Пойду
+                  </button>
+                  <button
+                    type="button"
+                    className={`profile-tab ${myEventsSubTab === 'hidden' ? 'active' : ''}`}
+                    onClick={() => setMyEventsSubTab('hidden')}
+                  >
+                    Скрытые
+                  </button>
+                </div>
+              )}
+
+              {myEventsSubTab === 'hidden' && hasNotInterested ? (
+                hiddenLoading ? (
+                  <div className="profile-loading-small">
+                    <div className="spinner-small"></div>
+                    <p>Загрузка событий...</p>
+                  </div>
+                ) : hiddenEvents.length === 0 ? (
+                  <p className="profile-empty-hint">Скрытых событий нет</p>
+                ) : (
+                  <div className="profile-calendar-day-events">
+                    {hiddenEvents.map((event) => {
+                      const eventId = event.id ?? event.event_id;
+                      return (
+                      <div key={eventId} className="profile-event-card profile-event-card--hidden">
+                        <div className="digest__header">
+                          <p className="digest__type">{event.event_type?.join(', ')}</p>
+                          <h3 className="digest__title">{event.title}</h3>
+                        </div>
+                        <div className="digest__mainInfo">
+                          <div className="digest__date-row">
+                            {event.start_date && (
+                              <div className="digest__day">
+                                <Calendar size={14} color="#1032A1" strokeWidth={1.5} /> {formatDate(event.start_date)}
+                              </div>
+                            )}
+                            {event.start_time && (
+                              <div className="digest__time">
+                                <Clock size={14} color="#1032A1" strokeWidth={1.5} /> {formatTime(event.start_time)}
+                              </div>
+                            )}
+                          </div>
+                          {typeof event.price === 'number' && (
+                            <div className="digest__price">
+                              <RussianRuble size={14} color="#1032A1" strokeWidth={1.5} />
+                              {event.price === 0 ? 'Бесплатно' : event.price}
+                            </div>
+                          )}
+                          {event.participation_type && (
+                            <div className="digest__partType">
+                              <Users size={14} color="#1032A1" strokeWidth={1.5} />
+                              {event.participation_type?.join?.(', ') ?? event.participation_type}
+                            </div>
+                          )}
+                          <div className="digest__location">
+                            <MapPin size={14} color="#1032A1" strokeWidth={1.5} />
+                            {event.city?.join(', ') || event.address || 'Онлайн'}
+                          </div>
+                        </div>
+                        {event.tags?.length > 0 && (
+                          <div className="digest__tags">
+                            {event.tags.map((tag, i) => (
+                              <span key={i} className="digest__tag">#{tag}</span>
+                            ))}
+                          </div>
+                        )}
+                        <div className="profile-event-card__actions">
+                          <Link
+                            to={`/events/${eventId}`}
+                            className="digest__link"
+                            state={{ token, userId: userData?.id, from: 'profile-events' }}
+                            onClick={() => {
+                              fetch(`https://ritmevents.ru/api/v1/events/${eventId}/view`, {
+                                method: 'POST',
+                                headers: {
+                                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ source: 'profile' }),
+                              });
+                            }}
+                          >
+                            <button className="btn digest__knowMore">Подробнее</button>
+                          </Link>
+                          <button
+                            type="button"
+                            className="profile-event-card__restore"
+                            onClick={() => unmarkNotInterested(eventId)}
+                          >
+                            Вернуть в дайджест
+                          </button>
+                        </div>
+                      </div>
+                      );
+                    })}
+                  </div>
+                )
+              ) : savedLoading ? (
                 <div className="profile-loading-small">
                   <div className="spinner-small"></div>
                   <p>Загрузка событий...</p>
@@ -980,7 +1089,7 @@ const copyInviteLink = () => {
                               });
                             }}
                           >
-                            <button className="btn digest__knowMore">ПОДРОБНЕЕ</button>
+                            <button className="btn digest__knowMore">Подробнее</button>
                           </Link>
                         </div>
                       ))

@@ -178,7 +178,13 @@ describe('EventsDigest — sort by importance toggle', () => {
     });
   });
 
-  const lastFetchedUrl = () => new URL(global.fetch.mock.calls.at(-1)[0]);
+  const lastFetchedUrl = () => {
+    const calls = global.fetch.mock.calls.filter(([url]) => {
+      const u = new URL(url);
+      return u.pathname === '/api/v1/events';
+    });
+    return new URL(calls.at(-1)[0]);
+  };
 
   it('defaults to sort=date and switch is off', async () => {
     renderDigest();

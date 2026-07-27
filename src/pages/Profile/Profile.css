@@ -107,20 +107,6 @@
   padding: 24px 0;
 }
 
-/* ── Event card in calendar ── */
-.profile-event-card .digest__knowMore {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 8px 16px;
-  background: #1032A1;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
 /* ── Bookmark on Event page ── */
 .event__bookmark-btn {
   margin-bottom: 8px;
@@ -582,6 +568,41 @@
   background: rgba(79, 119, 241, 0.1);
 }
 
+.profile__events-subtabs {
+  margin-block: 20px 12px;
+}
+
+.profile-event-card--hidden {
+  padding-right: 15px;
+}
+
+.profile-event-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.profile-event-card__restore {
+  padding: 6px 12px;
+  border-radius: 7px;
+  border: 1.5px solid transparent;
+  background: #1032A1;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.profile-event-card__restore:hover {
+  background: #0c2680;
+  color: #fff;
+}
+
 .calendar-badge {
   display: inline-block;
   background: var(--tg-theme-secondary-bg-color, #f0f0f0);
@@ -658,6 +679,11 @@
     border: none;
     cursor: pointer;
     transition: opacity 0.3s ease;
+}
+
+.profile-event-card__actions .digest__knowMore {
+  align-self: auto;
+  margin-top: 0;
 }
 
 

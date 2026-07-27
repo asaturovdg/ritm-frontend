@@ -94,7 +94,7 @@ export default function EventsDigest() {
   });
 
   const [sortByImportance, setSortByImportance] = useState(() => {
-    return sessionStorage.getItem('events_sort_importance') === 'true';
+    return localStorage.getItem('events_sort_importance') === 'true';
   });
 
   const [weekRange, setWeekRange] = useState({ start: '', end: '' });
@@ -121,8 +121,12 @@ export default function EventsDigest() {
     sessionStorage.setItem('events_week_offset', currentWeekOffset);
     sessionStorage.setItem('events_page', currentPage);
     sessionStorage.setItem('events_search_query', searchQuery);
-    sessionStorage.setItem('events_sort_importance', sortByImportance);
-  }, [currentWeekOffset, currentPage, searchQuery, sortByImportance]);
+  }, [currentWeekOffset, currentPage, searchQuery]);
+
+  // Персистим тумблер "Сначала важные" между заходами в приложение
+  useEffect(() => {
+    localStorage.setItem('events_sort_importance', sortByImportance);
+  }, [sortByImportance]);
 
   const handleInvalidToken = useCallback(() => {
     localStorage.removeItem('access_token');
@@ -529,7 +533,7 @@ export default function EventsDigest() {
             <p>Загрузка мероприятий...</p>
           </div>
         ) : events.length > 0 ? (
-          events.filter(event => !isNotInterested(event.id)).map(event => (
+          events.filter(event => !hasNotInterested || !isNotInterested(event.id)).map(event => (
             <div
               key={event.id}
               role="button"
