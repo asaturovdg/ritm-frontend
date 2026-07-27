@@ -579,6 +579,7 @@
 .profile-event-card__actions {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   margin-top: 10px;
   flex-wrap: wrap;
