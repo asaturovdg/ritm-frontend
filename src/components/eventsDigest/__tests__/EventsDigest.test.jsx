@@ -171,6 +171,7 @@ describe('EventsDigest — sort by importance toggle', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     sessionStorage.clear();
+    localStorage.clear();
 
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -203,7 +204,7 @@ describe('EventsDigest — sort by importance toggle', () => {
     await vi.waitFor(() => expect(lastFetchedUrl().searchParams.get('sort')).toBe('importance'));
     expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true');
     expect(lastFetchedUrl().searchParams.get('offset')).toBe('0');
-    expect(sessionStorage.getItem('events_sort_importance')).toBe('true');
+    expect(localStorage.getItem('events_sort_importance')).toBe('true');
   });
 
   it('restores sort=date after toggling importance off again', async () => {
