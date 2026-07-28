@@ -90,6 +90,18 @@ body {
   font-family: inherit;
 }
 
+/* Tab-style controls across the app are plain <button>s with their own custom
+   styling — without this reset, native button chrome (background, focus
+   outline) shows through identically in both themes, reading as a stray box
+   around whichever tab was last clicked. */
+button {
+  background: none;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  color: inherit;
+}
+
 a{
   text-decoration: none;
   color: var(--color-text);
