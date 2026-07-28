@@ -83,6 +83,7 @@ describe('Profile — save actions', () => {
 
   it('shows "Периодичность сохранена!" after changing periodicity', async () => {
     render$();
+    fireEvent.click(screen.getByRole('button', { name: 'Настройки' }));
     fireEvent.click(screen.getByText('Раз в 2 дня'));
     await waitFor(() =>
       expect(screen.getByText('Периодичность сохранена!')).toBeInTheDocument()
@@ -91,6 +92,7 @@ describe('Profile — save actions', () => {
 
   it('does not show "Фильтры сохранены!" after changing periodicity', async () => {
     render$();
+    fireEvent.click(screen.getByRole('button', { name: 'Настройки' }));
     fireEvent.click(screen.getByText('Каждый день'));
     await waitFor(() =>
       expect(screen.queryByText('Фильтры сохранены!')).not.toBeInTheDocument()

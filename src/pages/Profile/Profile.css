@@ -1217,8 +1217,35 @@
   margin: 0;
 }
 
-.profile__digest-settings-section {
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid var(--color-border);
+.profile-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.profile-settings-modal {
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-settings-modal .calendar-subsection {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
 }

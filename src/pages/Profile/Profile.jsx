@@ -9,15 +9,14 @@ import { usePlatform } from "../../platform/usePlatform.js";
 import { useUserFilters } from "../../components/useUserFilters.jsx";
 import { useSavedEvents } from "../../components/SavedEventsContext.jsx";
 import { useNotInterested } from "../../components/NotInterestedContext.jsx";
-import { useCalendarPromptPreference } from "../../components/useCalendarPromptPreference.jsx";
-import { useTheme } from "../../components/ThemeContext.jsx";
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js";
 import { CALENDAR_ALLOWLIST, NOT_INTERESTED_ALLOWLIST, hasFeature } from "../../data/featureFlags.js";
-import { Calendar, Clock, RussianRuble, MapPin, Users } from "lucide-react";
+import { Calendar, Clock, RussianRuble, MapPin, Users, Settings } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useSwipeNavigation } from "../../hooks/useSwipeNavigation.js";
 import { useAppTabs } from "../../hooks/useAppTabs.js";
 import { ProfileUserBadge } from "./ProfileUserBadge.jsx";
+import { ProfileSettingsModal } from "./ProfileSettingsModal.jsx";
 
 import dateIcon from "../../assets/icons/DateRange.svg";
 import timeIcon from "../../assets/icons/time.svg";
@@ -32,8 +31,6 @@ export function Profile() {
   const { filters, setFilters, saveFilters, flushPendingSave, isSaving } = useUserFilters();
   const { savedEvents, loading: savedLoading, unsaveEvent } = useSavedEvents();
   const { hiddenEvents, loading: hiddenLoading, unmarkNotInterested } = useNotInterested();
-  const { skipPrompt, setSkipPrompt, isPending: isCalendarPromptPending } = useCalendarPromptPreference();
-  const { mode: themeMode, setMode: setThemeMode } = useTheme();
   const hasCalendar = hasFeature(CALENDAR_ALLOWLIST, userId);
   const hasNotInterested = hasFeature(NOT_INTERESTED_ALLOWLIST, userId);
   const navigate = useNavigate();
@@ -51,6 +48,7 @@ const [showCopySuccessModal, setShowCopySuccessModal] = useState(false);
 const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   // Остальные состояния
   const [showModal, setShowModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [activeTab, setActiveTab] = useState('myFilters');
   const [subtabDirection, setSubtabDirection] = useState(1);
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date());
@@ -570,8 +568,31 @@ const copyInviteLink = () => {
     <div className="profile-container" {...bindSubtabSwipe()}>
       <div className="profile-header">
         <h1 className="profile-header__title">Профиль</h1>
-        <ProfileUserBadge userData={userData} />
+        <div className="profile-header__actions">
+          <button
+            type="button"
+            className="profile-settings-btn"
+            aria-label="Настройки"
+            onClick={() => setShowSettingsModal(true)}
+          >
+            <Settings size={20} strokeWidth={1.5} />
+          </button>
+          <ProfileUserBadge userData={userData} />
+        </div>
       </div>
+
+      {showSettingsModal && (
+        <ProfileSettingsModal
+          onClose={() => setShowSettingsModal(false)}
+          digestPeriod={digestPeriod}
+          digestDay={digestDay}
+          weeklyDayError={weeklyDayError}
+          setDigestPeriod={setDigestPeriod}
+          setDigestDay={setDigestDay}
+          setWeeklyDayError={setWeeklyDayError}
+          saveDigestPeriod={saveDigestPeriod}
+        />
+      )}
       <div className="profileTabs">
         {tabs.map((tab) => (
           <button
@@ -732,99 +753,9 @@ const copyInviteLink = () => {
           </div>
         )}
 
-        {activeTab === 'myFilters' && (
-          <div className="profile__digest-settings-section">
-            <div className="filter-section">
-              <div className="filter-section-header">
-                <h3 className="filter-section__title">Периодичность дайджеста</h3>
-              </div>
-              <div className="profile_chips-container">
-                {[
-                  { value: 'daily', label: 'Каждый день' },
-                  { value: 'every_2_days', label: 'Раз в 2 дня' },
-                  { value: 'weekly', label: 'Раз в неделю' },
-                  { value: 'monthly', label: 'Раз в месяц' },
-                  { value: 'never', label: 'Никогда' },
-                ].map(({ value, label }) => (
-                  <button
-                    key={value}
-                    className={`profile_chip ${digestPeriod === value ? 'profile_chip-active' : ''}`}
-                    onClick={() => {
-                      setDigestPeriod(value);
-                      if (value !== 'weekly') {
-                        setDigestDay(null);
-                        setWeeklyDayError(false);
-                        saveDigestPeriod(value, null);
-                      }
-                    }}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-
-              {digestPeriod === 'weekly' && (
-                <div className="digest-day-picker">
-                  <p className="digest-day-picker__label">День недели</p>
-                  <div className="digest-weekdays">
-                    {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((dayLabel, idx) => (
-                      <button
-                        key={idx}
-                        className={`profile_chip ${digestDay === idx ? 'profile_chip-active' : ''}`}
-                        onClick={() => {
-                          setDigestDay(idx);
-                          setWeeklyDayError(false);
-                          saveDigestPeriod('weekly', idx);
-                        }}
-                      >
-                        {dayLabel}
-                      </button>
-                    ))}
-                  </div>
-                  {weeklyDayError && (
-                    <p className="digest-day-picker__error">Выберите день недели</p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="filter-section">
-              <div className="filter-section-header">
-                <h3 className="filter-section__title">Оформление</h3>
-              </div>
-              <div className="profile_chips-container">
-                {[
-                  { value: 'light', label: 'Светлая' },
-                  { value: 'dark', label: 'Тёмная' },
-                  { value: 'system', label: 'Системная' },
-                ].map(({ value, label }) => (
-                  <button
-                    key={value}
-                    className={`profile_chip ${themeMode === value ? 'profile_chip-active' : ''}`}
-                    onClick={() => setThemeMode(value)}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* календари */}
         {activeTab === 'myCalendars' && (
           <div className="profile__calendars-section">
-            <div className="calendar-subsection">
-              <label className="calendar-prompt-toggle">
-                <input
-                  type="checkbox"
-                  checked={!skipPrompt}
-                  onChange={(e) => setSkipPrompt(!e.target.checked)}
-                  disabled={isCalendarPromptPending}
-                />
-                Предлагать добавить во внешний календарь при сохранении события
-              </label>
-            </div>
             <div className="calendar-subsection">
               {loadingExtra.calendars ? (
                 <div className="profile-loading-small">
