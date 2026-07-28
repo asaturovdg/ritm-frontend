@@ -3,8 +3,8 @@
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: #1032A1;
-  color: #fff;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
   padding: 10px 20px;
   border-radius: 20px;
   font-size: 14px;
@@ -23,7 +23,7 @@
   pointer-events: auto;
   background: transparent;
   border: none;
-  color: #fff;
+  color: var(--color-on-accent);
   font-weight: 600;
   font-size: 14px;
   text-decoration: underline;

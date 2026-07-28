@@ -4,10 +4,10 @@
 }
 
 .moderation-card {
-  border: 1px solid #eee;
+  border: 1px solid var(--color-border-soft);
   border-radius: 14px;
   padding: 14px;
-  background: #fff;
+  background: var(--color-bg-elevated);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
@@ -16,7 +16,7 @@
   justify-content: space-between;
   align-items: center;
   font-size: 12px;
-  color: #888;
+  color: var(--color-text-muted);
   margin-bottom: 10px;
 }
 
@@ -25,7 +25,7 @@
   border: none;
   padding: 0;
   font-weight: 600;
-  color: #1032A1;
+  color: var(--color-accent);
   cursor: pointer;
   font-size: 13px;
 }
@@ -42,7 +42,7 @@
 .moderation-card__original-link {
   display: inline-block;
   font-size: 12px;
-  color: #1032A1;
+  color: var(--color-accent);
   text-decoration: none;
   margin-bottom: 10px;
 }
@@ -52,7 +52,7 @@
 }
 
 .moderation-card__field {
-  border: 1px solid #eee;
+  border: 1px solid var(--color-border-soft);
   border-radius: 10px;
   padding: 8px 10px;
   margin-bottom: 8px;
@@ -61,13 +61,13 @@
 .moderation-card__field-label {
   font-size: 10px;
   text-transform: uppercase;
-  color: #999;
+  color: var(--color-text-muted);
   font-weight: 600;
   margin-bottom: 4px;
 }
 
 .moderation-card__before {
-  color: #999;
+  color: var(--color-text-muted);
   text-decoration: line-through;
   font-size: 13px;
   line-height: 1.4;
@@ -76,13 +76,14 @@
 
 .moderation-card__input {
   width: 100%;
-  border: 1.5px solid #1032A1;
+  border: 1.5px solid var(--color-accent);
   border-radius: 7px;
   padding: 6px 8px;
   font-size: 13px;
   font-family: inherit;
   margin-top: 4px;
   box-sizing: border-box;
+  background: var(--color-bg-elevated);
   color: #1a7f37;
   font-weight: 600;
 }
@@ -106,21 +107,21 @@ textarea.moderation-card__input {
   gap: 6px;
   margin-top: 6px;
   font-size: 12px;
-  color: #555;
+  color: var(--color-text-secondary);
 }
 
 .moderation-card__checkbox input {
-  accent-color: #1032A1;
+  accent-color: var(--color-accent);
 }
 
 .moderation-card__unchanged {
   font-size: 13px;
-  color: #333;
+  color: var(--color-text);
   margin-bottom: 8px;
 }
 
 .moderation-card__unchanged span {
-  color: #bbb;
+  color: var(--color-text-muted);
 }
 
 .moderation-card__footer {
@@ -138,16 +139,16 @@ textarea.moderation-card__input {
   font-size: 12px;
   font-weight: 600;
   text-align: center;
-  border: 1.5px solid #1032A1;
-  color: #1032A1;
-  background: #fff;
+  border: 1.5px solid var(--color-accent);
+  color: var(--color-accent);
+  background: var(--color-bg-elevated);
   cursor: pointer;
   font-family: inherit;
 }
 
 .moderation-card__btn--primary {
-  background: #1032A1;
-  color: #fff;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 .moderation-sheet {
@@ -169,7 +170,7 @@ textarea.moderation-card__input {
   width: 100%;
   max-height: 70vh;
   overflow-y: auto;
-  background: #fff;
+  background: var(--color-bg-elevated);
   border-radius: 16px 16px 0 0;
   padding: 16px;
   box-sizing: border-box;
@@ -186,13 +187,13 @@ textarea.moderation-card__input {
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-soft);
   font-size: 13px;
   cursor: pointer;
 }
 
 .moderation-sheet__item--active {
-  background: #e8edf9;
+  background: var(--color-accent-soft);
   margin: 0 -10px;
   padding: 10px 10px;
   border-radius: 8px;
@@ -208,7 +209,7 @@ textarea.moderation-card__input {
 
 .moderation-sheet__load-more {
   text-align: center;
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 12px;
   padding: 10px 0;
 }

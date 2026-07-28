@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" style="color-scheme: light;">
+<html lang="en">
   <head>
     <script>
       const redirect = sessionStorage.getItem('redirect');
@@ -8,8 +8,27 @@
         window.history.replaceState(null, '', redirect);
       }
     </script>
+    <script>
+      (function () {
+        // Applied synchronously before first paint to avoid a light-theme flash
+        // in dark clients. Manual choice (localStorage) wins; otherwise falls
+        // back to prefers-color-scheme, since Telegram/Max SDKs aren't loaded
+        // yet at this point (see AuthContext's platform-theme sync effect,
+        // which corrects this later if the platform's real colorScheme differs).
+        try {
+          var mode = localStorage.getItem('theme_mode');
+          var theme = mode === 'light' || mode === 'dark'
+            ? mode
+            : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      }());
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#ffffff" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&display=swap" rel="stylesheet">

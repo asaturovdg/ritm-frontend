@@ -1,16 +1,16 @@
-/* Основные цвета */
+/* Основные цвета — переиспользуют глобальные тема-токены из index.css */
 :root {
-  --black: #000000;
-  --white: #ffffff;
+  --black: var(--color-text);
+  --white: var(--color-bg-elevated);
   --green-primary: #56ff71;
   --green-light: #adffc6;
   --cyan-primary: #62ecff;
   --cyan-light: #bafffb;
-  --blue-dark: #1032a1;
-  --blue-primary: #0882ff;
-  --gray-border: #e0e0e0;
-  --gray-bg: #f5f5f5;
-  --gray-text: #666666;
+  --blue-dark: var(--color-accent);
+  --blue-primary: var(--color-accent-2);
+  --gray-border: var(--color-border);
+  --gray-bg: var(--color-bg-muted);
+  --gray-text: var(--color-text-secondary);
 }
 
 * {
@@ -364,7 +364,7 @@
 .preview-section p {
   margin: 0;
   line-height: 1.5;
-  color: #333;
+  color: var(--color-text);
   overflow-wrap: break-word;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -484,8 +484,8 @@
 
 /* Ошибки */
 .error-message {
-  background: #fee2e2;
-  color: #dc2626;
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
   padding: 12px;
   border-radius: 12px;
   margin-bottom: 20px;
@@ -664,7 +664,7 @@
 }
 
 .modal-content {
-  background: white;
+  background: var(--color-bg-elevated);
   border-radius: 16px;
   width: 90%;
   max-width: 500px;
@@ -679,12 +679,12 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .modal-header h3 {
   margin: 0;
-  color: #1032a1;
+  color: var(--color-accent);
 }
 
 .modal-close {
@@ -692,7 +692,7 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .modal-body {
@@ -703,43 +703,43 @@
 .detail-section {
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border-soft);
 }
 
 .detail-section strong {
   display: block;
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 12px;
   margin-bottom: 4px;
 }
 
 .detail-section p {
   margin: 8px 0 0 0;
-  color: #333;
+  color: var(--color-text);
   font-size: 14px;
   line-height: 1.5;
 }
 
 .detail-section a {
-  color: #0882ff;
+  color: var(--color-accent-2);
   text-decoration: none;
   word-break: break-all;
 }
 
 .rejection-reason {
-  background: #ffebee;
+  background: var(--color-danger-bg);
   padding: 12px;
   border-radius: 8px;
   border-bottom: none;
 }
 
 .rejection-reason strong {
-  color: #c62828;
+  color: var(--color-danger);
 }
 
 .modal-footer {
   padding: 16px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--color-border);
 }
 
 .modal-close-btn {
@@ -802,18 +802,18 @@
 
 
 .contact-field .question-input.error {
-  border-color: #e74c3c;
-  background-color: #fff5f5;
+  border-color: var(--color-danger);
+  background-color: var(--color-danger-bg);
 }
 
 .error-hint {
   font-size: 12px;
-  color: #e74c3c;
+  color: var(--color-danger);
   margin-top: 5px;
 }
 
 .contact-hint {
   font-size: 13px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 10px 0;
 }

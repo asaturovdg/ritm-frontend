@@ -10,6 +10,7 @@ import { useUserFilters } from "../../components/useUserFilters.jsx";
 import { useSavedEvents } from "../../components/SavedEventsContext.jsx";
 import { useNotInterested } from "../../components/NotInterestedContext.jsx";
 import { useCalendarPromptPreference } from "../../components/useCalendarPromptPreference.jsx";
+import { useTheme } from "../../components/ThemeContext.jsx";
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js";
 import { CALENDAR_ALLOWLIST, NOT_INTERESTED_ALLOWLIST, hasFeature } from "../../data/featureFlags.js";
 import { Calendar, Clock, RussianRuble, MapPin, Users } from "lucide-react";
@@ -32,6 +33,7 @@ export function Profile() {
   const { savedEvents, loading: savedLoading, unsaveEvent } = useSavedEvents();
   const { hiddenEvents, loading: hiddenLoading, unmarkNotInterested } = useNotInterested();
   const { skipPrompt, setSkipPrompt, isPending: isCalendarPromptPending } = useCalendarPromptPreference();
+  const { mode: themeMode, setMode: setThemeMode } = useTheme();
   const hasCalendar = hasFeature(CALENDAR_ALLOWLIST, userId);
   const hasNotInterested = hasFeature(NOT_INTERESTED_ALLOWLIST, userId);
   const navigate = useNavigate();
@@ -576,7 +578,6 @@ const copyInviteLink = () => {
             key={tab}
             className={`profile-tab ${activeTab === tab ? 'active' : ''}`}
             onClick={() => goToTab(tab)}
-            style={{color: '#000000'}}
           >
             {tab === 'myFilters' ? 'Фильтры'
               : tab === 'myEvents' ? 'События'
@@ -785,6 +786,27 @@ const copyInviteLink = () => {
                   )}
                 </div>
               )}
+            </div>
+
+            <div className="filter-section">
+              <div className="filter-section-header">
+                <h3 className="filter-section__title">Оформление</h3>
+              </div>
+              <div className="profile_chips-container">
+                {[
+                  { value: 'light', label: 'Светлая' },
+                  { value: 'dark', label: 'Тёмная' },
+                  { value: 'system', label: 'Системная' },
+                ].map(({ value, label }) => (
+                  <button
+                    key={value}
+                    className={`profile_chip ${themeMode === value ? 'profile_chip-active' : ''}`}
+                    onClick={() => setThemeMode(value)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}

@@ -47,6 +47,10 @@ vi.mock('../../../platform/usePlatform.js', () => ({
   usePlatform: () => ({ openLink: openLinkFn }),
 }));
 
+vi.mock('../../../components/ThemeContext.jsx', () => ({
+  useTheme: () => ({ mode: 'system', theme: 'light', setMode: vi.fn() }),
+}));
+
 global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => [] });
 
 import { Profile } from '../Profile.jsx';

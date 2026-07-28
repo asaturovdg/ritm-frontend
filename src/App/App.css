@@ -29,8 +29,8 @@
   z-index: 100;
   display: flex;
   justify-content: space-around;
-  background: #fff;
-  border-top: 1px solid #e8e8e8;
+  background: var(--color-bg-elevated);
+  border-top: 1px solid var(--color-border);
   padding: 4px 4px 8px;
   flex-shrink: 0;
 }
@@ -60,27 +60,27 @@
   right: 20%;
   height: 2px;
   border-radius: 0 0 2px 2px;
-  background: #1032A1;
+  background: var(--color-accent);
 }
 
 .nav-icon {
   display: block;
-  color: #aaa;
+  color: var(--color-text-muted);
   transition: color 0.2s ease;
 }
 
 .nav-btn.active .nav-icon {
-  color: #1032A1;
+  color: var(--color-accent);
 }
 
 .nav-label {
   font-size: 10px;
-  color: #aaa;
+  color: var(--color-text-muted);
   white-space: nowrap;
   transition: color 0.2s ease;
 }
 
 .nav-btn.active .nav-label {
-  color: #1032A1;
+  color: var(--color-accent);
   font-weight: 600;
 }
