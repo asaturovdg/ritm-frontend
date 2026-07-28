@@ -17,9 +17,9 @@ const getPlatformTheme = () => {
 const getStoredMode = () => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return MODES.includes(stored) ? stored : 'system';
+    return MODES.includes(stored) ? stored : 'light';
   } catch {
-    return 'system';
+    return 'light';
   }
 };
 
