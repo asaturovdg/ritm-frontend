@@ -11,9 +11,9 @@
   gap: 4px;
   padding: 6px 12px;
   border-radius: 7px;
-  border: 1.5px solid #1032A1;
+  border: 1.5px solid var(--color-accent);
   background: transparent;
-  color: #1032A1;
+  color: var(--color-accent);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -26,14 +26,14 @@
 }
 
 .save-calendar-btn:hover {
-  background: #1032A1;
-  color: #fff;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 .save-calendar-btn--saved {
-  background: #e8edf9;
-  border-color: #1032A1;
-  color: #1032A1;
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 /* External calendar prompt */
@@ -42,14 +42,14 @@
   flex-direction: column;
   gap: 6px;
   padding: 10px 12px;
-  background: #f5f7ff;
+  background: var(--color-accent-soft);
   border-radius: 8px;
-  border: 1px solid #c5d0f5;
+  border: 1px solid var(--color-accent-soft);
 }
 
 .external-prompt__label {
   font-size: 12px;
-  color: #555;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -65,17 +65,17 @@
   gap: 4px;
   padding: 5px 10px;
   border-radius: 6px;
-  border: 1px solid #c5d0f5;
-  background: #fff;
+  border: 1px solid var(--color-accent-soft);
+  background: var(--color-bg-elevated);
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
-  color: #222;
+  color: var(--color-text);
   transition: background 0.15s;
 }
 
 .external-prompt__btn:hover:not(:disabled) {
-  background: #e8edf9;
+  background: var(--color-accent-soft);
 }
 
 .external-prompt__btn:disabled {
@@ -97,11 +97,11 @@
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
-  color: #888;
+  color: var(--color-text-muted);
 }
 
 .external-prompt__skip:hover {
-  color: #555;
+  color: var(--color-text);
 }
 
 .external-prompt__remember {
@@ -112,10 +112,10 @@
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
-  color: #888;
+  color: var(--color-text-muted);
   text-decoration: underline;
 }
 
 .external-prompt__remember:hover {
-  color: #555;
+  color: var(--color-text);
 }

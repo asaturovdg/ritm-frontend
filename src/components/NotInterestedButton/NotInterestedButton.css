@@ -5,9 +5,9 @@
   gap: 4px;
   padding: 6px 12px;
   border-radius: 7px;
-  border: 1.5px solid #888;
+  border: 1.5px solid var(--color-text-muted);
   background: transparent;
-  color: #888;
+  color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -18,14 +18,14 @@
 }
 
 .not-interested-btn:hover:not(:disabled) {
-  background: #888;
-  color: #fff;
+  background: var(--color-text-muted);
+  color: var(--color-on-accent);
 }
 
 .not-interested-btn--marked {
-  background: #eee;
-  border-color: #888;
-  color: #888;
+  background: var(--color-bg-muted);
+  border-color: var(--color-text-muted);
+  color: var(--color-text-muted);
 }
 
 .not-interested-btn:disabled {

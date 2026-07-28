@@ -18,7 +18,7 @@
 .event__header > .event__title,
 .event__header-text > .event__title {
     font-size: 28px;
-    color: #1032A1;
+    color: var(--color-accent);
 }
 
 .event__share-btn {
@@ -29,8 +29,8 @@
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    border: 1px solid #1032A1;
-    color: #1032A1;
+    border: 1px solid var(--color-accent);
+    color: var(--color-accent);
     background: transparent;
     cursor: pointer;
     transition: background 0.15s ease;
@@ -38,7 +38,7 @@
 }
 
 .event__share-btn:active {
-    background: #e8edfa;
+    background: var(--color-accent-soft);
 }
 
 
@@ -69,7 +69,7 @@
 }
 
 .event-link{
-    color:black;
+    color: var(--color-text);
     text-decoration: underline;
     text-underline-offset:4px;
 }
@@ -105,8 +105,8 @@
     padding: 4px 8px;
     border-radius: 7px;
     font-size: 14px;
-    background-color: #E8EDFB;
-    color: #1032A1;
+    background-color: var(--color-accent-soft);
+    color: var(--color-accent);
 }
 
 .event__tags{
@@ -114,7 +114,7 @@
     gap:7px;
     width: fit-content;
     flex-wrap: wrap;
-    border-bottom: 1px #E1E1E1 solid;
+    border-bottom: 1px var(--color-border) solid;
     padding-bottom: 10px;
     margin-top: 10px;
 }
@@ -123,6 +123,7 @@
    padding: 4px 8px;
    border-radius: 7px;
    font-size: 14px;
+   color: #0c2680;
 }
 
 .event__tag:nth-child(3n+1){
@@ -170,15 +171,15 @@
 
 .event__cta .save-calendar-btn,
 .event__cta .not-interested-btn {
-    background-color: #1032A1;
-    color: #ffffff;
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
     border: 1.5px solid transparent;
 }
 
 .event__cta .save-calendar-btn:hover:not(:disabled),
 .event__cta .not-interested-btn:hover:not(:disabled) {
-    background-color: #0c2680;
-    color: #ffffff;
+    background-color: var(--color-accent-hover);
+    color: var(--color-on-accent);
 }
 
 .event__cta .save-calendar-btn--saved,
@@ -194,8 +195,8 @@
 }
 
 .event-addToCalendar--btn{
-    border:1.5px #1032A1 solid;
-    color:#1032a1;
+    border:1.5px var(--color-accent) solid;
+    color: var(--color-accent);
     font-weight: 600;
     font-size: 12px;
     border-radius:7px;
@@ -212,8 +213,8 @@
 
 .event-register--btn{
     padding: 6px 12px;
-    background-color: #1032A1;
-    color: white;
+    background-color: var(--color-accent);
+    color: var(--color-on-accent);
     font-weight: 600;
     font-size: 12px;
     border-radius:7px;
@@ -244,7 +245,7 @@
 }
 
 .speaker__name{
-    color:#1032A1;
+    color: var(--color-accent);
     font-weight: 500;
 }
 
@@ -278,8 +279,8 @@
     display: inline-flex;
     align-items: center;
     padding: 6px 12px;
-    background: #f0f2f8; 
-    color: #1032A1;      
+    background: var(--color-bg-muted);
+    color: var(--color-accent);
     border-radius: 10px;
     font-size: 14px;
     text-decoration: none;
@@ -288,18 +289,18 @@
 }
 
 .organizer-chip:hover {
-    background: #e1e7f5;
-    border-color: #1032A1;
+    background: var(--color-accent-soft);
+    border-color: var(--color-accent);
 }
 
 .organizer-chip--no-link {
-    cursor: default;    
-    color: #444;         
-    background: #f5f5f5; 
+    cursor: default;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-muted-2);
 }
 
 a.organizer-chip:active {
-    background-color: #d0d7ee;
+    background-color: var(--color-accent-soft);
 }
 
 .calendar--btn img{
@@ -316,7 +317,7 @@ a.organizer-chip:active {
 .calendar-dropdown{
     position: absolute;
     right:-3px;
-    background: var(--tg-theme-bg-color, #fff);
+    background: var(--color-bg-elevated);
     border-radius: 18px;
     padding: 10px;
     top:58px;
@@ -340,8 +341,8 @@ a.organizer-chip:active {
 /* Баннер статуса для предпросмотра заявок */
 .event-status-banner {
   padding: 12px 16px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
   margin-bottom: 16px;
 }
 
@@ -381,7 +382,7 @@ a.organizer-chip:active {
   background: transparent;
   border: none;
   font-size: 16px;
-  color: #1032A1;
+  color: var(--color-accent);
   padding: 0 0 12px 0;
   cursor: pointer;
 }
@@ -391,8 +392,8 @@ a.organizer-chip:active {
 .back-to-digest-btn {
   margin-top: 20px;
   padding: 10px 20px;
-  background: #007aff;
-  color: white;
+  background: var(--color-accent-2);
+  color: var(--color-on-accent);
   border: none;
   border-radius: 8px;
   cursor: pointer;

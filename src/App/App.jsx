@@ -10,7 +10,6 @@ import { Profile } from '../pages/Profile/Profile';
 import Feedback from '../pages/Feedback/Feedback';
 import Submissions from '../pages/Submissions/Submissions';
 import Moderation from '../pages/Moderation/Moderation.jsx';
-import { ThemeWrapper } from '../components/ThemeWrapper';
 import { TransitionContext } from '../components/TransitionContext';
 
 import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
@@ -190,8 +189,7 @@ export default function App() {
     : { duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] };
 
   return (
-    <ThemeWrapper>
-      <TransitionContext.Provider value={transitionConfig}>
+    <TransitionContext.Provider value={transitionConfig}>
           <div className="app-container">
 
             <div className="app-content" {...bindSwipe()}>
@@ -258,7 +256,6 @@ export default function App() {
             </AnimatePresence>
 
           </div>
-        </TransitionContext.Provider>
-    </ThemeWrapper>
+    </TransitionContext.Provider>
   );
 }

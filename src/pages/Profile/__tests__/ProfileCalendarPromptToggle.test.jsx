@@ -31,6 +31,10 @@ vi.mock('../../../platform/usePlatform.js', () => ({
   usePlatform: () => ({ openLink: vi.fn() }),
 }));
 
+vi.mock('../../../components/ThemeContext.jsx', () => ({
+  useTheme: () => ({ mode: 'system', theme: 'light', setMode: vi.fn() }),
+}));
+
 vi.mock('../../../components/SavedEventsContext.jsx', () => ({
   useSavedEvents: () => ({ savedEvents: [], loading: false }),
 }));

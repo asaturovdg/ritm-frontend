@@ -16,7 +16,7 @@
 .featured-section__title {
   font-size: 16px;
   font-weight: 700;
-  color: #1032A1;
+  color: var(--color-accent);
 }
 
 .featured-section__count {
@@ -170,7 +170,7 @@
   text-align: left;
   font-family: inherit;
   font-size: inherit;
-  background: #fff;
+  background: var(--color-bg-elevated);
   will-change: transform, opacity;
 }
 
@@ -241,7 +241,7 @@
   align-items: center;
   gap: 4px;
   font-size: 11px;
-  color: #555;
+  color: var(--color-text-secondary);
 }
 
 .featured-card__tracks {
@@ -252,8 +252,8 @@
 }
 
 .featured-card__track {
-  background: #E8EDFB;
-  color: #1032A1;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
   font-size: 10px;
   font-weight: 500;
   padding: 2px 7px;

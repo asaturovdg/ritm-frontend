@@ -10,9 +10,9 @@
 }
 
 .whats-new-card {
-  background: #ffffff;
+  background: var(--color-bg-elevated);
   border-radius: 20px;
-  border: 1px solid #e8e8e8;
+  border: 1px solid var(--color-border);
   padding: 28px 24px 24px;
   max-width: 360px;
   width: 100%;
@@ -23,7 +23,7 @@
 .whats-new-title {
   font-size: 18px;
   font-weight: 700;
-  color: #1032A1;
+  color: var(--color-accent);
   margin-bottom: 16px;
 }
 
@@ -52,13 +52,13 @@
 .whats-new-release-date {
   font-size: 13px;
   font-weight: 600;
-  color: #1032A1;
+  color: var(--color-accent);
   margin-bottom: 8px;
 }
 
 .whats-new-list li {
   font-size: 14px;
-  color: #000;
+  color: var(--color-text);
   padding-left: 16px;
   position: relative;
   line-height: 1.5;
@@ -68,14 +68,14 @@
   content: '•';
   position: absolute;
   left: 0;
-  color: #1032A1;
+  color: var(--color-accent);
 }
 
 .whats-new-btn {
   width: 100%;
   padding: 12px;
-  background: #1032A1;
-  color: #fff;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
   border-radius: 12px;
 
   font-size: 14px;
