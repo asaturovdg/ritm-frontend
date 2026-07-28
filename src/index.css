@@ -71,6 +71,18 @@ body {
   color: var(--color-text);
 }
 
+/* telegram-ui's AppRoot wraps the entire app and sets its own `color` on this
+   scoping class (var(--tgui--text_color), which falls back to a hardcoded
+   #000/#fff outside real Telegram) — that wins over `body`'s color for any
+   plain text without its own rule, decoupling it from our theme tokens and
+   from the `[data-theme]` attribute they react to. Reassert our own token
+   here (loaded after telegram-ui's stylesheet, so it wins at equal
+   specificity) so all text stays on the same reactive source of truth. */
+.tgui-6a12827a138e8827 {
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
 *{
   margin: 0;
   padding: 0;

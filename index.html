@@ -10,16 +10,21 @@
     </script>
     <script>
       (function () {
-        // Applied synchronously before first paint to avoid a light-theme flash
-        // in dark clients. Manual choice (localStorage) wins; otherwise falls
-        // back to prefers-color-scheme, since Telegram/Max SDKs aren't loaded
-        // yet at this point (see AuthContext's platform-theme sync effect,
-        // which corrects this later if the platform's real colorScheme differs).
+        // Applied synchronously before first paint to avoid a theme flash.
+        // Default (no stored choice) is light. An explicit 'system' choice
+        // resolves against prefers-color-scheme here (Telegram/Max SDKs
+        // aren't loaded yet, so ThemeProvider reconciles against the real
+        // platform colorScheme after mount if it differs).
         try {
           var mode = localStorage.getItem('theme_mode');
-          var theme = mode === 'light' || mode === 'dark'
-            ? mode
-            : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          var theme;
+          if (mode === 'light' || mode === 'dark') {
+            theme = mode;
+          } else if (mode === 'system') {
+            theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          } else {
+            theme = 'light';
+          }
           document.documentElement.setAttribute('data-theme', theme);
         } catch (e) {
           document.documentElement.setAttribute('data-theme', 'light');
