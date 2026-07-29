@@ -115,9 +115,9 @@
     background-color: var(--color-bg-muted);
 }
 
-.digest__tag:nth-child(3n+1){ background-color: #ADFFC6; color: #0c2680; }
-.digest__tag:nth-child(3n+2){ background-color: #bafffb; color: #0c2680; }
-.digest__tag:nth-child(3n+3){ background-color: #84a0f5; color: #0c2680; }
+.digest__tag:nth-child(3n+1){ background-color: #ADFFC6; color: #000000; }
+.digest__tag:nth-child(3n+2){ background-color: #bafffb; color: #000000; }
+.digest__tag:nth-child(3n+3){ background-color: #84a0f5; color: #000000; }
 
 
 .digest__bottom-row {
