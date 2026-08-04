@@ -1,0 +1,125 @@
+.collections-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+}
+
+.collections-sheet__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.collections-sheet__panel {
+  position: relative;
+  width: 100%;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: var(--color-bg-elevated);
+  border-radius: 16px 16px 0 0;
+  padding: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.collections-sheet__title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.collections-sheet__loading,
+.collections-sheet__empty {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+.collections-sheet__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.collections-sheet__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border-soft);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.collections-sheet__item-name {
+  flex: 1;
+}
+
+.collections-sheet__item-count {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.collections-sheet__add {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  padding: 8px 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.collections-sheet__create-row {
+  display: flex;
+  gap: 8px;
+}
+
+.collections-sheet__create-input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  font-size: 13px;
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+.collections-sheet__create-btn {
+  padding: 8px 14px;
+  border-radius: 7px;
+  border: none;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.collections-sheet__create-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.collections-sheet__done {
+  margin-top: 4px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.collections-sheet__done:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Placeholder } from '@telegram-apps/telegram-ui';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, MapPin, RussianRuble, Hand } from 'lucide-react';
+import { Calendar, Clock, MapPin, RussianRuble, Hand, MoreVertical } from 'lucide-react';
 import { useAuth } from '../../components/AuthContext.jsx';
+import { useCollections } from '../../components/CollectionsContext.jsx';
 import './Featured.css';
 
 const formatDate = (d) => d ? d.split('-').reverse().join('.') : '';
@@ -84,7 +85,7 @@ function FeaturedCard({ event, onClick, variant = 'default' }) {
   );
 }
 
-function FeaturedCarousel({ title, items, onCardClick, variant = 'default', showHint = false }) {
+function FeaturedCarousel({ title, items, onCardClick, variant = 'default', showHint = false, headerExtra = null }) {
   const iconColor = getIconColor(variant);
   const carouselRef = useRef(null);
   const rafRef = useRef(null);
@@ -175,6 +176,7 @@ function FeaturedCarousel({ title, items, onCardClick, variant = 'default', show
         >
           {items.length}
         </span>
+        {headerExtra}
       </div>
       <div className="featured-carousel-wrap">
         <div className="featured-carousel" ref={carouselRef}>
@@ -204,12 +206,284 @@ function FeaturedCarousel({ title, items, onCardClick, variant = 'default', show
   );
 }
 
+function CollectionMenu({ open, onToggle, onClose, onRename, onDelete }) {
+  return (
+    <div className="collection-menu">
+      <button
+        type="button"
+        className="collection-menu__trigger"
+        aria-label="Действия с подборкой"
+        onClick={(e) => { e.stopPropagation(); onToggle(); }}
+      >
+        <MoreVertical size={16} strokeWidth={1.75} />
+      </button>
+      {open && (
+        <>
+          <div className="collection-menu__backdrop" onClick={onClose} />
+          <div className="collection-menu__dropdown">
+            <button type="button" className="collection-menu__item" onClick={() => { onClose(); onRename(); }}>
+              Переименовать
+            </button>
+            <button type="button" className="collection-menu__item collection-menu__item--danger" onClick={() => { onClose(); onDelete(); }}>
+              Удалить
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function MyCollectionSection({ collection, token, onCardClick, isMenuOpen, onToggleMenu, onCloseMenu, onRename, onDelete }) {
+  const [events, setEvents] = useState(null);
+  const [loadingEvents, setLoadingEvents] = useState(false);
+
+  useEffect(() => {
+    if (!collection.event_count) {
+      setEvents([]);
+      return;
+    }
+    let cancelled = false;
+    setLoadingEvents(true);
+    fetch(`https://ritmevents.ru/api/v1/collections/${collection.id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(async (res) => {
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled) setEvents(Array.isArray(data?.events) ? data.events : []);
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoadingEvents(false); });
+    return () => { cancelled = true; };
+  }, [collection.id, collection.event_count, token]);
+
+  const menu = (
+    <CollectionMenu
+      open={isMenuOpen}
+      onToggle={onToggleMenu}
+      onClose={onCloseMenu}
+      onRename={onRename}
+      onDelete={onDelete}
+    />
+  );
+
+  if (!collection.event_count) {
+    return (
+      <div className="featured-section">
+        <div className="featured-section__header">
+          <span className="featured-section__title">{collection.name}</span>
+          <span className="featured-section__count">0</span>
+          {menu}
+        </div>
+        <p className="my-collection__empty">Подборка пуста. Добавьте события через карточку события.</p>
+      </div>
+    );
+  }
+
+  if (loadingEvents || events === null) {
+    return (
+      <div className="featured-section">
+        <div className="featured-section__header">
+          <span className="featured-section__title">{collection.name}</span>
+          <span className="featured-section__count">{collection.event_count}</span>
+          {menu}
+        </div>
+        <p className="my-collection__empty">Загрузка…</p>
+      </div>
+    );
+  }
+
+  return (
+    <FeaturedCarousel
+      title={collection.name}
+      items={events}
+      onCardClick={onCardClick}
+      headerExtra={menu}
+    />
+  );
+}
+
+function MyCollectionsPanel() {
+  const { token } = useAuth();
+  const navigate = useNavigate();
+  const { collections, loading, create, rename, remove } = useCollections();
+
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createValue, setCreateValue] = useState('');
+  const [createBusy, setCreateBusy] = useState(false);
+  const [renameTarget, setRenameTarget] = useState(null);
+  const [renameValue, setRenameValue] = useState('');
+  const [renameBusy, setRenameBusy] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+
+  const handleOwnCardClick = (id) => {
+    fetch(`https://ritmevents.ru/api/v1/events/${id}/view`, {
+      method: 'POST',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ source: 'profile' }),
+    });
+    navigate(`/events/${id}`);
+  };
+
+  const handleCreate = async () => {
+    const name = createValue.trim();
+    if (!name) return;
+    setCreateBusy(true);
+    try {
+      await create(name);
+      setCreateOpen(false);
+      setCreateValue('');
+    } catch {
+      /* toast not needed here — modal stays open, user can retry */
+    } finally {
+      setCreateBusy(false);
+    }
+  };
+
+  const handleRename = async () => {
+    const name = renameValue.trim();
+    if (!name || !renameTarget) return;
+    setRenameBusy(true);
+    try {
+      await rename(renameTarget.id, name);
+      setRenameTarget(null);
+    } catch {
+      /* keep modal open on failure */
+    } finally {
+      setRenameBusy(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleteBusy(true);
+    try {
+      await remove(deleteTarget.id);
+      setDeleteTarget(null);
+    } catch {
+      /* keep modal open on failure */
+    } finally {
+      setDeleteBusy(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="spinner" />
+        <p>Загрузка...</p>
+      </div>
+    );
+  }
+
+  if (collections.length === 0) {
+    return (
+      <>
+        <Placeholder
+          className="placeholder"
+          header="У вас пока нет подборок"
+          description="Добавьте событие в подборку через карточку события"
+          action={
+            <button className="digest__knowMore" onClick={() => setCreateOpen(true)}>
+              Создать подборку
+            </button>
+          }
+        />
+        {createOpen && (
+          <div className="modal-overlay" onClick={() => setCreateOpen(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <h3>Новая подборка</h3>
+              <input
+                type="text"
+                className="collection-name-input"
+                value={createValue}
+                onChange={(e) => setCreateValue(e.target.value)}
+                placeholder="Название подборки"
+                maxLength={100}
+                autoFocus
+              />
+              <div className="modal-actions">
+                <button className="modal-cancel-btn" onClick={() => setCreateOpen(false)}>Отмена</button>
+                <button className="modal-confirm-btn" onClick={handleCreate} disabled={createBusy || !createValue.trim()}>
+                  Создать
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  return (
+    <>
+      {collections.map((collection) => (
+        <MyCollectionSection
+          key={collection.id}
+          collection={collection}
+          token={token}
+          onCardClick={handleOwnCardClick}
+          isMenuOpen={openMenuId === collection.id}
+          onToggleMenu={() => setOpenMenuId(prev => prev === collection.id ? null : collection.id)}
+          onCloseMenu={() => setOpenMenuId(null)}
+          onRename={() => { setRenameTarget(collection); setRenameValue(collection.name); }}
+          onDelete={() => setDeleteTarget(collection)}
+        />
+      ))}
+
+      {renameTarget && (
+        <div className="modal-overlay" onClick={() => setRenameTarget(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>Переименовать подборку</h3>
+            <input
+              type="text"
+              className="collection-name-input"
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              maxLength={100}
+              autoFocus
+            />
+            <div className="modal-actions">
+              <button className="modal-cancel-btn" onClick={() => setRenameTarget(null)}>Отмена</button>
+              <button className="modal-confirm-btn" onClick={handleRename} disabled={renameBusy || !renameValue.trim()}>
+                Сохранить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>Удалить подборку «{deleteTarget.name}»?</h3>
+            <p>Это действие нельзя отменить.</p>
+            <div className="modal-actions">
+              <button className="modal-cancel-btn" onClick={() => setDeleteTarget(null)}>Отмена</button>
+              <button className="modal-confirm-btn" onClick={handleDelete} disabled={deleteBusy}>
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function Featured() {
   const { token, isAuthReady, isCheckingAuth, setShowInputCode } = useAuth();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [activeSubTab, setActiveSubTab] = useState('recommendations');
 
   useEffect(() => {
     if (!isAuthReady || !token) return;
@@ -264,9 +538,45 @@ export default function Featured() {
     navigate(`/events/${id}`);
   };
 
+  let hintAssigned = false;
+  const claimHint = (items) => {
+    if (hintAssigned || !items || items.length === 0) return false;
+    hintAssigned = true;
+    return true;
+  };
+
+  const subTabSwitcher = (
+    <div className="featured-subtabs">
+      <button
+        type="button"
+        className={`featured-subtabs__btn ${activeSubTab === 'recommendations' ? 'featured-subtabs__btn--active' : ''}`}
+        onClick={() => setActiveSubTab('recommendations')}
+      >
+        Рекомендации
+      </button>
+      <button
+        type="button"
+        className={`featured-subtabs__btn ${activeSubTab === 'mine' ? 'featured-subtabs__btn--active' : ''}`}
+        onClick={() => setActiveSubTab('mine')}
+      >
+        Мои подборки
+      </button>
+    </div>
+  );
+
+  if (activeSubTab === 'mine') {
+    return (
+      <div className="featured">
+        {subTabSwitcher}
+        <MyCollectionsPanel />
+      </div>
+    );
+  }
+
   if (isCheckingAuth || loading) {
     return (
       <div className="featured">
+        {subTabSwitcher}
         <div className="loading-container">
           <div className="spinner" />
           <p>Загрузка...</p>
@@ -278,6 +588,7 @@ export default function Featured() {
   if (error) {
     return (
       <div className="featured">
+        {subTabSwitcher}
         <p style={{ textAlign: 'center', color: '#888', marginTop: 32 }}>
           Не удалось загрузить рекомендации. Попробуйте позже.
         </p>
@@ -285,15 +596,9 @@ export default function Featured() {
     );
   }
 
-  let hintAssigned = false;
-  const claimHint = (items) => {
-    if (hintAssigned || !items || items.length === 0) return false;
-    hintAssigned = true;
-    return true;
-  };
-
   return (
     <div className="featured">
+      {subTabSwitcher}
       {data?.for_you === null ? (
         <Placeholder
           className="placeholder"

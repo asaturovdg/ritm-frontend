@@ -14,6 +14,7 @@ import { WhatsNewProvider } from './components/WhatsNew/WhatsNewContext.jsx'
 import WhatsNewModal from './components/WhatsNew/WhatsNewModal.jsx'
 import { SavedEventsProvider } from './components/SavedEventsContext.jsx'
 import { NotInterestedProvider } from './components/NotInterestedContext.jsx'
+import { CollectionsProvider } from './components/CollectionsContext.jsx'
 
 function ThemedAppRoot({ children }) {
   const { theme } = useTheme();
@@ -33,11 +34,13 @@ createRoot(document.getElementById('root')).render(
             <AuthProvider>
               <SavedEventsProvider>
                 <NotInterestedProvider>
-                  <ToastProvider>
-                    <FiltersProvider>
-                      <App />
-                    </FiltersProvider>
-                  </ToastProvider>
+                  <CollectionsProvider>
+                    <ToastProvider>
+                      <FiltersProvider>
+                        <App />
+                      </FiltersProvider>
+                    </ToastProvider>
+                  </CollectionsProvider>
                 </NotInterestedProvider>
               </SavedEventsProvider>
             </AuthProvider>

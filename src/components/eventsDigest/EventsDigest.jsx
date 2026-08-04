@@ -8,6 +8,7 @@ import { usePlatform } from "../../platform/usePlatform.js"
 import TelegramLoginWidget from '../TelegramLoginWidget/TelegramLoginWidget.jsx';
 import BookmarkButton from '../BookmarkButton/BookmarkButton.jsx';
 import NotInterestedButton from '../NotInterestedButton/NotInterestedButton.jsx';
+import CollectionsButton from '../CollectionsButton/CollectionsButton.jsx';
 import { useNotInterested } from '../NotInterestedContext.jsx';
 import { CALENDAR_ALLOWLIST, NOT_INTERESTED_ALLOWLIST, hasFeature } from '../../data/featureFlags.js';
 
@@ -631,6 +632,7 @@ export default function EventsDigest() {
                 {hasNotInterested && (
                   <NotInterestedButton event={event} source={isSearchMode ? 'search' : 'list'} />
                 )}
+                <CollectionsButton event={event} source={isSearchMode ? 'search' : 'list'} />
               </div>
             </div>
           ))

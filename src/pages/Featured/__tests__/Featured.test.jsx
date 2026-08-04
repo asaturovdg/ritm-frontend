@@ -1,7 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Featured from '../Featured.jsx';
+
+const mockCreate = vi.fn();
+const mockRename = vi.fn();
+const mockRemove = vi.fn();
+let collectionsFixture = [];
+let collectionsLoading = false;
+
+vi.mock('../../../components/CollectionsContext.jsx', () => ({
+  useCollections: () => ({
+    collections: collectionsFixture,
+    loading: collectionsLoading,
+    create: mockCreate,
+    rename: mockRename,
+    remove: mockRemove,
+  }),
+}));
 
 vi.mock('@telegram-apps/telegram-ui', () => ({
   Placeholder: ({ header, description, action }) => (
@@ -110,5 +126,82 @@ describe('Featured page', () => {
         })
       );
     });
+  });
+});
+
+describe('Featured page — Мои подборки sub-tab', () => {
+  beforeEach(() => {
+    collectionsFixture = [];
+    collectionsLoading = false;
+    global.fetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => sampleData,
+    });
+  });
+
+  it('shows an empty state with a create button when the user has no collections', async () => {
+    renderFeatured();
+    await screen.findByText('Что-то для тебя');
+
+    fireEvent.click(screen.getByText('Мои подборки'));
+
+    expect(await screen.findByText('У вас пока нет подборок')).toBeInTheDocument();
+    expect(screen.getByText('Создать подборку')).toBeInTheDocument();
+  });
+
+  it('creating a collection from the empty state calls context.create()', async () => {
+    mockCreate.mockResolvedValue({ id: 9, name: 'Мои события', event_count: 0 });
+    renderFeatured();
+    await screen.findByText('Что-то для тебя');
+    fireEvent.click(screen.getByText('Мои подборки'));
+    await screen.findByText('Создать подборку');
+
+    fireEvent.click(screen.getByText('Создать подборку'));
+    fireEvent.change(screen.getByPlaceholderText('Название подборки'), { target: { value: 'Мои события' } });
+    fireEvent.click(screen.getByText('Создать'));
+
+    await waitFor(() => expect(mockCreate).toHaveBeenCalledWith('Мои события'));
+  });
+
+  it('renders a section per collection with a non-empty one showing its carousel', async () => {
+    collectionsFixture = [
+      { id: 1, name: 'Мои конференции', event_count: 1 },
+      { id: 2, name: 'На выходные', event_count: 0 },
+    ];
+    global.fetch.mockImplementation((url) => {
+      const u = String(url);
+      if (u === 'https://ritmevents.ru/api/v1/featured') {
+        return Promise.resolve({ ok: true, status: 200, json: async () => sampleData });
+      }
+      if (u.includes('/collections/1')) {
+        return Promise.resolve({ ok: true, json: async () => ({ id: 1, name: 'Мои конференции', events: [sampleEvent] }) });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({}) });
+    });
+
+    renderFeatured();
+    await screen.findByText('Что-то для тебя');
+    fireEvent.click(screen.getByText('Мои подборки'));
+
+    expect(await screen.findByText('Highload++ 2025')).toBeInTheDocument();
+    expect(screen.getByText('Подборка пуста. Добавьте события через карточку события.')).toBeInTheDocument();
+  });
+
+  it('kebab menu offers rename and delete, delete calls context.remove()', async () => {
+    mockRemove.mockResolvedValue();
+    collectionsFixture = [{ id: 1, name: 'На выходные', event_count: 0 }];
+    renderFeatured();
+    await screen.findByText('Что-то для тебя');
+    fireEvent.click(screen.getByText('Мои подборки'));
+    await screen.findByText('На выходные');
+
+    fireEvent.click(screen.getByLabelText('Действия с подборкой'));
+    fireEvent.click(screen.getByText('Удалить'));
+    expect(screen.getByText(/Удалить подборку/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Это действие нельзя отменить.').closest('.modal-content').querySelector('.modal-confirm-btn'));
+
+    await waitFor(() => expect(mockRemove).toHaveBeenCalledWith(1));
   });
 });

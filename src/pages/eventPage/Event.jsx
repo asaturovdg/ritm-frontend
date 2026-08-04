@@ -11,6 +11,7 @@ import { useCalendar } from "../../components/useCalendar.jsx";
 import { usePlatform } from "../../platform/usePlatform.js";
 import BookmarkButton from "../../components/BookmarkButton/BookmarkButton.jsx";
 import NotInterestedButton from "../../components/NotInterestedButton/NotInterestedButton.jsx";
+import CollectionsButton from "../../components/CollectionsButton/CollectionsButton.jsx";
 import { CALENDAR_ALLOWLIST, NOT_INTERESTED_ALLOWLIST, hasFeature } from "../../data/featureFlags.js";
 
 export default function Event({ embeddedId, isPreview = false, status }) {
@@ -346,6 +347,9 @@ export default function Event({ embeddedId, isPreview = false, status }) {
             )}
             {!isPreview && !fromProfileEvents && hasNotInterested && (
               <NotInterestedButton event={event} source="list" />
+            )}
+            {!isPreview && !fromProfileEvents && (
+              <CollectionsButton event={event} source="list" />
             )}
             {event.registration_url && (
               <a

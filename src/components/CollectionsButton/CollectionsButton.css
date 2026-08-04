@@ -1,0 +1,20 @@
+.collections-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 7px;
+  border: 1.5px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  font-family: inherit;
+  box-sizing: border-box;
+  line-height: 0;
+}
+
+.collections-btn:hover {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
