@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../AuthContext.jsx';
 import { useCollections } from '../CollectionsContext.jsx';
 import { useToast } from '../Toast/ToastContext.jsx';
@@ -84,7 +85,7 @@ export default function CollectionsSheet({ event, source = 'list', onClose }) {
     }
   };
 
-  return (
+  return createPortal(
     <div className="collections-sheet">
       <div
         className="collections-sheet__backdrop"
@@ -147,6 +148,7 @@ export default function CollectionsSheet({ event, source = 'list', onClose }) {
           Готово
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
