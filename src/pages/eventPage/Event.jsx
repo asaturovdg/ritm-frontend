@@ -345,12 +345,6 @@ export default function Event({ embeddedId, isPreview = false, status }) {
             {!isPreview && !fromProfileEvents && hasCalendar && (
               <BookmarkButton event={event} />
             )}
-            {!isPreview && !fromProfileEvents && hasNotInterested && (
-              <NotInterestedButton event={event} source="list" />
-            )}
-            {!isPreview && !fromProfileEvents && (
-              <CollectionsButton event={event} source="list" />
-            )}
             {event.registration_url && (
               <a
                 href={event.registration_url}
@@ -366,6 +360,12 @@ export default function Event({ embeddedId, isPreview = false, status }) {
               >
                 Регистрация
               </a>
+            )}
+            {!isPreview && !fromProfileEvents && (
+              <CollectionsButton event={event} source="list" />
+            )}
+            {!isPreview && !fromProfileEvents && hasNotInterested && (
+              <NotInterestedButton event={event} source="list" />
             )}
 
             {!isPreview && !fromProfileEvents && event.start_date && !hasCalendar && (
