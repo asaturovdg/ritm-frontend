@@ -86,7 +86,10 @@ export default function CollectionsSheet({ event, source = 'list', onClose }) {
   };
 
   return createPortal(
-    <div className="collections-sheet">
+    <div
+      className="collections-sheet"
+      onClick={(e) => e.stopPropagation()}
+    >
       <div
         className="collections-sheet__backdrop"
         data-testid="collections-sheet-backdrop"

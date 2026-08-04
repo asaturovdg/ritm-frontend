@@ -546,17 +546,17 @@ export default function Featured() {
   };
 
   const subTabSwitcher = (
-    <div className="featured-subtabs">
+    <div className="profileTabs featured-subtabs">
       <button
         type="button"
-        className={`featured-subtabs__btn ${activeSubTab === 'recommendations' ? 'featured-subtabs__btn--active' : ''}`}
+        className={`profile-tab ${activeSubTab === 'recommendations' ? 'active' : ''}`}
         onClick={() => setActiveSubTab('recommendations')}
       >
         Рекомендации
       </button>
       <button
         type="button"
-        className={`featured-subtabs__btn ${activeSubTab === 'mine' ? 'featured-subtabs__btn--active' : ''}`}
+        className={`profile-tab ${activeSubTab === 'mine' ? 'active' : ''}`}
         onClick={() => setActiveSubTab('mine')}
       >
         Мои подборки

@@ -63,6 +63,23 @@ describe('CollectionsSheet', () => {
     );
   });
 
+  it('clicks inside the sheet do not bubble to an ancestor click handler (portal still bubbles via the React tree)', async () => {
+    const parentClick = vi.fn();
+    render(
+      <div onClick={parentClick}>
+        <CollectionsSheet event={event} onClose={vi.fn()} />
+      </div>
+    );
+
+    await waitFor(() => expect(screen.getByText('Мои конференции')).toBeInTheDocument());
+
+    fireEvent.click(screen.getAllByRole('checkbox')[0]);
+    fireEvent.click(screen.getByText('Готово'));
+    fireEvent.click(screen.getByTestId('collections-sheet-backdrop'));
+
+    expect(parentClick).not.toHaveBeenCalled();
+  });
+
   it('inline creation adds the new collection pre-checked and collapses the input', async () => {
     mockCreate.mockResolvedValue({ id: 3, name: 'IT-митапы', event_count: 0 });
     collectionsFixture = [];
