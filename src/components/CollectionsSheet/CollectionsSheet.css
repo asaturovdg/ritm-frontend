@@ -1,7 +1,9 @@
 .collections-sheet {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  /* Above .bottom-nav (z-index: 100) — the sheet is portaled to document.body,
+     a sibling of .app-container, so it must out-rank the nav bar explicitly. */
+  z-index: 200;
   display: flex;
   align-items: flex-end;
 }

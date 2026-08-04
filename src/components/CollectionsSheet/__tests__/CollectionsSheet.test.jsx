@@ -4,6 +4,7 @@ import CollectionsSheet from '../CollectionsSheet.jsx';
 
 const mockCreate = vi.fn();
 const mockLoad = vi.fn();
+const mockBumpEventCount = vi.fn();
 const mockShowToast = vi.fn();
 
 let collectionsFixture;
@@ -17,6 +18,7 @@ vi.mock('../../CollectionsContext.jsx', () => ({
     collections: collectionsFixture,
     create: mockCreate,
     load: mockLoad,
+    bumpEventCount: mockBumpEventCount,
   }),
 }));
 
@@ -125,6 +127,33 @@ describe('CollectionsSheet', () => {
       );
     });
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('bumps event_count locally for collections added/removed after a successful "Готово"', async () => {
+    // starts checked into [1] (Мои конференции), user checks [2] (На выходные) too
+    // and unchecks [1] — so 1 is removed, 2 is added.
+    global.fetch = vi.fn((url, opts) => {
+      const u = String(url);
+      if (u.includes('/events/42/collections') && opts?.method === 'PUT') {
+        return Promise.resolve({ ok: true, json: async () => ({ collection_ids: [2] }) });
+      }
+      if (u.includes('/events/42/collections')) {
+        return Promise.resolve({ ok: true, json: async () => ({ collection_ids: [1] }) });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({}) });
+    });
+
+    render(<CollectionsSheet event={event} onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByText('Мои конференции')).toBeInTheDocument());
+
+    fireEvent.click(screen.getAllByRole('checkbox')[0]); // uncheck "Мои конференции" (1)
+    fireEvent.click(screen.getAllByRole('checkbox')[1]); // check "На выходные" (2)
+    fireEvent.click(screen.getByText('Готово'));
+
+    await waitFor(() => {
+      expect(mockBumpEventCount).toHaveBeenCalledWith(2, 1);
+      expect(mockBumpEventCount).toHaveBeenCalledWith(1, -1);
+    });
   });
 
   it('on 400 shows a toast, keeps the sheet open, does not revert checkboxes, and reloads collections', async () => {

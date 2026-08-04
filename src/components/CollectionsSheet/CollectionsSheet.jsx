@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../AuthContext.jsx';
 import { useCollections } from '../CollectionsContext.jsx';
@@ -7,11 +7,12 @@ import './CollectionsSheet.css';
 
 export default function CollectionsSheet({ event, source = 'list', onClose }) {
   const { token } = useAuth();
-  const { collections, create, load } = useCollections();
+  const { collections, create, load, bumpEventCount } = useCollections();
   const showToast = useToast();
 
   const eventId = event?.id;
   const [selected, setSelected] = useState(new Set());
+  const initialSelectedRef = useRef(new Set());
   const [loadingMembership, setLoadingMembership] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -27,7 +28,11 @@ export default function CollectionsSheet({ event, source = 'list', onClose }) {
       .then(async (res) => {
         if (!res.ok) return;
         const data = await res.json();
-        if (!cancelled) setSelected(new Set(data?.collection_ids ?? []));
+        const ids = new Set(data?.collection_ids ?? []);
+        if (!cancelled) {
+          setSelected(ids);
+          initialSelectedRef.current = ids;
+        }
       })
       .catch(() => {})
       .finally(() => {
@@ -72,6 +77,9 @@ export default function CollectionsSheet({ event, source = 'list', onClose }) {
         body: JSON.stringify({ collection_ids: Array.from(selected), source }),
       });
       if (res.ok) {
+        const before = initialSelectedRef.current;
+        selected.forEach((id) => { if (!before.has(id)) bumpEventCount(id, 1); });
+        before.forEach((id) => { if (!selected.has(id)) bumpEventCount(id, -1); });
         onClose();
         return;
       }

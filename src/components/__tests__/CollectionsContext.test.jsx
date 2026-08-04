@@ -117,4 +117,22 @@ describe('CollectionsContext', () => {
 
     expect(result.current.collections).toHaveLength(0);
   });
+
+  it('bumpEventCount() adjusts the local count and never goes below 0', async () => {
+    global.fetch.mockImplementation((url) => {
+      if (String(url).includes('/users/88/collections')) {
+        return Promise.resolve({ ok: true, json: async () => [{ id: 1, name: 'Мои конференции', event_count: 2 }] });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({}) });
+    });
+
+    const { result } = renderHook(() => useCollections(), { wrapper });
+    await act(async () => {});
+
+    act(() => { result.current.bumpEventCount(1, 1); });
+    expect(result.current.collections[0].event_count).toBe(3);
+
+    act(() => { result.current.bumpEventCount(1, -5); });
+    expect(result.current.collections[0].event_count).toBe(0);
+  });
 });

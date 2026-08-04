@@ -8,6 +8,7 @@ const defaultContext = {
   create: async () => null,
   rename: async () => {},
   remove: async () => {},
+  bumpEventCount: () => {},
 };
 
 const CollectionsContext = createContext(defaultContext);
@@ -78,6 +79,12 @@ export function CollectionsProvider({ children }) {
     setCollections(prev => prev.filter(c => c.id !== id));
   }, [token]);
 
+  const bumpEventCount = useCallback((id, delta) => {
+    setCollections(prev => prev.map(c =>
+      c.id === id ? { ...c, event_count: Math.max(0, c.event_count + delta) } : c
+    ));
+  }, []);
+
   return (
     <CollectionsContext.Provider value={{
       collections,
@@ -86,6 +93,7 @@ export function CollectionsProvider({ children }) {
       create,
       rename,
       remove,
+      bumpEventCount,
     }}>
       {children}
     </CollectionsContext.Provider>
