@@ -45,4 +45,15 @@ describe('CollectionsButton', () => {
     fireEvent.click(screen.getByText('close'));
     expect(screen.queryByTestId('collections-sheet')).not.toBeInTheDocument();
   });
+
+  it('shows the "В подборку" label by default (full pill button)', () => {
+    render(<CollectionsButton event={event} />);
+    expect(screen.getByText('В подборку')).toBeInTheDocument();
+  });
+
+  it('hides the label in compact mode (icon-only, for digest cards)', () => {
+    render(<CollectionsButton event={event} compact />);
+    expect(screen.queryByText('В подборку')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('В подборку')).toBeInTheDocument();
+  });
 });

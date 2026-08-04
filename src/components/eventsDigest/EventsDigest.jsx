@@ -632,7 +632,7 @@ export default function EventsDigest() {
                 {hasNotInterested && (
                   <NotInterestedButton event={event} source={isSearchMode ? 'search' : 'list'} />
                 )}
-                <CollectionsButton event={event} source={isSearchMode ? 'search' : 'list'} />
+                <CollectionsButton event={event} source={isSearchMode ? 'search' : 'list'} compact />
               </div>
             </div>
           ))
