@@ -163,21 +163,24 @@
 .event__cta > .event-register--btn,
 .event__cta > .bookmark-wrapper,
 .event__cta > .calendar-wrapper,
-.event__cta > .not-interested-btn {
+.event__cta > .not-interested-btn,
+.event__cta > .collections-btn {
     flex: 1 1 calc(50% - 6px);
     max-width: calc(50% - 6px);
     box-sizing: border-box;
 }
 
 .event__cta .save-calendar-btn,
-.event__cta .not-interested-btn {
+.event__cta .not-interested-btn,
+.event__cta .collections-btn {
     background-color: var(--color-accent);
     color: var(--color-on-accent);
     border: 1.5px solid transparent;
 }
 
 .event__cta .save-calendar-btn:hover:not(:disabled),
-.event__cta .not-interested-btn:hover:not(:disabled) {
+.event__cta .not-interested-btn:hover:not(:disabled),
+.event__cta .collections-btn:hover {
     background-color: var(--color-accent-hover);
     color: var(--color-on-accent);
 }
