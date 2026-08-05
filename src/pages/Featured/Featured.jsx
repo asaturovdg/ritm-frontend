@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, Clock, MapPin, RussianRuble, Hand, MoreVertical } from 'lucide-react';
 import { useAuth } from '../../components/AuthContext.jsx';
 import { useCollections } from '../../components/CollectionsContext.jsx';
+import ColorSwatchPicker from '../../components/ColorSwatchPicker/ColorSwatchPicker.jsx';
 import './Featured.css';
 
 const formatDate = (d) => d ? d.split('-').reverse().join('.') : '';
@@ -85,7 +86,7 @@ function FeaturedCard({ event, onClick, variant = 'default' }) {
   );
 }
 
-function FeaturedCarousel({ title, items, onCardClick, variant = 'default', showHint = false, headerExtra = null }) {
+function FeaturedCarousel({ title, items, onCardClick, variant = 'default', showHint = false, headerExtra = null, titleExtra = null }) {
   const iconColor = getIconColor(variant);
   const carouselRef = useRef(null);
   const rafRef = useRef(null);
@@ -169,6 +170,7 @@ function FeaturedCarousel({ title, items, onCardClick, variant = 'default', show
   return (
     <div className="featured-section">
       <div className="featured-section__header">
+        {titleExtra}
         <span className="featured-section__title">{title}</span>
         <span
           className="featured-section__count"
@@ -206,7 +208,7 @@ function FeaturedCarousel({ title, items, onCardClick, variant = 'default', show
   );
 }
 
-function CollectionMenu({ open, onToggle, onClose, onRename, onDelete }) {
+function CollectionMenu({ open, onToggle, onClose, onRename, onChangeColor, onDelete }) {
   return (
     <div className="collection-menu">
       <button
@@ -224,6 +226,9 @@ function CollectionMenu({ open, onToggle, onClose, onRename, onDelete }) {
             <button type="button" className="collection-menu__item" onClick={() => { onClose(); onRename(); }}>
               Переименовать
             </button>
+            <button type="button" className="collection-menu__item" onClick={() => { onClose(); onChangeColor(); }}>
+              Изменить цвет
+            </button>
             <button type="button" className="collection-menu__item collection-menu__item--danger" onClick={() => { onClose(); onDelete(); }}>
               Удалить
             </button>
@@ -234,9 +239,11 @@ function CollectionMenu({ open, onToggle, onClose, onRename, onDelete }) {
   );
 }
 
-function MyCollectionSection({ collection, token, onCardClick, isMenuOpen, onToggleMenu, onCloseMenu, onRename, onDelete }) {
+function MyCollectionSection({ collection, token, onCardClick, isMenuOpen, onToggleMenu, onCloseMenu, onRename, onChangeColor, onDelete }) {
+  const { colors } = useCollections();
   const [events, setEvents] = useState(null);
   const [loadingEvents, setLoadingEvents] = useState(false);
+  const dotColor = collection.color ?? colors[0];
 
   useEffect(() => {
     if (!collection.event_count) {
@@ -264,14 +271,17 @@ function MyCollectionSection({ collection, token, onCardClick, isMenuOpen, onTog
       onToggle={onToggleMenu}
       onClose={onCloseMenu}
       onRename={onRename}
+      onChangeColor={onChangeColor}
       onDelete={onDelete}
     />
   );
+  const dot = dotColor && <span className="color-dot" style={{ background: dotColor }} />;
 
   if (!collection.event_count) {
     return (
       <div className="featured-section">
         <div className="featured-section__header">
+          {dot}
           <span className="featured-section__title">{collection.name}</span>
           <span className="featured-section__count">0</span>
           {menu}
@@ -285,6 +295,7 @@ function MyCollectionSection({ collection, token, onCardClick, isMenuOpen, onTog
     return (
       <div className="featured-section">
         <div className="featured-section__header">
+          {dot}
           <span className="featured-section__title">{collection.name}</span>
           <span className="featured-section__count">{collection.event_count}</span>
           {menu}
@@ -300,6 +311,7 @@ function MyCollectionSection({ collection, token, onCardClick, isMenuOpen, onTog
       items={events}
       onCardClick={onCardClick}
       headerExtra={menu}
+      titleExtra={dot}
     />
   );
 }
@@ -307,15 +319,19 @@ function MyCollectionSection({ collection, token, onCardClick, isMenuOpen, onTog
 function MyCollectionsPanel() {
   const { token } = useAuth();
   const navigate = useNavigate();
-  const { collections, loading, create, rename, remove } = useCollections();
+  const { collections, colors, loading, create, rename, changeColor, remove } = useCollections();
 
   const [openMenuId, setOpenMenuId] = useState(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [createValue, setCreateValue] = useState('');
+  const [createColor, setCreateColor] = useState('');
   const [createBusy, setCreateBusy] = useState(false);
   const [renameTarget, setRenameTarget] = useState(null);
   const [renameValue, setRenameValue] = useState('');
   const [renameBusy, setRenameBusy] = useState(false);
+  const [colorTarget, setColorTarget] = useState(null);
+  const [colorValue, setColorValue] = useState('');
+  const [colorBusy, setColorBusy] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
 
@@ -336,13 +352,26 @@ function MyCollectionsPanel() {
     if (!name) return;
     setCreateBusy(true);
     try {
-      await create(name);
+      await create(name, createColor || undefined);
       setCreateOpen(false);
       setCreateValue('');
     } catch {
       /* toast not needed here — modal stays open, user can retry */
     } finally {
       setCreateBusy(false);
+    }
+  };
+
+  const handleChangeColor = async () => {
+    if (!colorTarget || !colorValue) return;
+    setColorBusy(true);
+    try {
+      await changeColor(colorTarget.id, colorValue);
+      setColorTarget(null);
+    } catch {
+      /* keep modal open on failure */
+    } finally {
+      setColorBusy(false);
     }
   };
 
@@ -390,7 +419,7 @@ function MyCollectionsPanel() {
           header="У вас пока нет подборок"
           description="Добавьте событие в подборку через карточку события"
           action={
-            <button className="digest__knowMore" onClick={() => setCreateOpen(true)}>
+            <button className="digest__knowMore" onClick={() => { setCreateOpen(true); setCreateColor(colors[0] ?? ''); }}>
               Создать подборку
             </button>
           }
@@ -399,6 +428,7 @@ function MyCollectionsPanel() {
           <div className="modal-overlay" onClick={() => setCreateOpen(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <h3>Новая подборка</h3>
+              <ColorSwatchPicker colors={colors} value={createColor} onChange={setCreateColor} />
               <input
                 type="text"
                 className="collection-name-input"
@@ -433,6 +463,7 @@ function MyCollectionsPanel() {
           onToggleMenu={() => setOpenMenuId(prev => prev === collection.id ? null : collection.id)}
           onCloseMenu={() => setOpenMenuId(null)}
           onRename={() => { setRenameTarget(collection); setRenameValue(collection.name); }}
+          onChangeColor={() => { setColorTarget(collection); setColorValue(collection.color ?? colors[0] ?? ''); }}
           onDelete={() => setDeleteTarget(collection)}
         />
       ))}
@@ -452,6 +483,21 @@ function MyCollectionsPanel() {
             <div className="modal-actions">
               <button className="modal-cancel-btn" onClick={() => setRenameTarget(null)}>Отмена</button>
               <button className="modal-confirm-btn" onClick={handleRename} disabled={renameBusy || !renameValue.trim()}>
+                Сохранить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {colorTarget && (
+        <div className="modal-overlay" onClick={() => setColorTarget(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>Изменить цвет подборки</h3>
+            <ColorSwatchPicker colors={colors} value={colorValue} onChange={setColorValue} />
+            <div className="modal-actions" style={{ marginTop: 20 }}>
+              <button className="modal-cancel-btn" onClick={() => setColorTarget(null)}>Отмена</button>
+              <button className="modal-confirm-btn" onClick={handleChangeColor} disabled={colorBusy}>
                 Сохранить
               </button>
             </div>
