@@ -16,6 +16,7 @@ vi.mock('../../AuthContext.jsx', () => ({
 vi.mock('../../CollectionsContext.jsx', () => ({
   useCollections: () => ({
     collections: collectionsFixture,
+    colors: ['#FF0000', '#00FF00'],
     create: mockCreate,
     load: mockLoad,
     bumpEventCount: mockBumpEventCount,
@@ -110,9 +111,42 @@ describe('CollectionsSheet', () => {
     fireEvent.change(screen.getByPlaceholderText('Название подборки'), { target: { value: 'IT-митапы' } });
     fireEvent.click(screen.getByText('Создать'));
 
-    await waitFor(() => expect(mockCreate).toHaveBeenCalledWith('IT-митапы'));
+    await waitFor(() => expect(mockCreate).toHaveBeenCalledWith('IT-митапы', '#FF0000'));
     // input collapses back to the "+ Новая подборка" row
     await waitFor(() => expect(screen.getByText('+ Новая подборка')).toBeInTheDocument());
+  });
+
+  it('shows a color dot before each collection name matching its color', async () => {
+    collectionsFixture = [
+      { id: 1, name: 'Мои конференции', color: '#FF0000', event_count: 5 },
+      { id: 2, name: 'На выходные', color: null, event_count: 0 },
+    ];
+    render(<CollectionsSheet event={event} onClose={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getByText('Мои конференции')).toBeInTheDocument());
+
+    const dots = document.querySelectorAll('.color-dot');
+    expect(dots).toHaveLength(2);
+    expect(dots[0]).toHaveStyle({ background: '#FF0000' });
+    // null color falls back to the first palette color
+    expect(dots[1]).toHaveStyle({ background: '#FF0000' });
+  });
+
+  it('shows the color picker in the create row, defaulting to the first palette color', async () => {
+    collectionsFixture = [];
+    render(<CollectionsSheet event={event} onClose={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getByText('+ Новая подборка')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('+ Новая подборка'));
+
+    expect(screen.getByLabelText('#FF0000')).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(screen.getByLabelText('#00FF00'));
+    expect(screen.getByLabelText('#00FF00')).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.change(screen.getByPlaceholderText('Название подборки'), { target: { value: 'IT-митапы' } });
+    fireEvent.click(screen.getByText('Создать'));
+
+    await waitFor(() => expect(mockCreate).toHaveBeenCalledWith('IT-митапы', '#00FF00'));
   });
 
   it('"Готово" sends one PUT with the full collection_ids list and closes on success', async () => {

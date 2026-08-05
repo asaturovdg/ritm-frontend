@@ -3,11 +3,12 @@ import { createPortal } from 'react-dom';
 import { useAuth } from '../AuthContext.jsx';
 import { useCollections } from '../CollectionsContext.jsx';
 import { useToast } from '../Toast/ToastContext.jsx';
+import ColorSwatchPicker from '../ColorSwatchPicker/ColorSwatchPicker.jsx';
 import './CollectionsSheet.css';
 
 export default function CollectionsSheet({ event, source = 'list', onClose }) {
   const { token } = useAuth();
-  const { collections, create, load, bumpEventCount } = useCollections();
+  const { collections, colors, create, load, bumpEventCount } = useCollections();
   const showToast = useToast();
 
   const eventId = event?.id;
@@ -17,6 +18,7 @@ export default function CollectionsSheet({ event, source = 'list', onClose }) {
   const [submitting, setSubmitting] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
+  const [newColor, setNewColor] = useState('');
   const [creatingBusy, setCreatingBusy] = useState(false);
 
   useEffect(() => {
@@ -54,7 +56,7 @@ export default function CollectionsSheet({ event, source = 'list', onClose }) {
     if (!name) return;
     setCreatingBusy(true);
     try {
-      const collection = await create(name);
+      const collection = await create(name, newColor || undefined);
       setSelected(prev => new Set([...prev, collection.id]));
       setCreating(false);
       setNewName('');
@@ -120,6 +122,7 @@ export default function CollectionsSheet({ event, source = 'list', onClose }) {
                   checked={selected.has(c.id)}
                   onChange={() => toggle(c.id)}
                 />
+                <span className="color-dot" style={{ background: c.color ?? colors[0] }} />
                 <span className="collections-sheet__item-name">{c.name}</span>
                 <span className="collections-sheet__item-count">{c.event_count}</span>
               </label>
@@ -128,26 +131,29 @@ export default function CollectionsSheet({ event, source = 'list', onClose }) {
         )}
 
         {creating ? (
-          <div className="collections-sheet__create-row">
-            <input
-              type="text"
-              className="collections-sheet__create-input"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="Название подборки"
-              maxLength={100}
-              autoFocus
-            />
-            <button
-              className="collections-sheet__create-btn"
-              onClick={handleCreate}
-              disabled={creatingBusy || !newName.trim()}
-            >
-              Создать
-            </button>
+          <div className="collections-sheet__create">
+            <ColorSwatchPicker colors={colors} value={newColor} onChange={setNewColor} />
+            <div className="collections-sheet__create-row">
+              <input
+                type="text"
+                className="collections-sheet__create-input"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Название подборки"
+                maxLength={100}
+                autoFocus
+              />
+              <button
+                className="collections-sheet__create-btn"
+                onClick={handleCreate}
+                disabled={creatingBusy || !newName.trim()}
+              >
+                Создать
+              </button>
+            </div>
           </div>
         ) : (
-          <button className="collections-sheet__add" onClick={() => setCreating(true)}>
+          <button className="collections-sheet__add" onClick={() => { setCreating(true); setNewColor(colors[0] ?? ''); }}>
             + Новая подборка
           </button>
         )}
