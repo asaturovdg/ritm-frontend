@@ -76,9 +76,22 @@
   font-family: inherit;
 }
 
+.collections-sheet__create {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .collections-sheet__create-row {
   display: flex;
   gap: 8px;
+}
+
+.color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .collections-sheet__create-input {

@@ -5,6 +5,7 @@ import Featured from '../Featured.jsx';
 
 const mockCreate = vi.fn();
 const mockRename = vi.fn();
+const mockChangeColor = vi.fn();
 const mockRemove = vi.fn();
 let collectionsFixture = [];
 let collectionsLoading = false;
@@ -12,9 +13,11 @@ let collectionsLoading = false;
 vi.mock('../../../components/CollectionsContext.jsx', () => ({
   useCollections: () => ({
     collections: collectionsFixture,
+    colors: ['#FF0000', '#00FF00'],
     loading: collectionsLoading,
     create: mockCreate,
     rename: mockRename,
+    changeColor: mockChangeColor,
     remove: mockRemove,
   }),
 }));
@@ -161,7 +164,7 @@ describe('Featured page — Мои подборки sub-tab', () => {
     fireEvent.change(screen.getByPlaceholderText('Название подборки'), { target: { value: 'Мои события' } });
     fireEvent.click(screen.getByText('Создать'));
 
-    await waitFor(() => expect(mockCreate).toHaveBeenCalledWith('Мои события'));
+    await waitFor(() => expect(mockCreate).toHaveBeenCalledWith('Мои события', '#FF0000'));
   });
 
   it('renders a section per collection with a non-empty one showing its carousel', async () => {
@@ -186,6 +189,49 @@ describe('Featured page — Мои подборки sub-tab', () => {
 
     expect(await screen.findByText('Highload++ 2025')).toBeInTheDocument();
     expect(screen.getByText('Подборка пуста. Добавьте события через карточку события.')).toBeInTheDocument();
+  });
+
+  it('shows a color dot before the collection title in the section header', async () => {
+    collectionsFixture = [{ id: 1, name: 'Мои митапы', color: '#00FF00', event_count: 0 }];
+    renderFeatured();
+    await screen.findByText('Что-то для тебя');
+    fireEvent.click(screen.getByText('Мои подборки'));
+
+    await waitFor(() => expect(screen.getByText('Мои митапы')).toBeInTheDocument());
+    const dot = document.querySelector('.color-dot');
+    expect(dot).toHaveStyle({ background: '#00FF00' });
+  });
+
+  it('opens a color picker modal from the kebab menu and calls changeColor on save', async () => {
+    collectionsFixture = [{ id: 1, name: 'Мои митапы', color: '#FF0000', event_count: 0 }];
+    renderFeatured();
+    await screen.findByText('Что-то для тебя');
+    fireEvent.click(screen.getByText('Мои подборки'));
+    await screen.findByText('Мои митапы');
+
+    fireEvent.click(screen.getByLabelText('Действия с подборкой'));
+    fireEvent.click(screen.getByText('Изменить цвет'));
+
+    expect(screen.getByText('Изменить цвет подборки')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('#00FF00'));
+    fireEvent.click(screen.getByText('Сохранить'));
+
+    await waitFor(() => expect(mockChangeColor).toHaveBeenCalledWith(1, '#00FF00'));
+  });
+
+  it('color picker in the create modal defaults to the first palette color and is passed to create()', async () => {
+    renderFeatured();
+    await screen.findByText('Что-то для тебя');
+    fireEvent.click(screen.getByText('Мои подборки'));
+    await screen.findByText('Создать подборку');
+
+    fireEvent.click(screen.getByText('Создать подборку'));
+
+    expect(screen.getByLabelText('#FF0000')).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.change(screen.getByPlaceholderText('Название подборки'), { target: { value: 'Новая' } });
+    fireEvent.click(screen.getByText('Создать'));
+
+    await waitFor(() => expect(mockCreate).toHaveBeenCalledWith('Новая', '#FF0000'));
   });
 
   it('kebab menu offers rename and delete, delete calls context.remove()', async () => {

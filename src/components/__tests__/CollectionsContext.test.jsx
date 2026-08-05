@@ -73,6 +73,140 @@ describe('CollectionsContext', () => {
     );
   });
 
+  it('loadColors() fetches the palette and stores it', async () => {
+    global.fetch.mockImplementation((url) => {
+      const u = String(url);
+      if (u.includes('/users/88/collections')) {
+        return Promise.resolve({ ok: true, json: async () => [] });
+      }
+      if (u.endsWith('/collections/colors')) {
+        return Promise.resolve({ ok: true, json: async () => ['#FF0000', '#00FF00'] });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({}) });
+    });
+
+    const { result } = renderHook(() => useCollections(), { wrapper });
+    await act(async () => {});
+
+    expect(result.current.colors).toEqual([]);
+
+    await act(async () => {
+      await result.current.loadColors();
+    });
+
+    expect(result.current.colors).toEqual(['#FF0000', '#00FF00']);
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://ritmevents.ru/api/v1/collections/colors',
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: 'Bearer test-token' }) })
+    );
+  });
+
+  it('loadColors() leaves colors empty on failure', async () => {
+    global.fetch.mockImplementation((url) => {
+      const u = String(url);
+      if (u.includes('/users/88/collections')) {
+        return Promise.resolve({ ok: true, json: async () => [] });
+      }
+      if (u.endsWith('/collections/colors')) {
+        return Promise.resolve({ ok: false, status: 500 });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({}) });
+    });
+
+    const { result } = renderHook(() => useCollections(), { wrapper });
+    await act(async () => {});
+
+    await act(async () => {
+      await result.current.loadColors();
+    });
+
+    expect(result.current.colors).toEqual([]);
+  });
+
+  it('create(name, color) posts the color and stores it locally', async () => {
+    global.fetch.mockImplementation((url, opts) => {
+      const u = String(url);
+      if (u.includes('/users/88/collections')) {
+        return Promise.resolve({ ok: true, json: async () => [] });
+      }
+      if (u.endsWith('/collections') && opts?.method === 'POST') {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ id: 4, name: 'Митапы', color: '#FF0000', created_at: '2026-08-05T00:00:00' }),
+        });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({}) });
+    });
+
+    const { result } = renderHook(() => useCollections(), { wrapper });
+    await act(async () => {});
+
+    let created;
+    await act(async () => {
+      created = await result.current.create('Митапы', '#FF0000');
+    });
+
+    expect(created).toEqual({ id: 4, name: 'Митапы', color: '#FF0000', event_count: 0 });
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://ritmevents.ru/api/v1/collections',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ name: 'Митапы', color: '#FF0000' }),
+      })
+    );
+  });
+
+  it('changeColor() patches the color and updates the local collection', async () => {
+    global.fetch.mockImplementation((url, opts) => {
+      const u = String(url);
+      if (u.includes('/users/88/collections')) {
+        return Promise.resolve({ ok: true, json: async () => [{ id: 1, name: 'Мои конференции', color: '#FF0000', event_count: 2 }] });
+      }
+      if (u.endsWith('/collections/1') && opts?.method === 'PATCH') {
+        return Promise.resolve({ ok: true, json: async () => ({ id: 1, name: 'Мои конференции', color: '#00FF00' }) });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({}) });
+    });
+
+    const { result } = renderHook(() => useCollections(), { wrapper });
+    await act(async () => {});
+
+    await act(async () => {
+      await result.current.changeColor(1, '#00FF00');
+    });
+
+    expect(result.current.collections[0]).toEqual({ id: 1, name: 'Мои конференции', color: '#00FF00', event_count: 2 });
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://ritmevents.ru/api/v1/collections/1',
+      expect.objectContaining({
+        method: 'PATCH',
+        body: JSON.stringify({ color: '#00FF00' }),
+      })
+    );
+  });
+
+  it('changeColor() throws on failure and leaves the local collection unchanged', async () => {
+    global.fetch.mockImplementation((url, opts) => {
+      const u = String(url);
+      if (u.includes('/users/88/collections')) {
+        return Promise.resolve({ ok: true, json: async () => [{ id: 1, name: 'Мои конференции', color: '#FF0000', event_count: 2 }] });
+      }
+      if (u.endsWith('/collections/1') && opts?.method === 'PATCH') {
+        return Promise.resolve({ ok: false, status: 422 });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({}) });
+    });
+
+    const { result } = renderHook(() => useCollections(), { wrapper });
+    await act(async () => {});
+
+    await expect(act(async () => {
+      await result.current.changeColor(1, '#00FF00');
+    })).rejects.toThrow('collection color change failed');
+
+    expect(result.current.collections[0].color).toBe('#FF0000');
+  });
+
   it('rename() updates the local collection name', async () => {
     global.fetch.mockImplementation((url, opts) => {
       const u = String(url);
