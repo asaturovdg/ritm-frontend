@@ -19,6 +19,15 @@ const VARIANT_ICON_COLOR = {
 
 const getIconColor = (variant) => VARIANT_ICON_COLOR[variant] || VARIANT_ICON_COLOR.default;
 
+const lightenHex = (hex, amount) => {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const clamp = (v) => Math.min(255, Math.round(v));
+  const r = clamp((num >> 16) + 255 * amount);
+  const g = clamp(((num >> 8) & 0xff) + 255 * amount);
+  const b = clamp((num & 0xff) + 255 * amount);
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+};
+
 const SWIPE_HINT_STORAGE_KEY = 'featured_swipe_hint_last_shown_at';
 const SWIPE_HINT_REAPPEAR_MS = 7 * 24 * 60 * 60 * 1000; // раз в 7 дней, даже если уже свайпал
 
@@ -39,11 +48,14 @@ const recordHintShown = () => {
   }
 };
 
-function FeaturedCard({ event, onClick, variant = 'default' }) {
-  const iconColor = getIconColor(variant);
+function FeaturedCard({ event, onClick, variant = 'default', accentColor }) {
+  const iconColor = accentColor || getIconColor(variant);
+  const headerStyle = accentColor
+    ? { background: `linear-gradient(135deg, ${accentColor}, ${lightenHex(accentColor, 0.35)})` }
+    : undefined;
   return (
     <button className={`featured-card featured-card--${variant}`} onClick={onClick}>
-      <div className="featured-card__header">
+      <div className="featured-card__header" style={headerStyle}>
         <div className="featured-card__type">
           {event.event_type?.join(', ')}
         </div>
@@ -86,8 +98,8 @@ function FeaturedCard({ event, onClick, variant = 'default' }) {
   );
 }
 
-function FeaturedCarousel({ title, items, onCardClick, variant = 'default', showHint = false, headerExtra = null, titleExtra = null }) {
-  const iconColor = getIconColor(variant);
+function FeaturedCarousel({ title, items, onCardClick, variant = 'default', showHint = false, headerExtra = null, accentColor = null }) {
+  const iconColor = accentColor || getIconColor(variant);
   const carouselRef = useRef(null);
   const rafRef = useRef(null);
   const scrollEndTimerRef = useRef(null);
@@ -170,8 +182,7 @@ function FeaturedCarousel({ title, items, onCardClick, variant = 'default', show
   return (
     <div className="featured-section">
       <div className="featured-section__header">
-        {titleExtra}
-        <span className="featured-section__title">{title}</span>
+        <span className="featured-section__title" style={accentColor ? { color: accentColor } : undefined}>{title}</span>
         <span
           className="featured-section__count"
           style={{ color: iconColor, borderColor: iconColor }}
@@ -183,7 +194,7 @@ function FeaturedCarousel({ title, items, onCardClick, variant = 'default', show
       <div className="featured-carousel-wrap">
         <div className="featured-carousel" ref={carouselRef}>
           {items.map(event => (
-            <FeaturedCard key={event.id} event={event} onClick={() => onCardClick(event.id)} variant={variant} />
+            <FeaturedCard key={event.id} event={event} onClick={() => onCardClick(event.id)} variant={variant} accentColor={accentColor} />
           ))}
         </div>
         <div className="featured-carousel__fade" aria-hidden="true" />
@@ -243,7 +254,7 @@ function MyCollectionSection({ collection, token, onCardClick, isMenuOpen, onTog
   const { colors } = useCollections();
   const [events, setEvents] = useState(null);
   const [loadingEvents, setLoadingEvents] = useState(false);
-  const dotColor = collection.color ?? colors[0];
+  const accentColor = collection.color ?? colors[0];
 
   useEffect(() => {
     if (!collection.event_count) {
@@ -275,14 +286,13 @@ function MyCollectionSection({ collection, token, onCardClick, isMenuOpen, onTog
       onDelete={onDelete}
     />
   );
-  const dot = dotColor && <span className="color-dot" style={{ background: dotColor }} />;
+  const titleStyle = accentColor ? { color: accentColor } : undefined;
 
   if (!collection.event_count) {
     return (
       <div className="featured-section">
         <div className="featured-section__header">
-          {dot}
-          <span className="featured-section__title">{collection.name}</span>
+          <span className="featured-section__title" style={titleStyle}>{collection.name}</span>
           <span className="featured-section__count">0</span>
           {menu}
         </div>
@@ -295,8 +305,7 @@ function MyCollectionSection({ collection, token, onCardClick, isMenuOpen, onTog
     return (
       <div className="featured-section">
         <div className="featured-section__header">
-          {dot}
-          <span className="featured-section__title">{collection.name}</span>
+          <span className="featured-section__title" style={titleStyle}>{collection.name}</span>
           <span className="featured-section__count">{collection.event_count}</span>
           {menu}
         </div>
@@ -311,7 +320,7 @@ function MyCollectionSection({ collection, token, onCardClick, isMenuOpen, onTog
       items={events}
       onCardClick={onCardClick}
       headerExtra={menu}
-      titleExtra={dot}
+      accentColor={accentColor}
     />
   );
 }

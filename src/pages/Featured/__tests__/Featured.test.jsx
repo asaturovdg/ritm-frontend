@@ -191,15 +191,37 @@ describe('Featured page — Мои подборки sub-tab', () => {
     expect(screen.getByText('Подборка пуста. Добавьте события через карточку события.')).toBeInTheDocument();
   });
 
-  it('shows a color dot before the collection title in the section header', async () => {
+  it('colors the collection title in the section header to match its color', async () => {
     collectionsFixture = [{ id: 1, name: 'Мои митапы', color: '#00FF00', event_count: 0 }];
     renderFeatured();
     await screen.findByText('Что-то для тебя');
     fireEvent.click(screen.getByText('Мои подборки'));
 
     await waitFor(() => expect(screen.getByText('Мои митапы')).toBeInTheDocument());
-    const dot = document.querySelector('.color-dot');
-    expect(dot).toHaveStyle({ background: '#00FF00' });
+    expect(screen.getByText('Мои митапы')).toHaveStyle({ color: '#00FF00' });
+  });
+
+  it('colors the carousel title and card headers for a non-empty collection', async () => {
+    collectionsFixture = [{ id: 1, name: 'Мои конференции', color: '#00FF00', event_count: 1 }];
+    global.fetch.mockImplementation((url) => {
+      const u = String(url);
+      if (u === 'https://ritmevents.ru/api/v1/featured') {
+        return Promise.resolve({ ok: true, status: 200, json: async () => sampleData });
+      }
+      if (u.includes('/collections/1')) {
+        return Promise.resolve({ ok: true, json: async () => ({ id: 1, name: 'Мои конференции', events: [sampleEvent] }) });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({}) });
+    });
+
+    renderFeatured();
+    await screen.findByText('Что-то для тебя');
+    fireEvent.click(screen.getByText('Мои подборки'));
+
+    await waitFor(() => expect(screen.getByText('Highload++ 2025')).toBeInTheDocument());
+    expect(screen.getByText('Мои конференции')).toHaveStyle({ color: '#00FF00' });
+    const cardHeader = screen.getByText('Highload++ 2025').closest('.featured-card__header');
+    expect(cardHeader.style.background).toContain('rgb(0, 255, 0)');
   });
 
   it('opens a color picker modal from the kebab menu and calls changeColor on save', async () => {

@@ -40,10 +40,6 @@ export function CollectionsProvider({ children }) {
     }
   }, [token, userId]);
 
-  useEffect(() => {
-    if (isAuthReady && token && userId) load();
-  }, [isAuthReady, token, userId, load]);
-
   const loadColors = useCallback(async () => {
     if (!token) return;
     try {
@@ -58,6 +54,13 @@ export function CollectionsProvider({ children }) {
       console.error('CollectionsContext loadColors error:', e);
     }
   }, [token]);
+
+  useEffect(() => {
+    if (isAuthReady && token && userId) {
+      load();
+      loadColors();
+    }
+  }, [isAuthReady, token, userId, load, loadColors]);
 
   const create = useCallback(async (name, color) => {
     const res = await fetch('https://ritmevents.ru/api/v1/collections', {

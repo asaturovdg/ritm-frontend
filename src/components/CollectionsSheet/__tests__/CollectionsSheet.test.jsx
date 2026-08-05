@@ -116,7 +116,7 @@ describe('CollectionsSheet', () => {
     await waitFor(() => expect(screen.getByText('+ Новая подборка')).toBeInTheDocument());
   });
 
-  it('shows a color dot before each collection name matching its color', async () => {
+  it('colors each collection name to match its color', async () => {
     collectionsFixture = [
       { id: 1, name: 'Мои конференции', color: '#FF0000', event_count: 5 },
       { id: 2, name: 'На выходные', color: null, event_count: 0 },
@@ -125,11 +125,9 @@ describe('CollectionsSheet', () => {
 
     await waitFor(() => expect(screen.getByText('Мои конференции')).toBeInTheDocument());
 
-    const dots = document.querySelectorAll('.color-dot');
-    expect(dots).toHaveLength(2);
-    expect(dots[0]).toHaveStyle({ background: '#FF0000' });
+    expect(screen.getByText('Мои конференции')).toHaveStyle({ color: '#FF0000' });
     // null color falls back to the first palette color
-    expect(dots[1]).toHaveStyle({ background: '#FF0000' });
+    expect(screen.getByText('На выходные')).toHaveStyle({ color: '#FF0000' });
   });
 
   it('shows the color picker in the create row, defaulting to the first palette color', async () => {
