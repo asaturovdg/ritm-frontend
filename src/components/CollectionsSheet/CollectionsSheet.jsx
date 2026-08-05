@@ -97,6 +97,7 @@ export default function CollectionsSheet({ event, source = 'list', onClose }) {
     <div
       className="collections-sheet"
       onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => e.stopPropagation()}
     >
       <div
         className="collections-sheet__backdrop"

@@ -130,7 +130,8 @@
 }
 
 .digest__bottom-row .save-calendar-btn,
-.digest__bottom-row .not-interested-btn {
+.digest__bottom-row .not-interested-btn,
+.digest__bottom-row .collections-btn {
     width: auto;
     min-width: 0;
     white-space: nowrap;
@@ -140,7 +141,8 @@
 }
 
 .digest__bottom-row .save-calendar-btn:hover:not(:disabled),
-.digest__bottom-row .not-interested-btn:hover:not(:disabled) {
+.digest__bottom-row .not-interested-btn:hover:not(:disabled),
+.digest__bottom-row .collections-btn:hover {
     background-color: var(--color-accent-hover);
     color: var(--color-on-accent);
 }
