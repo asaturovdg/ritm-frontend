@@ -82,6 +82,23 @@ describe('CollectionsSheet', () => {
     expect(parentClick).not.toHaveBeenCalled();
   });
 
+  it('pressing Space while typing a new collection name does not bubble to an ancestor keydown handler (e.g. card role="button" Space-to-click)', async () => {
+    const parentKeyDown = vi.fn();
+    collectionsFixture = [];
+    render(
+      <div onKeyDown={parentKeyDown}>
+        <CollectionsSheet event={event} onClose={vi.fn()} />
+      </div>
+    );
+
+    await waitFor(() => expect(screen.getByText('+ Новая подборка')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('+ Новая подборка'));
+
+    fireEvent.keyDown(screen.getByPlaceholderText('Название подборки'), { key: ' ', code: 'Space' });
+
+    expect(parentKeyDown).not.toHaveBeenCalled();
+  });
+
   it('inline creation adds the new collection pre-checked and collapses the input', async () => {
     mockCreate.mockResolvedValue({ id: 3, name: 'IT-митапы', event_count: 0 });
     collectionsFixture = [];
