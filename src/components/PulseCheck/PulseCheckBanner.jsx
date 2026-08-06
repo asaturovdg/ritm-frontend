@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext.jsx';
 import { registerDigestOpen } from './pulseCheckStorage.js';
 import './PulseCheckBanner.css';
@@ -27,7 +27,11 @@ async function submitPulseCheck(token, score, comment) {
 
 export default function PulseCheckBanner() {
   const { token } = useAuth();
-  const [visible] = useState(() => registerDigestOpen());
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    setVisible(registerDigestOpen());
+  }, []);
   const [step, setStep] = useState('question'); // 'question' | 'comment' | 'thanks'
   const [score, setScore] = useState(null);
   const [comment, setComment] = useState('');

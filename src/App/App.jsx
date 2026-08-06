@@ -209,6 +209,7 @@ export default function App() {
                     <Route path='/submissions' element={<Submissions />} />
                     <Route path='/moderation' element={<Moderation />} />
                     <Route path='/invite/assistant/:token' element={<InviteAccept />} />
+                    <Route path='*' element={<Navigate to="/" replace />} />
                   </Routes>
                 </motion.div>
               </AnimatePresence>

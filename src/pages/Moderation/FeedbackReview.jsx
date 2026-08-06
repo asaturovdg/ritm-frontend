@@ -94,8 +94,12 @@ export default function FeedbackReview() {
         </ul>
       )}
 
-      {!loading && items.length > 0 && items.length < total && (
-        <p className="feedback-review__total">Показано {items.length} из {total}</p>
+      {!loading && items.length > 0 && (
+        <p className="feedback-review__total">
+          {items.length < total
+            ? `Последние ${items.length} из ${total}`
+            : `Всего: ${total}`}
+        </p>
       )}
     </div>
   );

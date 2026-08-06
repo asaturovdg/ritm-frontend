@@ -70,4 +70,33 @@ describe('FeedbackReview', () => {
     await waitFor(() => expect(mockShowToast).toHaveBeenCalledWith('Не удалось загрузить обратную связь'));
     expect(await screen.findByText('Пока пусто')).toBeInTheDocument();
   });
+
+  it('shows an honest hint (not "Показано X из Y") when more items exist than are shown', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        items: [{ id: 1, score: 5, comment: 'Отлично', created_at: '2026-08-01T00:00:00Z' }],
+        total: 5,
+      }),
+    });
+
+    render(<FeedbackReview />);
+
+    expect(await screen.findByText('Последние 1 из 5')).toBeInTheDocument();
+    expect(screen.queryByText('Показано 1 из 5')).not.toBeInTheDocument();
+  });
+
+  it('shows a plain total when all items are already shown', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        items: [{ id: 1, score: 5, comment: 'Отлично', created_at: '2026-08-01T00:00:00Z' }],
+        total: 1,
+      }),
+    });
+
+    render(<FeedbackReview />);
+
+    expect(await screen.findByText('Всего: 1')).toBeInTheDocument();
+  });
 });

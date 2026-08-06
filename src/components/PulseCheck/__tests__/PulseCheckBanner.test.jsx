@@ -12,9 +12,9 @@ describe('PulseCheckBanner', () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: true });
   });
 
-  it('renders nothing before the threshold is reached', () => {
+  it('renders nothing before the threshold is reached', async () => {
     const { container } = render(<PulseCheckBanner />);
-    expect(container).toBeEmptyDOMElement();
+    await waitFor(() => expect(container).toBeEmptyDOMElement());
   });
 
   it('shows the question on the third mount and submits a score', async () => {
@@ -22,7 +22,9 @@ describe('PulseCheckBanner', () => {
     render(<PulseCheckBanner />);
     render(<PulseCheckBanner />);
 
-    expect(screen.getByText('Как тебе подборка?')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Как тебе подборка?')).toBeInTheDocument();
+    });
 
     fireEvent.click(screen.getByLabelText('Оценка 4'));
     expect(screen.getByPlaceholderText('Комментарий (необязательно)')).toBeInTheDocument();
@@ -42,10 +44,12 @@ describe('PulseCheckBanner', () => {
     expect(screen.getByText('Спасибо за отзыв!')).toBeInTheDocument();
   });
 
-  it('dismisses without submitting when close is clicked', () => {
+  it('dismisses without submitting when close is clicked', async () => {
     render(<PulseCheckBanner />);
     render(<PulseCheckBanner />);
     render(<PulseCheckBanner />);
+
+    await waitFor(() => screen.getByLabelText('Закрыть'));
 
     fireEvent.click(screen.getByLabelText('Закрыть'));
     expect(global.fetch).not.toHaveBeenCalled();
@@ -57,6 +61,8 @@ describe('PulseCheckBanner', () => {
     render(<PulseCheckBanner />);
     render(<PulseCheckBanner />);
     render(<PulseCheckBanner />);
+
+    await waitFor(() => screen.getByLabelText('Оценка 3'));
 
     fireEvent.click(screen.getByLabelText('Оценка 3'));
     fireEvent.click(screen.getByText('Отправить'));
@@ -87,6 +93,8 @@ describe('PulseCheckBanner', () => {
     render(<PulseCheckBanner />);
     render(<PulseCheckBanner />);
     render(<PulseCheckBanner />);
+
+    await waitFor(() => screen.getByLabelText('Оценка 2'));
 
     fireEvent.click(screen.getByLabelText('Оценка 2'));
     const submitButton = screen.getByText('Отправить');
