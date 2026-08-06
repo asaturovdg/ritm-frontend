@@ -1290,3 +1290,17 @@
   padding-bottom: 0;
   border-bottom: none;
 }
+
+.ux-feedback-modal__textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border-soft);
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  margin-top: 10px;
+}
