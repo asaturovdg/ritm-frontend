@@ -14,6 +14,7 @@ import { TransitionContext } from '../components/TransitionContext';
 import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
 import { useAuth } from '../components/AuthContext.jsx';
 import { useAppTabs } from '../hooks/useAppTabs';
+import { waitForPlatformSdk } from '../platform/waitForSdk.js';
 import './App.css';
 
 export default function App() {
@@ -25,7 +26,7 @@ export default function App() {
 
   const prevPathRef = useRef(location.pathname);
   const transitionConfigRef = useRef({ direction: 0, type: 'tab' });
-  const deepLinkHandledRef = useRef(false);
+  const lastStartParamRef = useRef(null);
 
   const curr = location.pathname;
   const prev = prevPathRef.current;
@@ -45,48 +46,50 @@ export default function App() {
   }
   const transitionConfig = transitionConfigRef.current;
 
-  // Telegram deep-links (invite + event + calendar)
+  // Telegram/Max deep-links (invite + event + calendar).
+  // Re-checked on every foreground (not just mount): iOS often keeps the mini app's
+  // WebView alive in the background, so tapping a new startapp link just resumes the
+  // existing page instead of remounting it — without this, the user is left on whatever
+  // screen (e.g. profile) was open before backgrounding instead of the shared event.
   useEffect(() => {
-    if (deepLinkHandledRef.current) return;
-    const startParam = window.Telegram?.WebApp?.initDataUnsafe?.start_param;
-    if (startParam?.startsWith('invite_')) {
-      deepLinkHandledRef.current = true;
-      navigate(`/invite/assistant/${startParam.replace('invite_', '')}`, { replace: true });
-    } else if (startParam?.startsWith('event_')) {
-      deepLinkHandledRef.current = true;
-      navigate(`/events/${startParam.replace('event_', '')}`, { replace: true });
-    } else if (startParam?.startsWith('cal_')) {
-      const [, provider, eventId] = startParam.split('_');
-      deepLinkHandledRef.current = true;
-      navigate(`/events/${eventId}?cal=${provider}`, { replace: true });
-    } else if (startParam?.startsWith('calerr_')) {
-      const [, provider, eventId] = startParam.split('_');
-      deepLinkHandledRef.current = true;
-      navigate(`/events/${eventId}?calerr=${provider}`, { replace: true });
-    }
-  }, [navigate]);
+    let cancelled = false;
 
-  // Max deep-links (invite + event + calendar)
-  useEffect(() => {
-    if (deepLinkHandledRef.current) return;
-    const startParam =
+    const getStartParam = () =>
+      window.Telegram?.WebApp?.initDataUnsafe?.start_param ||
       window.WebApp?.initDataUnsafe?.start_param ||
       new URLSearchParams(window.location.search).get('WebAppStartParam');
-    if (startParam?.startsWith('invite_')) {
-      deepLinkHandledRef.current = true;
-      navigate(`/invite/assistant/${startParam.replace('invite_', '')}`, { replace: true });
-    } else if (startParam?.startsWith('event_')) {
-      deepLinkHandledRef.current = true;
-      navigate(`/events/${startParam.replace('event_', '')}`, { replace: true });
-    } else if (startParam?.startsWith('cal_')) {
-      const [, provider, eventId] = startParam.split('_');
-      deepLinkHandledRef.current = true;
-      navigate(`/events/${eventId}?cal=${provider}`, { replace: true });
-    } else if (startParam?.startsWith('calerr_')) {
-      const [, provider, eventId] = startParam.split('_');
-      deepLinkHandledRef.current = true;
-      navigate(`/events/${eventId}?calerr=${provider}`, { replace: true });
-    }
+
+    const checkStartParam = () => {
+      const startParam = getStartParam();
+      if (!startParam || startParam === lastStartParamRef.current) return;
+      lastStartParamRef.current = startParam;
+
+      if (startParam.startsWith('invite_')) {
+        navigate(`/invite/assistant/${startParam.replace('invite_', '')}`, { replace: true });
+      } else if (startParam.startsWith('event_')) {
+        navigate(`/events/${startParam.replace('event_', '')}`, { replace: true });
+      } else if (startParam.startsWith('cal_')) {
+        const [, provider, eventId] = startParam.split('_');
+        navigate(`/events/${eventId}?cal=${provider}`, { replace: true });
+      } else if (startParam.startsWith('calerr_')) {
+        const [, provider, eventId] = startParam.split('_');
+        navigate(`/events/${eventId}?calerr=${provider}`, { replace: true });
+      }
+    };
+
+    waitForPlatformSdk().then(() => {
+      if (!cancelled) checkStartParam();
+    });
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') checkStartParam();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
   }, [navigate]);
 
   // Telegram back button

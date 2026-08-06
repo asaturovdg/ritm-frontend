@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { waitForPlatformSdk } from '../platform/waitForSdk.js';
 
 const PLATFORMS = {
   TELEGRAM: 'telegram',
@@ -175,29 +176,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        if (document.readyState !== 'complete') {
-          await new Promise(resolve => window.addEventListener('load', resolve, { once: true }));
-        }
-
-        // The Telegram SDK is injected as a dynamic async script, so window.load does not
-        // guarantee it has executed yet. Poll briefly before proceeding so that initData
-        // is available when we need it for platform auth.
-        if (!window.Telegram?.WebApp) {
-          const ua = navigator.userAgent.toLowerCase();
-          const params = new URLSearchParams(window.location.search);
-          const mightBeTelegram = ua.includes('telegram') || !!params.get('tgWebAppData');
-          if (mightBeTelegram) {
-            await new Promise(resolve => {
-              let elapsed = 0;
-              const poll = () => {
-                if (window.Telegram?.WebApp || elapsed >= 3000) { resolve(); return; }
-                elapsed += 50;
-                setTimeout(poll, 50);
-              };
-              poll();
-            });
-          }
-        }
+        await waitForPlatformSdk();
 
         const initSdk = () => {
           if (window.WebApp?.initData) {
