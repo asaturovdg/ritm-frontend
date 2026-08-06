@@ -415,7 +415,7 @@
   background: var(--color-bg-muted);
   color: var(--color-text);
   border-radius: 7px;
-  border: 1.5px solid transparent;
+  border: 1.5px solid var(--color-border);
   font-size: 12px;
   font-weight: 600;
   font-family: inherit;
