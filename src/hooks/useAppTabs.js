@@ -1,12 +1,11 @@
-import { Newspaper, User, MessageCircle, FilePlus, Sparkles, ClipboardCheck } from 'lucide-react';
+import { Newspaper, User, FilePlus, Sparkles, ClipboardCheck } from 'lucide-react';
 import { useAuth } from '../components/AuthContext.jsx';
 import { FEATURED_ALLOWLIST, hasFeature } from '../data/featureFlags.js';
 
 const BASE_TABS = [
-  { id: 'events',      label: 'Дайджест',          Icon: Newspaper,      path: '/' },
-  { id: 'profile',     label: 'Профиль',           Icon: User,           path: '/profile' },
-  { id: 'feedback',    label: 'Обратная связь',    Icon: MessageCircle,  path: '/feedback' },
-  { id: 'submissions', label: 'Заявка',            Icon: FilePlus,       path: '/submissions' },
+  { id: 'events',      label: 'Дайджест',    Icon: Newspaper, path: '/' },
+  { id: 'profile',     label: 'Профиль',     Icon: User,      path: '/profile' },
+  { id: 'submissions', label: 'Заявка',      Icon: FilePlus,  path: '/submissions' },
 ];
 const FEATURED_TAB = { id: 'featured', label: 'Подборки', Icon: Sparkles, path: '/featured' };
 const MODERATION_TAB = { id: 'moderation', label: 'Модерация', Icon: ClipboardCheck, path: '/moderation' };

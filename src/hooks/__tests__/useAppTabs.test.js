@@ -15,8 +15,8 @@ describe('useAppTabs', () => {
     mockUserData = { is_admin: false };
     const { result } = renderHook(() => useAppTabs());
     expect(result.current.hasFeatured).toBe(true);
-    expect(result.current.TAB_PATHS).toEqual(['/featured', '/', '/profile', '/feedback', '/submissions']);
-    expect(result.current.TABS.map((t) => t.id)).toEqual(['featured', 'events', 'profile', 'feedback', 'submissions']);
+    expect(result.current.TAB_PATHS).toEqual(['/featured', '/', '/profile', '/submissions']);
+    expect(result.current.TABS.map((t) => t.id)).toEqual(['featured', 'events', 'profile', 'submissions']);
   });
 
   it('prepends /featured for any user', () => {
@@ -24,7 +24,7 @@ describe('useAppTabs', () => {
     mockUserData = { is_admin: false };
     const { result } = renderHook(() => useAppTabs());
     expect(result.current.hasFeatured).toBe(true);
-    expect(result.current.TAB_PATHS).toEqual(['/featured', '/', '/profile', '/feedback', '/submissions']);
+    expect(result.current.TAB_PATHS).toEqual(['/featured', '/', '/profile', '/submissions']);
     expect(result.current.TABS[0].id).toBe('featured');
   });
 
@@ -33,7 +33,7 @@ describe('useAppTabs', () => {
     mockUserData = { is_admin: true };
     const { result } = renderHook(() => useAppTabs());
     expect(result.current.isAdmin).toBe(true);
-    expect(result.current.TAB_PATHS).toEqual(['/featured', '/', '/profile', '/feedback', '/submissions', '/moderation']);
+    expect(result.current.TAB_PATHS).toEqual(['/featured', '/', '/profile', '/submissions', '/moderation']);
     expect(result.current.TABS[result.current.TABS.length - 1].id).toBe('moderation');
   });
 
@@ -41,7 +41,7 @@ describe('useAppTabs', () => {
     mockUserId = '5';
     mockUserData = { is_admin: true };
     const { result } = renderHook(() => useAppTabs());
-    expect(result.current.TAB_PATHS).toEqual(['/featured', '/', '/profile', '/feedback', '/submissions', '/moderation']);
+    expect(result.current.TAB_PATHS).toEqual(['/featured', '/', '/profile', '/submissions', '/moderation']);
   });
 
   it('does not append /moderation when userData is not loaded yet', () => {
@@ -49,6 +49,6 @@ describe('useAppTabs', () => {
     mockUserData = null;
     const { result } = renderHook(() => useAppTabs());
     expect(result.current.isAdmin).toBe(false);
-    expect(result.current.TAB_PATHS).toEqual(['/featured', '/', '/profile', '/feedback', '/submissions']);
+    expect(result.current.TAB_PATHS).toEqual(['/featured', '/', '/profile', '/submissions']);
   });
 });
