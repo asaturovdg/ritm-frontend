@@ -7,7 +7,6 @@ import EventsDigest from '../components/eventsDigest/EventsDigest';
 import Featured from '../pages/Featured/Featured';
 import Event from '../pages/eventPage/Event';
 import { Profile } from '../pages/Profile/Profile';
-import Feedback from '../pages/Feedback/Feedback';
 import Submissions from '../pages/Submissions/Submissions';
 import Moderation from '../pages/Moderation/Moderation.jsx';
 import { TransitionContext } from '../components/TransitionContext';
@@ -135,7 +134,6 @@ export default function App() {
     if (location.pathname === '/featured') return 'featured';
     if (location.pathname === '/' || location.pathname.includes('/events/')) return 'events';
     if (location.pathname === '/profile') return 'profile';
-    if (location.pathname === '/feedback') return 'feedback';
     if (location.pathname === '/submissions') return 'submissions';
     if (location.pathname === '/moderation') return 'moderation';
     return 'events';
@@ -146,7 +144,6 @@ export default function App() {
       featured: '/featured',
       events: '/',
       profile: '/profile',
-      feedback: '/feedback',
       submissions: '/submissions',
       moderation: '/moderation',
     };
@@ -209,10 +206,10 @@ export default function App() {
                     <Route path='/' element={<EventsDigest />} />
                     <Route path='/events/:id' element={<Event />} />
                     <Route path='/profile' element={<Profile />} />
-                    <Route path='/feedback' element={<Feedback />} />
                     <Route path='/submissions' element={<Submissions />} />
                     <Route path='/moderation' element={<Moderation />} />
                     <Route path='/invite/assistant/:token' element={<InviteAccept />} />
+                    <Route path='*' element={<Navigate to="/" replace />} />
                   </Routes>
                 </motion.div>
               </AnimatePresence>

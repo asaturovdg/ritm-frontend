@@ -9,6 +9,7 @@ import TelegramLoginWidget from '../TelegramLoginWidget/TelegramLoginWidget.jsx'
 import BookmarkButton from '../BookmarkButton/BookmarkButton.jsx';
 import NotInterestedButton from '../NotInterestedButton/NotInterestedButton.jsx';
 import CollectionsButton from '../CollectionsButton/CollectionsButton.jsx';
+import PulseCheckBanner from '../PulseCheck/PulseCheckBanner.jsx';
 import { useNotInterested } from '../NotInterestedContext.jsx';
 import { CALENDAR_ALLOWLIST, NOT_INTERESTED_ALLOWLIST, hasFeature } from '../../data/featureFlags.js';
 
@@ -511,6 +512,8 @@ export default function EventsDigest() {
           )}
         </div>
       )}
+
+      <PulseCheckBanner />
 
       <div className="digest-list">
         {!hasFilters && !isSearchMode ? (

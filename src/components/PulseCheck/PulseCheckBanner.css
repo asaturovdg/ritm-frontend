@@ -1,0 +1,47 @@
+/* src/components/PulseCheck/PulseCheckBanner.css */
+.pulse-check-banner {
+  position: relative;
+  margin: 0 0 12px;
+  padding: 12px 36px 12px 14px;
+  border-radius: 12px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-soft);
+}
+
+.pulse-check-banner__close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  border: none;
+  background: none;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--color-text-muted);
+}
+
+.pulse-check-banner__title {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.pulse-check-banner__scores {
+  display: flex;
+  gap: 8px;
+}
+
+.pulse-check-banner__score {
+  border: none;
+  background: none;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+}
+
+.pulse-check-banner__score:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

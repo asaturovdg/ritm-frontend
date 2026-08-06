@@ -4,12 +4,39 @@ import { useAuth } from '../../components/AuthContext.jsx';
 import { useToast } from '../../components/Toast/ToastContext.jsx';
 import ModerationCard from './ModerationCard.jsx';
 import QueueListSheet from './QueueListSheet.jsx';
+import FeedbackReview from './FeedbackReview.jsx';
 import './Moderation.css';
 
 const API_BASE = 'https://ritmevents.ru/api/v1';
 const PAGE_SIZE = 20;
 
 export default function Moderation() {
+  const [section, setSection] = useState('queue'); // 'queue' | 'feedback'
+
+  return (
+    <div className="moderation-page">
+      <div className="moderation-tabs">
+        <button
+          type="button"
+          className={`moderation-tab ${section === 'queue' ? 'active' : ''}`}
+          onClick={() => setSection('queue')}
+        >
+          Заявки
+        </button>
+        <button
+          type="button"
+          className={`moderation-tab ${section === 'feedback' ? 'active' : ''}`}
+          onClick={() => setSection('feedback')}
+        >
+          Обратная связь
+        </button>
+      </div>
+      {section === 'queue' ? <ModerationQueue /> : <FeedbackReview />}
+    </div>
+  );
+}
+
+function ModerationQueue() {
   const { token, isAuthReady, setShowInputCode } = useAuth();
   const showToast = useToast();
 
