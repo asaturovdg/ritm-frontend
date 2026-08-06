@@ -19,12 +19,17 @@ const VARIANT_ICON_COLOR = {
 
 const getIconColor = (variant) => VARIANT_ICON_COLOR[variant] || VARIANT_ICON_COLOR.default;
 
-const lightenHex = (hex, amount) => {
+// Darkens toward black by a fixed fraction rather than lightening toward
+// white — the palette includes already-light colors (lime, amber), and
+// lightening those washes the gradient out under the card's white text.
+// Darkening keeps every stop saturated enough for white text regardless
+// of how light the source color is.
+const darkenHex = (hex, amount) => {
   const num = parseInt(hex.replace('#', ''), 16);
-  const clamp = (v) => Math.min(255, Math.round(v));
-  const r = clamp((num >> 16) + 255 * amount);
-  const g = clamp(((num >> 8) & 0xff) + 255 * amount);
-  const b = clamp((num & 0xff) + 255 * amount);
+  const clamp = (v) => Math.max(0, Math.round(v));
+  const r = clamp((num >> 16) * (1 - amount));
+  const g = clamp(((num >> 8) & 0xff) * (1 - amount));
+  const b = clamp((num & 0xff) * (1 - amount));
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 };
 
@@ -51,7 +56,7 @@ const recordHintShown = () => {
 function FeaturedCard({ event, onClick, variant = 'default', accentColor }) {
   const iconColor = accentColor || getIconColor(variant);
   const headerStyle = accentColor
-    ? { background: `linear-gradient(135deg, ${accentColor}, ${lightenHex(accentColor, 0.35)})` }
+    ? { background: `linear-gradient(135deg, ${darkenHex(accentColor, 0.3)}, ${accentColor})` }
     : undefined;
   return (
     <button className={`featured-card featured-card--${variant}`} onClick={onClick}>
