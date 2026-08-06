@@ -48,4 +48,68 @@ describe('shareEventForPlatform', () => {
       expect.stringContaining('/events/42')
     );
   });
+
+  describe('native Telegram share sheet', () => {
+    beforeEach(() => {
+      window.fetch = vi.fn();
+    });
+
+    it('uses shareMessage when the backend prepares a message id', async () => {
+      window.fetch.mockResolvedValue({ ok: true, json: async () => ({ message_id: 'abc123' }) });
+      const shareMessage = vi.fn((id, cb) => cb(true));
+      window.Telegram = {
+        WebApp: { shareMessage, isVersionAtLeast: () => true },
+      };
+      const showToast = vi.fn();
+
+      await shareEventForPlatform(42, 'HolyJS 2026', ['Конференция'], 'telegram', showToast, 'tok');
+
+      expect(window.fetch).toHaveBeenCalledWith(
+        'https://ritmevents.ru/api/v1/events/42/share-message',
+        expect.objectContaining({ method: 'POST', headers: { Authorization: 'Bearer tok' } })
+      );
+      expect(shareMessage).toHaveBeenCalledWith('abc123', expect.any(Function));
+      expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
+    });
+
+    it('falls back to clipboard when the backend call fails', async () => {
+      window.fetch.mockResolvedValue({ ok: false });
+      window.Telegram = {
+        WebApp: { shareMessage: vi.fn(), isVersionAtLeast: () => true },
+      };
+      const showToast = vi.fn();
+
+      await shareEventForPlatform(42, 'HolyJS 2026', ['Конференция'], 'telegram', showToast, 'tok');
+
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        expect.stringContaining('https://t.me/ritmevents_bot?startapp=event_42')
+      );
+    });
+
+    it('falls back to clipboard when the client does not support shareMessage', async () => {
+      window.Telegram = { WebApp: { isVersionAtLeast: () => false } };
+      const showToast = vi.fn();
+
+      await shareEventForPlatform(42, 'HolyJS 2026', ['Конференция'], 'telegram', showToast, 'tok');
+
+      expect(window.fetch).not.toHaveBeenCalled();
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        expect.stringContaining('https://t.me/ritmevents_bot?startapp=event_42')
+      );
+    });
+
+    it('falls back to clipboard when there is no auth token', async () => {
+      window.Telegram = {
+        WebApp: { shareMessage: vi.fn(), isVersionAtLeast: () => true },
+      };
+      const showToast = vi.fn();
+
+      await shareEventForPlatform(42, 'HolyJS 2026', ['Конференция'], 'telegram', showToast, null);
+
+      expect(window.fetch).not.toHaveBeenCalled();
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        expect.stringContaining('https://t.me/ritmevents_bot?startapp=event_42')
+      );
+    });
+  });
 });
