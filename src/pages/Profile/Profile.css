@@ -30,6 +30,9 @@
   font-size: 11px;
   font-weight: 600;
   color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .profile-react-calendar .react-calendar__month-view__weekdays__weekday {
@@ -77,6 +80,13 @@
   color: #fff !important;
 }
 
+/* Hover feedback for plain tiles only — deliberately excludes --active/--now
+   so it never re-triggers the WebKit repaint bug the block above works
+   around (their background must stay transparent, always). */
+.profile-react-calendar .react-calendar__tile:enabled:hover:not(.react-calendar__tile--active):not(.react-calendar__tile--now) {
+  background: var(--color-bg-muted);
+}
+
 .profile-react-calendar .react-calendar__tile abbr {
   position: relative;
   z-index: 1;
@@ -84,8 +94,12 @@
 
 .calendar-tile-highlight {
   position: absolute;
-  inset: 0;
-  border-radius: 8px;
+  top: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
   pointer-events: none;
   z-index: 0;
 }
