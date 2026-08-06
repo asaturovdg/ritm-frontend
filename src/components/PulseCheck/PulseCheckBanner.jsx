@@ -32,6 +32,7 @@ export default function PulseCheckBanner() {
   const [score, setScore] = useState(null);
   const [comment, setComment] = useState('');
   const [dismissed, setDismissed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!visible || dismissed) return null;
 
@@ -41,6 +42,8 @@ export default function PulseCheckBanner() {
   };
 
   const finish = async () => {
+    if (isSubmitting) return; // Guard against double-submit
+    setIsSubmitting(true);
     try {
       await submitPulseCheck(token, score, comment.trim());
     } catch {
@@ -92,7 +95,7 @@ export default function PulseCheckBanner() {
             onChange={(e) => setComment(e.target.value)}
             maxLength={280}
           />
-          <button type="button" className="pulse-check-banner__submit" onClick={finish}>
+          <button type="button" className="pulse-check-banner__submit" onClick={finish} disabled={isSubmitting}>
             Отправить
           </button>
         </>

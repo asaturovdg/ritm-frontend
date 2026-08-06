@@ -50,4 +50,52 @@ describe('PulseCheckBanner', () => {
     fireEvent.click(screen.getByLabelText('Закрыть'));
     expect(global.fetch).not.toHaveBeenCalled();
   });
+
+  it('still shows thanks and dismisses even when fetch fails', async () => {
+    global.fetch = vi.fn().mockResolvedValue({ ok: false });
+
+    render(<PulseCheckBanner />);
+    render(<PulseCheckBanner />);
+    render(<PulseCheckBanner />);
+
+    fireEvent.click(screen.getByLabelText('Оценка 3'));
+    fireEvent.click(screen.getByText('Отправить'));
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://ritmevents.ru/api/v1/feedback/pulse-check',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ score: 3, comment: null }),
+        })
+      );
+    });
+
+    expect(screen.getByText('Спасибо за отзыв!')).toBeInTheDocument();
+
+    // Wait for auto-dismiss
+    await waitFor(() => {
+      expect(screen.queryByText('Спасибо за отзыв!')).not.toBeInTheDocument();
+    }, { timeout: 2000 });
+  });
+
+  it('prevents double-submit by disabling button while submitting', async () => {
+    global.fetch = vi.fn(() => new Promise((resolve) => {
+      setTimeout(() => resolve({ ok: true }), 100);
+    }));
+
+    render(<PulseCheckBanner />);
+    render(<PulseCheckBanner />);
+    render(<PulseCheckBanner />);
+
+    fireEvent.click(screen.getByLabelText('Оценка 2'));
+    const submitButton = screen.getByText('Отправить');
+
+    fireEvent.click(submitButton);
+    fireEvent.click(submitButton); // Try to click again while first submit is in-flight
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledTimes(1); // Should only be called once
+    });
+  });
 });
