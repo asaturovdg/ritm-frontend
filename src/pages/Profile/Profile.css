@@ -48,7 +48,6 @@
   position: relative;
   padding: 6px 4px 14px;
   font-size: 13px;
-  border: 1px solid var(--color-border-soft);
 }
 
 /* iOS WKWebView (Max) can fail to repaint a tile's background when
