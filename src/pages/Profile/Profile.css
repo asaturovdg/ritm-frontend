@@ -148,12 +148,23 @@
   color: #e05252;
 }
 
-/* Static tint, not part of the JS-toggled --active/--now overlay — safe
-   to background this directly without risking the WebKit repaint bug
-   noted above. Excluded when the day is also today/selected so it
-   doesn't muddy that highlight's own color. */
-.profile-react-calendar .react-calendar__month-view__days__day--weekend.react-calendar__tile:not(.react-calendar__tile--active):not(.react-calendar__tile--now) {
+/* Inset pseudo-element instead of an edge-to-edge background — adjacent
+   weekend cells (whole Sat/Sun columns) would otherwise merge into one
+   solid block with no visible boundary between individual dates. The 2px
+   inset leaves a gap on every side so each date still reads as its own
+   cell, matching how the today/selected highlight already looks.
+   Not part of the JS-toggled --active/--now overlay, so safe to paint
+   directly without risking the WebKit repaint bug noted above. Excluded
+   when the day is also today/selected so it doesn't muddy that
+   highlight's own color. */
+.profile-react-calendar .react-calendar__month-view__days__day--weekend.react-calendar__tile:not(.react-calendar__tile--active):not(.react-calendar__tile--now)::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 6px;
   background: rgba(224, 82, 82, 0.08);
+  z-index: 0;
+  pointer-events: none;
 }
 
 .profile-react-calendar .react-calendar__month-view__days__day--neighboringMonth abbr {
