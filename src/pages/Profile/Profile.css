@@ -148,6 +148,14 @@
   color: #e05252;
 }
 
+/* Static tint, not part of the JS-toggled --active/--now overlay — safe
+   to background this directly without risking the WebKit repaint bug
+   noted above. Excluded when the day is also today/selected so it
+   doesn't muddy that highlight's own color. */
+.profile-react-calendar .react-calendar__month-view__days__day--weekend.react-calendar__tile:not(.react-calendar__tile--active):not(.react-calendar__tile--now) {
+  background: rgba(224, 82, 82, 0.08);
+}
+
 .profile-react-calendar .react-calendar__month-view__days__day--neighboringMonth abbr {
   color: var(--color-text-muted);
 }
