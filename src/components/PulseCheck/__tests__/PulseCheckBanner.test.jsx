@@ -17,7 +17,7 @@ describe('PulseCheckBanner', () => {
     await waitFor(() => expect(container).toBeEmptyDOMElement());
   });
 
-  it('shows the question on the third mount and submits a score', async () => {
+  it('shows the question on the third mount and submits a score immediately on tap', async () => {
     render(<PulseCheckBanner />);
     render(<PulseCheckBanner />);
     render(<PulseCheckBanner />);
@@ -27,9 +27,6 @@ describe('PulseCheckBanner', () => {
     });
 
     fireEvent.click(screen.getByLabelText('Оценка 4'));
-    expect(screen.getByPlaceholderText('Комментарий (необязательно)')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText('Отправить'));
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
@@ -65,7 +62,6 @@ describe('PulseCheckBanner', () => {
     await waitFor(() => screen.getByLabelText('Оценка 3'));
 
     fireEvent.click(screen.getByLabelText('Оценка 3'));
-    fireEvent.click(screen.getByText('Отправить'));
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
@@ -85,7 +81,7 @@ describe('PulseCheckBanner', () => {
     }, { timeout: 2000 });
   });
 
-  it('prevents double-submit by disabling button while submitting', async () => {
+  it('prevents double-submit by disabling score buttons while submitting', async () => {
     global.fetch = vi.fn(() => new Promise((resolve) => {
       setTimeout(() => resolve({ ok: true }), 100);
     }));
@@ -96,11 +92,9 @@ describe('PulseCheckBanner', () => {
 
     await waitFor(() => screen.getByLabelText('Оценка 2'));
 
-    fireEvent.click(screen.getByLabelText('Оценка 2'));
-    const submitButton = screen.getByText('Отправить');
-
-    fireEvent.click(submitButton);
-    fireEvent.click(submitButton); // Try to click again while first submit is in-flight
+    const scoreButton = screen.getByLabelText('Оценка 2');
+    fireEvent.click(scoreButton);
+    fireEvent.click(scoreButton); // Try to click again while first submit is in-flight
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledTimes(1); // Should only be called once

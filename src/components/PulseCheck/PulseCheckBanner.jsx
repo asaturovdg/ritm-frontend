@@ -11,14 +11,14 @@ const SCORES = [
   { value: 5, emoji: '😍' },
 ];
 
-async function submitPulseCheck(token, score, comment) {
+async function submitPulseCheck(token, score) {
   const response = await fetch('https://ritmevents.ru/api/v1/feedback/pulse-check', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ score, comment: comment || null }),
+    body: JSON.stringify({ score, comment: null }),
   });
   if (!response.ok) {
     throw new Error('pulse-check submit failed');
@@ -32,24 +32,17 @@ export default function PulseCheckBanner() {
   useEffect(() => {
     setVisible(registerDigestOpen());
   }, []);
-  const [step, setStep] = useState('question'); // 'question' | 'comment' | 'thanks'
-  const [score, setScore] = useState(null);
-  const [comment, setComment] = useState('');
+  const [step, setStep] = useState('question'); // 'question' | 'thanks'
   const [dismissed, setDismissed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!visible || dismissed) return null;
 
-  const handleScore = (value) => {
-    setScore(value);
-    setStep('comment');
-  };
-
-  const finish = async () => {
+  const handleScore = async (value) => {
     if (isSubmitting) return; // Guard against double-submit
     setIsSubmitting(true);
     try {
-      await submitPulseCheck(token, score, comment.trim());
+      await submitPulseCheck(token, value);
     } catch {
       // Best-effort: the banner still closes even if the network call fails,
       // since re-showing it would just repeat the same failure.
@@ -80,28 +73,12 @@ export default function PulseCheckBanner() {
                 className="pulse-check-banner__score"
                 aria-label={`Оценка ${value}`}
                 onClick={() => handleScore(value)}
+                disabled={isSubmitting}
               >
                 {emoji}
               </button>
             ))}
           </div>
-        </>
-      )}
-
-      {step === 'comment' && (
-        <>
-          <p className="pulse-check-banner__title">Спасибо! Что-то ещё?</p>
-          <input
-            type="text"
-            className="pulse-check-banner__input"
-            placeholder="Комментарий (необязательно)"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            maxLength={280}
-          />
-          <button type="button" className="pulse-check-banner__submit" onClick={finish} disabled={isSubmitting}>
-            Отправить
-          </button>
         </>
       )}
 
