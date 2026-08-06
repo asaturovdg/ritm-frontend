@@ -94,12 +94,8 @@
 
 .calendar-tile-highlight {
   position: absolute;
-  top: 1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
+  inset: 0;
+  border-radius: 8px;
   pointer-events: none;
   z-index: 0;
 }
