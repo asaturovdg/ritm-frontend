@@ -122,8 +122,7 @@ export default function CollectionsSheet({ event, source = 'list', onClose }) {
                   checked={selected.has(c.id)}
                   onChange={() => toggle(c.id)}
                 />
-                <span className="color-dot" style={{ background: c.color ?? colors[0] }} />
-                <span className="collections-sheet__item-name">{c.name}</span>
+                <span className="collections-sheet__item-name" style={{ color: c.color ?? colors[0] }}>{c.name}</span>
                 <span className="collections-sheet__item-count">{c.event_count}</span>
               </label>
             ))}

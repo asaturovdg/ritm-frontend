@@ -373,13 +373,6 @@
   margin-bottom: 16px;
 }
 
-.color-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
 .collection-name-input {
   width: 100%;
   padding: 10px;
@@ -405,28 +398,31 @@
 
 .modal-cancel-btn,
 .modal-confirm-btn {
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 6px 12px;
+  border-radius: 7px;
   cursor: pointer;
-  font-size: 14px;
-  border: none;
+  font-size: 12px;
+  font-weight: 600;
   font-family: inherit;
+  box-sizing: border-box;
 }
 
 .modal-cancel-btn {
-  background: var(--color-bg-muted);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
+  border: 1.5px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent);
+  transition: background 0.15s, color 0.15s;
 }
 
 .modal-cancel-btn:hover {
-  background: var(--color-border);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 .modal-confirm-btn {
+  border: 1.5px solid transparent;
   background: var(--color-accent);
   color: var(--color-on-accent);
-  font-weight: 600;
 }
 
 .modal-confirm-btn:hover {

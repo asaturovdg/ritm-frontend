@@ -39,6 +39,24 @@ describe('CollectionsContext', () => {
     expect(result.current.collections).toEqual([{ id: 1, name: 'Мои конференции', event_count: 5 }]);
   });
 
+  it('loads the color palette automatically on mount', async () => {
+    global.fetch.mockImplementation((url) => {
+      const u = String(url);
+      if (u.includes('/users/88/collections')) {
+        return Promise.resolve({ ok: true, json: async () => [] });
+      }
+      if (u.endsWith('/collections/colors')) {
+        return Promise.resolve({ ok: true, json: async () => ['#F44336', '#E91E63'] });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({}) });
+    });
+
+    const { result } = renderHook(() => useCollections(), { wrapper });
+    await act(async () => {});
+
+    expect(result.current.colors).toEqual(['#F44336', '#E91E63']);
+  });
+
   it('create() posts the name and appends the new collection locally with event_count 0', async () => {
     global.fetch.mockImplementation((url, opts) => {
       const u = String(url);
@@ -73,7 +91,7 @@ describe('CollectionsContext', () => {
     );
   });
 
-  it('loadColors() fetches the palette and stores it', async () => {
+  it('loadColors() re-fetches and replaces the stored palette', async () => {
     global.fetch.mockImplementation((url) => {
       const u = String(url);
       if (u.includes('/users/88/collections')) {
@@ -88,13 +106,21 @@ describe('CollectionsContext', () => {
     const { result } = renderHook(() => useCollections(), { wrapper });
     await act(async () => {});
 
-    expect(result.current.colors).toEqual([]);
+    expect(result.current.colors).toEqual(['#FF0000', '#00FF00']);
+
+    global.fetch.mockImplementation((url) => {
+      const u = String(url);
+      if (u.endsWith('/collections/colors')) {
+        return Promise.resolve({ ok: true, json: async () => ['#123456'] });
+      }
+      return Promise.resolve({ ok: true, json: async () => ({}) });
+    });
 
     await act(async () => {
       await result.current.loadColors();
     });
 
-    expect(result.current.colors).toEqual(['#FF0000', '#00FF00']);
+    expect(result.current.colors).toEqual(['#123456']);
     expect(global.fetch).toHaveBeenCalledWith(
       'https://ritmevents.ru/api/v1/collections/colors',
       expect.objectContaining({ headers: expect.objectContaining({ Authorization: 'Bearer test-token' }) })
