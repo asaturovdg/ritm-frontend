@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import ReactCalendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import './SubmissionDateTimePicker.css';
 
 const MONTH_NAMES = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
