@@ -1,0 +1,156 @@
+.submission-datetime-picker__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  z-index: 1000;
+}
+
+.submission-datetime-picker__sheet {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--color-bg-elevated);
+  border-radius: 16px 16px 0 0;
+  padding: 14px 16px 20px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.submission-datetime-picker__handle {
+  width: 36px;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 2px;
+  margin: 0 auto 12px;
+}
+
+.submission-datetime-picker__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 10px;
+}
+
+.submission-datetime-picker__nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.submission-datetime-picker__nav select {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+}
+
+.submission-datetime-picker__calendar {
+  width: 100%;
+  border: none;
+  font-family: inherit;
+}
+
+.submission-datetime-picker__calendar .react-calendar__navigation {
+  display: none;
+}
+
+.submission-datetime-picker__calendar .react-calendar__month-view__weekdays {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.submission-datetime-picker__calendar .react-calendar__month-view__weekdays abbr {
+  text-decoration: none;
+  cursor: default;
+}
+
+.submission-datetime-picker__calendar .react-calendar__tile {
+  position: relative;
+  padding: 8px 4px;
+  font-size: 13px;
+}
+
+/* Same WebKit repaint workaround as .profile-react-calendar: the highlight is
+   a separate overlay div (via tileContent) instead of relying on react-calendar's
+   own --active class repaint, which can go stale in iOS WKWebView (Max). */
+.submission-datetime-picker__calendar .react-calendar__tile,
+.submission-datetime-picker__calendar .react-calendar__tile:enabled:hover,
+.submission-datetime-picker__calendar .react-calendar__tile:enabled:focus,
+.submission-datetime-picker__calendar .react-calendar__tile--active,
+.submission-datetime-picker__calendar .react-calendar__tile--active:enabled:hover,
+.submission-datetime-picker__calendar .react-calendar__tile--active:enabled:focus {
+  background: transparent;
+}
+
+.submission-datetime-picker__calendar .react-calendar__tile--active abbr {
+  color: #fff;
+  position: relative;
+  z-index: 1;
+}
+
+.submission-datetime-picker__tile-highlight {
+  position: absolute;
+  inset: 4px;
+  border-radius: 8px;
+  background: var(--color-accent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.submission-datetime-picker__time-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin: 12px 0 8px;
+}
+
+.submission-datetime-picker__time-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 16px;
+}
+
+.submission-datetime-picker__time-chip {
+  flex: none;
+  padding: 6px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.submission-datetime-picker__time-chip.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.submission-datetime-picker__confirm {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--color-accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+.submission-datetime-picker__confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
