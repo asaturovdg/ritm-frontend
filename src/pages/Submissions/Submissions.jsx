@@ -1,28 +1,16 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { useAuth } from "../../components/AuthContext.jsx";
-import { usePlatform } from "../../platform/usePlatform.js";
+import { useToast } from "../../components/Toast/ToastContext.jsx";
 import "./Submissions.css";
 import { CITIES, EVENT_TYPES, PARTICIPATION_TYPES, CATEGORIES } from "../../data/filters.js";
 import backArr from "../../assets/icons/backArrow.svg";
-import dateIcon from "../../assets/icons/DateRange.svg";
-import timeIcon from "../../assets/icons/time.svg";
-import priceIcon from "../../assets/icons/currency.svg";
-import placeIcon from "../../assets/icons/Place.svg";
-import partTypeIcon from "../../assets/icons/partType.svg";
-import webIcon from "../../assets/icons/web.svg";
-
-const formatTime = (t) => t ? t.substring(0, 5) : '';
-const formatDate = (d) => d ? d.split('-').reverse().join('.') : '';
+import SubmissionsList from "./SubmissionsList.jsx";
 
 export default function Submissions() {
   const { token, userId } = useAuth();
-  const { openLink } = usePlatform();
+  const showToast = useToast();
   const [activeMainTab, setActiveMainTab] = useState('create');
 
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [selectedSubmission, setSelectedSubmission] = useState(null);
-  
   // Состояния для формы создания
   const [step, setStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,7 +21,8 @@ export default function Submissions() {
   // Состояния для заявок
   const [submissions, setSubmissions] = useState([]);
   const [isLoadingSubmissions, setIsLoadingSubmissions] = useState(false);
-  
+  const [hasLoadedSubmissionsOnce, setHasLoadedSubmissionsOnce] = useState(false);
+
   const [formData, setFormData] = useState({
     event_type: [],
     participation_type: [],
@@ -86,23 +75,24 @@ export default function Submissions() {
   const fetchUserSubmissions = async () => {
     if (!token || !userId) return;
 
-    setIsLoadingSubmissions(true);
+    const silent = hasLoadedSubmissionsOnce;
+    if (!silent) setIsLoadingSubmissions(true);
     try {
-      const uid = userId;
-      if (!uid) return;
-      
-      const response = await fetch(`https://ritmevents.ru/api/v1/users/${uid}/submissions`, {
+      const response = await fetch(`https://ritmevents.ru/api/v1/users/${userId}/submissions`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setSubmissions(data);
+        setHasLoadedSubmissionsOnce(true);
+      } else {
+        showToast('Не удалось загрузить заявки. Попробуйте ещё раз');
       }
-    } catch (err) {
-      console.error('Ошибка загрузки заявок:', err);
+    } catch {
+      showToast('Не удалось загрузить заявки. Попробуйте ещё раз');
     } finally {
-      setIsLoadingSubmissions(false);
+      if (!silent) setIsLoadingSubmissions(false);
     }
   };
 
@@ -427,24 +417,6 @@ export default function Submissions() {
     setError(null);
   };
 
-  const getStatusText = (status) => {
-    switch(status) {
-      case 'pending': return 'На модерации';
-      case 'approved': return 'Одобрено';
-      case 'rejected': return 'Отклонено';
-      default: return status;
-    }
-  };
-
-  const getStatusClass = (status) => {
-    switch(status) {
-      case 'pending': return 'status-pending';
-      case 'approved': return 'status-approved';
-      case 'rejected': return 'status-rejected';
-      default: return '';
-    }
-  };
-
   if (isCompleted && activeMainTab === 'create') {
     return (
       <div className="submissions-container">
@@ -467,11 +439,6 @@ export default function Submissions() {
       </div>
     );
   }
-
-  const handleOpenLink = (e, url) => {
-    e.preventDefault();
-    openLink(url);
-  };
 
   return (
     <div className="submissions-container">
@@ -791,222 +758,15 @@ export default function Submissions() {
       
 
       {activeMainTab === 'mySubmissions' && (
-  <div className="my-submissions">
-    {isLoadingSubmissions ? (
-      <div className="loading-container">
-        <div className="spinner"></div>
-        <p>Загрузка заявок...</p>
-      </div>
-    ) : submissions.length > 0 ? (
-      <div className="digest-list">
-        {submissions.map((submission) => (
-          <div key={submission.id} className="digest__item submission-item">
-            <div className="submission-status-badge">
-              <span className={`status-badge ${getStatusClass(submission.status)}`}>
-                {getStatusText(submission.status)}
-              </span>
-            </div>
-            <div className="digest__header">
-              <p className="digest__type">{submission.event_type?.join(', ')}</p>
-              <h3 className="digest__title">{submission.title}</h3>
-            </div>
-            <div className="digest__mainInfo">
-              <div className="digest__date-row">
-                {submission.start_date && (
-                  <div className="digest__day">
-                    <img src={dateIcon} alt="icon" /> {formatDate(submission.start_date)}
-                  </div>
-                )}
-                {submission.start_time && (
-                  <div className="digest__time">
-                    <img src={timeIcon} alt="icon" /> {formatTime(submission.start_time)}
-                  </div>
-                )}
-              </div>
-              {typeof submission.price === 'number' && (
-                <div className="digest__price">
-                  <img src={priceIcon} alt="ruble icon" />
-                  {submission.price === 0 ? 'Бесплатно' : `${submission.price}`}
-                </div>
-              )}
-              {submission.participation_type && submission.participation_type.length > 0 && (
-                <div className="digest__partType">
-                  <img src={partTypeIcon} alt="person speaking icon"/> 
-                  {submission.participation_type.join(', ')}
-                </div>
-              )}
-              <div className="digest__location">
-                <img src={placeIcon} alt="icon" />
-                {submission.city?.join(', ') || submission.address || 'Онлайн'}
-              </div>
-              {submission.event_url && (
-                <div className="digest__eventUrl">
-                  <img src={webIcon} alt="site icon" className="icon"/>
-                  <a 
-                    href={submission.event_url}
-                    onClick={(e) => handleOpenLink(e, submission.event_url)}
-                    className="digest-link"
-                  >
-                    Сайт мероприятия
-                  </a>
-                </div>
-              )}
-            </div>
-            {submission.tags && submission.tags.length > 0 && (
-              <div className="digest__tags">
-                {submission.tags.map((tag, i) => (
-                  <span key={i} className="digest__tag">#{tag}</span>
-                ))}
-              </div>
-            )}
-            
-            {/* Кнопка в зависимости от статуса */}
-            {submission.status === 'approved' && submission.published_event_id ? (
-              // Одобренные заявки - переходим на страницу события
-              <Link
-                to={`/events/${submission.published_event_id}`}
-                state={{ token, userId }}
-                className="digest__link"
-              >
-                <button className="btn digest__knowMore">ПОДРОБНЕЕ</button>
-              </Link>
-            ) : (
-              // Заявки на модерации или отклоненные - показываем модалку с деталями
-              <button 
-                className="btn digest__knowMore"
-                onClick={() => {
-                  setSelectedSubmission(submission);
-                  setShowDetailsModal(true);
-                }}
-              >
-                ПОДРОБНЕЕ
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
-    ) : (
-      <div className="empty-submissions">
-        <p>У вас пока нет отправленных заявок</p>
-        <button 
-          className="create-event-btn"
-          onClick={() => setActiveMainTab('create')}
-        >
-          Создать событие
-        </button>
-      </div>
-    )}
-
-    {/* Модальное окно с деталями заявки */}
-    {showDetailsModal && selectedSubmission && (
-      <div className="modal-overlay" onClick={() => setShowDetailsModal(false)}>
-        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <h3>{selectedSubmission.title}</h3>
-            <button className="modal-close" onClick={() => setShowDetailsModal(false)}>×</button>
-          </div>
-          <div className="modal-body">
-            <div className="detail-section">
-              <strong>Статус:</strong>
-              <span className={`status-badge ${getStatusClass(selectedSubmission.status)}`}>
-                {getStatusText(selectedSubmission.status)}
-              </span>
-            </div>
-            
-            {selectedSubmission.event_type && selectedSubmission.event_type.length > 0 && (
-              <div className="detail-section">
-                <strong>Тема:</strong> {selectedSubmission.event_type.join(', ')}
-              </div>
-            )}
-            
-            {selectedSubmission.track && selectedSubmission.track.length > 0 && (
-              <div className="detail-section">
-                <strong>Формат:</strong> {selectedSubmission.track.join(', ')}
-              </div>
-            )}
-            
-            {selectedSubmission.participation_type && selectedSubmission.participation_type.length > 0 && (
-              <div className="detail-section">
-                <strong>Кого приглашаем:</strong> {selectedSubmission.participation_type.join(', ')}
-              </div>
-            )}
-            
-            {selectedSubmission.city && selectedSubmission.city.length > 0 && (
-              <div className="detail-section">
-                <strong>Город:</strong> {selectedSubmission.city.join(', ')}
-              </div>
-            )}
-            
-            <div className="detail-section">
-              <strong>Дата:</strong> {formatDate(selectedSubmission.start_date)}
-              {selectedSubmission.start_time && ` в ${formatTime(selectedSubmission.start_time)}`}
-              {selectedSubmission.end_date && selectedSubmission.end_date !== selectedSubmission.start_date && (
-                <> - {formatDate(selectedSubmission.end_date)}</>
-              )}
-            </div>
-            
-            {selectedSubmission.price !== undefined && selectedSubmission.price !== null && (
-              <div className="detail-section">
-                <strong>Стоимость:</strong> {selectedSubmission.price === 0 ? 'Бесплатно' : `${selectedSubmission.price} ₽`}
-              </div>
-            )}
-            
-            {selectedSubmission.address && (
-              <div className="detail-section">
-                <strong>Адрес:</strong> {selectedSubmission.address}
-              </div>
-            )}
-            
-            {selectedSubmission.description && (
-              <div className="detail-section">
-                <strong>Описание:</strong>
-                <p>{selectedSubmission.description}</p>
-              </div>
-            )}
-            
-            {selectedSubmission.organizers && selectedSubmission.organizers.length > 0 && (
-              <div className="detail-section">
-                <strong>Организаторы:</strong> {selectedSubmission.organizers.join(', ')}
-              </div>
-            )}
-            
-            {selectedSubmission.speakers && selectedSubmission.speakers.length > 0 && (
-              <div className="detail-section">
-                <strong>Спикеры:</strong> {selectedSubmission.speakers.join(', ')}
-              </div>
-            )}
-            
-            {selectedSubmission.event_url && (
-              <div className="detail-section">
-                <strong>Сайт:</strong> 
-                <a href={selectedSubmission.event_url} onClick={(e) => handleOpenLink(e, selectedSubmission.event_url)}>
-                  {selectedSubmission.event_url}
-                </a>
-              </div>
-            )}
-            
-            {selectedSubmission.registration_url && (
-              <div className="detail-section">
-                <strong>Регистрация:</strong> 
-                <a href={selectedSubmission.registration_url} onClick={(e) => handleOpenLink(e, selectedSubmission.registration_url)}>
-                  {selectedSubmission.registration_url}
-                </a>
-              </div>
-            )}
-            
-            {selectedSubmission.rejection_reason && (
-              <div className="detail-section rejection-reason">
-                <strong>Причина отклонения:</strong> {selectedSubmission.rejection_reason}
-              </div>
-            )}
-          </div>
-          <div className="modal-footer">
-            <button className="modal-close-btn" onClick={() => setShowDetailsModal(false)}>Закрыть</button>
-          </div>
-        </div>
-      </div>
-    )}
-  </div>
+        <SubmissionsList
+          submissions={submissions}
+          isLoading={isLoadingSubmissions}
+          hasLoadedOnce={hasLoadedSubmissionsOnce}
+          token={token}
+          userId={userId}
+          onRefetch={fetchUserSubmissions}
+          onCreateNew={() => setActiveMainTab('create')}
+        />
       )}
     </div>
   );

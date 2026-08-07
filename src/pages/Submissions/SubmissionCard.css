@@ -1,3 +1,7 @@
+.submission-status-badge {
+  margin-bottom: 10px;
+}
+
 .submission-card__menu {
   position: relative;
   align-self: flex-start;

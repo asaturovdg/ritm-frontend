@@ -772,10 +772,6 @@
   align-self: flex-start;
 }
 
-.submission-status-badge{
-  margin-bottom: 10px;
-}
-
 .contacts-group {
   display: flex;
   flex-direction: column;
