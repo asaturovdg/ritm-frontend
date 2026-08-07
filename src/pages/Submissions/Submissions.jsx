@@ -442,9 +442,9 @@ export default function Submissions() {
 
   return (
     <div className="submissions-container">
-      <div className="submissions-tabs">
+      <div className="profileTabs">
         <button
-          className={`submissions-tab ${activeMainTab === 'create' ? 'active' : ''}`}
+          className={`profile-tab ${activeMainTab === 'create' ? 'active' : ''}`}
           onClick={() => {
             setActiveMainTab('create');
             resetForm();
@@ -453,7 +453,7 @@ export default function Submissions() {
           Создать событие
         </button>
         <button
-          className={`submissions-tab ${activeMainTab === 'mySubmissions' ? 'active' : ''}`}
+          className={`profile-tab ${activeMainTab === 'mySubmissions' ? 'active' : ''}`}
           onClick={() => setActiveMainTab('mySubmissions')}
         >
           Мои заявки

@@ -35,6 +35,47 @@ export default function SubmissionCard({ submission, token, userId, onShowDetail
 
   return (
     <div className="digest__item submission-item">
+      {!isApprovedWithEvent && (
+        <div className="submission-card__menu" ref={menuRef}>
+          <button
+            type="button"
+            data-testid="submission-card-menu-trigger"
+            className="submission-card__menu-trigger"
+            aria-label="Действия с заявкой"
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <MoreVertical size={18} />
+          </button>
+          {menuOpen && (
+            <div className="submission-card__menu-popover">
+              <button
+                type="button"
+                data-testid="submission-card-menu-details"
+                className="submission-card__menu-item"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onShowDetails(submission);
+                }}
+              >
+                Подробнее
+              </button>
+              {submission.status === 'pending' && (
+                <button
+                  type="button"
+                  data-testid="submission-card-menu-cancel"
+                  className="submission-card__menu-item submission-card__menu-item--danger"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onCancel(submission);
+                  }}
+                >
+                  Отменить
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
       <div className="submission-status-badge">
         <span className={`status-badge ${getStatusClass(submission.status)}`}>
           {getStatusText(submission.status)}
@@ -90,50 +131,10 @@ export default function SubmissionCard({ submission, token, userId, onShowDetail
         </div>
       )}
 
-      {isApprovedWithEvent ? (
+      {isApprovedWithEvent && (
         <Link to={`/events/${submission.published_event_id}`} state={{ token, userId }} className="digest__link">
           <button className="btn digest__knowMore">ПОДРОБНЕЕ</button>
         </Link>
-      ) : (
-        <div className="submission-card__menu" ref={menuRef}>
-          <button
-            type="button"
-            data-testid="submission-card-menu-trigger"
-            className="submission-card__menu-trigger"
-            aria-label="Действия с заявкой"
-            onClick={() => setMenuOpen((v) => !v)}
-          >
-            <MoreVertical size={18} />
-          </button>
-          {menuOpen && (
-            <div className="submission-card__menu-popover">
-              <button
-                type="button"
-                data-testid="submission-card-menu-details"
-                className="submission-card__menu-item"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onShowDetails(submission);
-                }}
-              >
-                Подробнее
-              </button>
-              {submission.status === 'pending' && (
-                <button
-                  type="button"
-                  data-testid="submission-card-menu-cancel"
-                  className="submission-card__menu-item submission-card__menu-item--danger"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onCancel(submission);
-                  }}
-                >
-                  Отменить
-                </button>
-              )}
-            </div>
-          )}
-        </div>
       )}
     </div>
   );
