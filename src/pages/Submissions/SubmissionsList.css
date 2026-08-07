@@ -1,0 +1,5 @@
+.submissions-empty-filtered {
+  text-align: center;
+  color: var(--color-text-secondary);
+  padding: 24px 0;
+}
