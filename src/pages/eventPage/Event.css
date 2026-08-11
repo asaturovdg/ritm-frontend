@@ -349,6 +349,12 @@ a.organizer-chip:active {
   margin-bottom: 16px;
 }
 
+.event-status-banner__reason {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
 .event-preview {
   border-radius: 16px;
   overflow: hidden;

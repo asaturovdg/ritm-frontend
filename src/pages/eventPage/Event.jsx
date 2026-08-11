@@ -14,7 +14,7 @@ import NotInterestedButton from "../../components/NotInterestedButton/NotInteres
 import CollectionsButton from "../../components/CollectionsButton/CollectionsButton.jsx";
 import { CALENDAR_ALLOWLIST, NOT_INTERESTED_ALLOWLIST, hasFeature } from "../../data/featureFlags.js";
 
-export default function Event({ embeddedId, isPreview = false, status }) {
+export default function Event({ embeddedId, isPreview = false, status, previewData = null, rejectionReason = null }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { id: paramId } = useParams();
@@ -96,6 +96,12 @@ export default function Event({ embeddedId, isPreview = false, status }) {
   };
 
   useEffect(() => {
+    if (previewData) {
+      setEvent(previewData);
+      setLoading(false);
+      setError(null);
+      return;
+    }
     if (isCheckingAuth) return;
 
     const fetchEvent = async () => {
@@ -151,7 +157,7 @@ export default function Event({ embeddedId, isPreview = false, status }) {
     };
 
     fetchEvent();
-  }, [id, token, isCheckingAuth]);
+  }, [id, token, isCheckingAuth, previewData]);
 
   const onAddToCalendar = (provider) => {
     handleAddToCalendar(event.id, provider, {
@@ -232,6 +238,9 @@ export default function Event({ embeddedId, isPreview = false, status }) {
           <span className={`status-badge ${getStatusClass(status)}`}>
             {getStatusText(status)}
           </span>
+          {status === 'rejected' && rejectionReason && (
+            <p className="event-status-banner__reason">{rejectionReason}</p>
+          )}
         </div>
       )}
 

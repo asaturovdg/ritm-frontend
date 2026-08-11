@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { MoreVertical } from 'lucide-react';
 import { usePlatform } from '../../platform/usePlatform.js';
 import { getStatusText, getStatusClass } from './submissionStatus.js';
@@ -14,6 +14,7 @@ import './SubmissionCard.css';
 
 export default function SubmissionCard({ submission, token, userId, onShowDetails, onCancel, onEdit, onResubmit }) {
   const { openLink } = usePlatform();
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -28,15 +29,30 @@ export default function SubmissionCard({ submission, token, userId, onShowDetail
 
   const handleOpenLink = (e, url) => {
     e.preventDefault();
+    e.stopPropagation();
     openLink(url);
   };
 
   const isApprovedWithEvent = submission.status === 'approved' && submission.published_event_id;
 
+  const handleCardClick = () => {
+    if (isApprovedWithEvent) {
+      navigate(`/events/${submission.published_event_id}`, { state: { token, userId } });
+    } else {
+      onShowDetails(submission);
+    }
+  };
+
   return (
-    <div className="digest__item submission-item">
+    <div
+      className="digest__item submission-item"
+      role="button"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCardClick(); } }}
+    >
       {!isApprovedWithEvent && (
-        <div className="submission-card__menu" ref={menuRef}>
+        <div className="submission-card__menu" ref={menuRef} onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
             data-testid="submission-card-menu-trigger"
@@ -158,7 +174,12 @@ export default function SubmissionCard({ submission, token, userId, onShowDetail
       )}
 
       {isApprovedWithEvent && (
-        <Link to={`/events/${submission.published_event_id}`} state={{ token, userId }} className="digest__link">
+        <Link
+          to={`/events/${submission.published_event_id}`}
+          state={{ token, userId }}
+          className="digest__link"
+          onClick={(e) => e.stopPropagation()}
+        >
           <button className="btn digest__knowMore">ПОДРОБНЕЕ</button>
         </Link>
       )}

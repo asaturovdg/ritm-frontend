@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useToast } from '../../components/Toast/ToastContext.jsx';
 import SubmissionStatusFilter from './SubmissionStatusFilter.jsx';
 import SubmissionCard from './SubmissionCard.jsx';
-import SubmissionDetailsModal from './SubmissionDetailsModal.jsx';
+import SubmissionEventPreview from './SubmissionEventPreview.jsx';
 import CancelSubmissionModal from './CancelSubmissionModal.jsx';
 import { getStatusText } from './submissionStatus.js';
 import './SubmissionsList.css';
@@ -84,7 +84,7 @@ export default function SubmissionsList({ submissions, isLoading, hasLoadedOnce,
       )}
 
       {detailsTarget && (
-        <SubmissionDetailsModal submission={detailsTarget} onClose={() => setDetailsTarget(null)} />
+        <SubmissionEventPreview submission={detailsTarget} onClose={() => setDetailsTarget(null)} />
       )}
 
       {cancelTarget && (

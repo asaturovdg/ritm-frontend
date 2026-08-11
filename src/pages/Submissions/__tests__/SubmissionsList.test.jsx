@@ -5,12 +5,16 @@ import { MemoryRouter } from 'react-router-dom';
 import SubmissionsList from '../SubmissionsList.jsx';
 
 vi.mock('../../../platform/usePlatform.js', () => ({
-  usePlatform: () => ({ openLink: vi.fn() }),
+  usePlatform: () => ({ openLink: vi.fn(), shareEvent: vi.fn(), showAlert: vi.fn(), platform: 'web' }),
 }));
 
 const { mockShowToast } = vi.hoisted(() => ({ mockShowToast: vi.fn() }));
 vi.mock('../../../components/Toast/ToastContext.jsx', () => ({
   useToast: () => mockShowToast,
+}));
+
+vi.mock('../../../components/AuthContext.jsx', () => ({
+  useAuth: () => ({ token: 'test-token', userId: '1', isCheckingAuth: false }),
 }));
 
 const submission = (overrides = {}) => ({
@@ -84,11 +88,24 @@ describe('SubmissionsList', () => {
     expect(screen.queryByText('У вас пока нет отправленных заявок')).not.toBeInTheDocument();
   });
 
-  it('opens the details modal from a card', async () => {
+  it('opens the event preview from a card\'s "Подробнее" menu item', async () => {
     renderList({ submissions: [submission({ id: 1 })] });
     await userEvent.click(screen.getByTestId('submission-card-menu-trigger'));
     await userEvent.click(screen.getByTestId('submission-card-menu-details'));
-    expect(screen.getByText('Закрыть')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Закрыть' })).toBeInTheDocument();
+  });
+
+  it('opens the event preview by tapping the card itself', async () => {
+    renderList({ submissions: [submission({ id: 1 })] });
+    await userEvent.click(screen.getByText('Митап по бэкенду'));
+    expect(screen.getByRole('button', { name: 'Закрыть' })).toBeInTheDocument();
+  });
+
+  it('closes the event preview via the close button', async () => {
+    renderList({ submissions: [submission({ id: 1 })] });
+    await userEvent.click(screen.getByText('Митап по бэкенду'));
+    await userEvent.click(screen.getByRole('button', { name: 'Закрыть' }));
+    expect(screen.queryByRole('button', { name: 'Закрыть' })).not.toBeInTheDocument();
   });
 
   it('opens the cancel confirm modal, calls DELETE, and refetches on success', async () => {

@@ -1,5 +1,6 @@
 .submission-item {
   position: relative;
+  cursor: pointer;
 }
 
 .submission-status-badge {
