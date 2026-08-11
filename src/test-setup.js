@@ -1,4 +1,15 @@
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
+
+// @testing-library/react's asyncWrapper (used to flush microtasks after events)
+// only auto-advances fake timers by 0ms when it detects a Jest-style `jest`
+// global with a mocked `setTimeout` (see jestFakeTimersAreEnabled() in
+// @testing-library/react/dist/pure.js). Vitest's vi.useFakeTimers() has no
+// such global, so without this shim any test that combines fake timers with
+// userEvent (or fireEvent) hangs forever on RTL's internal
+// `setTimeout(resolve, 0)` drain step. Providing a minimal jest-shaped global
+// lets RTL's own detection succeed and call through to vi.advanceTimersByTime.
+globalThis.jest ??= { advanceTimersByTime: (ms) => vi.advanceTimersByTime(ms) };
 
 // Node's built-in `localStorage` (--experimental-webstorage, on by default
 // in recent Node) is already defined on globalThis before vitest's jsdom
