@@ -1,0 +1,12 @@
+.submission-form-group__title {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.submission-form-group__error {
+  font-size: 12px;
+  color: var(--color-danger);
+  margin-top: 8px;
+}
