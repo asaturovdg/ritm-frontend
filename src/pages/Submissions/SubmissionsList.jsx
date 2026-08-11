@@ -7,7 +7,7 @@ import CancelSubmissionModal from './CancelSubmissionModal.jsx';
 import { getStatusText } from './submissionStatus.js';
 import './SubmissionsList.css';
 
-export default function SubmissionsList({ submissions, isLoading, hasLoadedOnce, token, userId, onRefetch, onCreateNew }) {
+export default function SubmissionsList({ submissions, isLoading, hasLoadedOnce, token, userId, onRefetch, onCreateNew, onEdit, onResubmit }) {
   const showToast = useToast();
   const [activeFilter, setActiveFilter] = useState('all');
   const [detailsTarget, setDetailsTarget] = useState(null);
@@ -76,6 +76,8 @@ export default function SubmissionsList({ submissions, isLoading, hasLoadedOnce,
               userId={userId}
               onShowDetails={setDetailsTarget}
               onCancel={setCancelTarget}
+              onEdit={onEdit}
+              onResubmit={onResubmit}
             />
           ))}
         </div>

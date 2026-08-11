@@ -121,4 +121,23 @@ describe('SubmissionsList', () => {
     await waitFor(() => expect(mockShowToast).toHaveBeenCalledWith('Не удалось отменить заявку. Попробуйте ещё раз'));
     expect(screen.getByText('Митап по бэкенду')).toBeInTheDocument();
   });
+
+  it('passes onEdit/onResubmit through to the card', async () => {
+    const onEdit = vi.fn();
+    const onResubmit = vi.fn();
+    renderList({
+      submissions: [submission({ id: 1, status: 'pending' }), submission({ id: 2, status: 'rejected' })],
+      onEdit,
+      onResubmit,
+    });
+
+    const triggers = screen.getAllByTestId('submission-card-menu-trigger');
+    await userEvent.click(triggers[0]);
+    await userEvent.click(screen.getByTestId('submission-card-menu-edit'));
+    expect(onEdit).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }));
+
+    await userEvent.click(triggers[1]);
+    await userEvent.click(screen.getByTestId('submission-card-menu-resubmit'));
+    expect(onResubmit).toHaveBeenCalledWith(expect.objectContaining({ id: 2 }));
+  });
 });
