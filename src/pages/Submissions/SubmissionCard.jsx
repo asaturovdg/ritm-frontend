@@ -12,7 +12,7 @@ import partTypeIcon from '../../assets/icons/partType.svg';
 import webIcon from '../../assets/icons/web.svg';
 import './SubmissionCard.css';
 
-export default function SubmissionCard({ submission, token, userId, onShowDetails, onCancel }) {
+export default function SubmissionCard({ submission, token, userId, onShowDetails, onCancel, onEdit, onResubmit }) {
   const { openLink } = usePlatform();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -59,6 +59,32 @@ export default function SubmissionCard({ submission, token, userId, onShowDetail
               >
                 Подробнее
               </button>
+              {submission.status === 'pending' && (
+                <button
+                  type="button"
+                  data-testid="submission-card-menu-edit"
+                  className="submission-card__menu-item"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onEdit(submission);
+                  }}
+                >
+                  Редактировать
+                </button>
+              )}
+              {submission.status === 'rejected' && (
+                <button
+                  type="button"
+                  data-testid="submission-card-menu-resubmit"
+                  className="submission-card__menu-item"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onResubmit(submission);
+                  }}
+                >
+                  Отправить заново
+                </button>
+              )}
               {submission.status === 'pending' && (
                 <button
                   type="button"

@@ -70,3 +70,26 @@ describe('SubmissionCard', () => {
     expect(screen.getByRole('link')).toHaveAttribute('href', '/events/42');
   });
 });
+
+describe('SubmissionCard edit/resubmit actions', () => {
+  it('shows Редактировать (not Отправить заново) for a pending submission and calls onEdit', async () => {
+    const onEdit = vi.fn();
+    renderCard(pendingSubmission, { onEdit });
+    await userEvent.click(screen.getByTestId('submission-card-menu-trigger'));
+    expect(screen.getByTestId('submission-card-menu-edit')).toBeInTheDocument();
+    expect(screen.queryByTestId('submission-card-menu-resubmit')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('submission-card-menu-edit'));
+    expect(onEdit).toHaveBeenCalledWith(pendingSubmission);
+  });
+
+  it('shows Отправить заново (not Редактировать) for a rejected submission and calls onResubmit', async () => {
+    const onResubmit = vi.fn();
+    const rejected = { ...pendingSubmission, status: 'rejected' };
+    renderCard(rejected, { onResubmit });
+    await userEvent.click(screen.getByTestId('submission-card-menu-trigger'));
+    expect(screen.getByTestId('submission-card-menu-resubmit')).toBeInTheDocument();
+    expect(screen.queryByTestId('submission-card-menu-edit')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('submission-card-menu-resubmit'));
+    expect(onResubmit).toHaveBeenCalledWith(rejected);
+  });
+});
