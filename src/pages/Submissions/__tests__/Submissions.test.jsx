@@ -94,8 +94,22 @@ const editablePendingSubmission = (overrides = {}) => ({
 
 describe('Submissions page — Создать событие tab (wizard rework)', () => {
   it('resets to a fresh create form when the "Создать событие" tab is clicked', async () => {
+    global.fetch.mockResolvedValue({ ok: true, json: async () => [editablePendingSubmission()] });
     renderSubmissions();
+    await userEvent.click(screen.getByText('Мои заявки'));
+    await screen.findByText('Митап по бэкенду');
+    await userEvent.click(screen.getByTestId('submission-card-menu-trigger'));
+    await userEvent.click(screen.getByTestId('submission-card-menu-edit'));
+
+    // Confirm we're actually in edit mode, prefilled with the submission's data.
+    expect(screen.getByDisplayValue('Митап по бэкенду')).toBeInTheDocument();
+
+    // Now click away to "Создать событие" mid-edit — this should discard the
+    // edit target and return to a fresh, unprefilled create-mode form.
+    await userEvent.click(screen.getByText('Создать событие'));
+
     expect(screen.getByText('Шаг 1 из 4')).toBeInTheDocument();
+    expect(screen.queryByDisplayValue('Митап по бэкенду')).not.toBeInTheDocument();
   });
 
   it('clicking Редактировать on a pending card switches to the create tab prefilled in edit mode', async () => {
@@ -131,5 +145,11 @@ describe('Submissions page — Создать событие tab (wizard rework)
 
     await waitFor(() => expect(mockShowToast).toHaveBeenCalledWith('Заявка обновлена'));
     expect(await screen.findByText('Мои заявки')).toHaveClass('active');
+
+    // Exactly 3 fetch calls total: initial GET (Мои заявки), PATCH (Сохранить),
+    // and the single refetch triggered by the tab-switch useEffect. A 4th call
+    // here would mean handleFormDone is redundantly refetching on top of the
+    // useEffect — regression guard for that bug.
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(3));
   });
 });

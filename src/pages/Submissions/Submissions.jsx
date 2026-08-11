@@ -72,8 +72,10 @@ export default function Submissions() {
     if (mode === 'edit') {
       showToast('Заявка обновлена');
       resetToCreate();
+      // The useEffect below already refetches on the 'mySubmissions' tab
+      // transition — an explicit fetchUserSubmissions() call here would
+      // fire a second, redundant GET.
       setActiveMainTab('mySubmissions');
-      fetchUserSubmissions();
     } else {
       setIsCompleted(true);
     }
@@ -87,8 +89,10 @@ export default function Submissions() {
             <h2>Заявка отправлена!</h2>
             <button onClick={() => {
               resetToCreate();
+              // The useEffect below already refetches on the 'mySubmissions'
+              // tab transition — an explicit fetchUserSubmissions() call here
+              // would fire a second, redundant GET.
               setActiveMainTab('mySubmissions');
-              fetchUserSubmissions();
             }} className="submit-btn">
               Посмотреть мои заявки
             </button>
