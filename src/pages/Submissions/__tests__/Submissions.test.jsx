@@ -69,3 +69,67 @@ describe('Submissions page — Мои заявки tab', () => {
     expect(screen.getByText('Митап по бэкенду')).toBeInTheDocument();
   });
 });
+
+// A date safely in the future no matter when this suite runs, so validateField('date_time', ...)
+// passes without needing to fake the system clock in this integration-level test file.
+const futureDate = new Date(Date.now() + 60 * 86400000).toISOString().split('T')[0];
+
+const editablePendingSubmission = (overrides = {}) => ({
+  id: 5,
+  title: 'Митап по бэкенду',
+  status: 'pending',
+  event_type: ['Митап'],
+  track: ['Backend'],
+  participation_type: ['Слушатель'],
+  start_date: futureDate,
+  start_time: '18:00',
+  end_date: futureDate,
+  end_time: '19:00',
+  city: ['Онлайн'], // avoids also having to fill the conditionally-required address field
+  price: 0,
+  contact_person: 'Иван Иванов',
+  contact_telegram: '@ivanov',
+  ...overrides,
+});
+
+describe('Submissions page — Создать событие tab (wizard rework)', () => {
+  it('resets to a fresh create form when the "Создать событие" tab is clicked', async () => {
+    renderSubmissions();
+    expect(screen.getByText('Шаг 1 из 4')).toBeInTheDocument();
+  });
+
+  it('clicking Редактировать on a pending card switches to the create tab prefilled in edit mode', async () => {
+    global.fetch.mockResolvedValue({ ok: true, json: async () => [editablePendingSubmission()] });
+    renderSubmissions();
+    await userEvent.click(screen.getByText('Мои заявки'));
+    await screen.findByText('Митап по бэкенду');
+    await userEvent.click(screen.getByTestId('submission-card-menu-trigger'));
+    await userEvent.click(screen.getByTestId('submission-card-menu-edit'));
+
+    expect(screen.getByDisplayValue('Митап по бэкенду')).toBeInTheDocument();
+    await userEvent.click(screen.getByText('Далее'));
+    await userEvent.click(screen.getByText('Далее'));
+    await userEvent.click(screen.getByText('Далее'));
+    expect(screen.getByText('Сохранить')).toBeInTheDocument();
+  });
+
+  it('a successful edit shows a toast, returns to Мои заявки, and refetches', async () => {
+    global.fetch
+      .mockResolvedValueOnce({ ok: true, json: async () => [editablePendingSubmission()] })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({}) }) // PATCH
+      .mockResolvedValueOnce({ ok: true, json: async () => [] }); // refetch after edit
+    renderSubmissions();
+    await userEvent.click(screen.getByText('Мои заявки'));
+    await screen.findByText('Митап по бэкенду');
+    await userEvent.click(screen.getByTestId('submission-card-menu-trigger'));
+    await userEvent.click(screen.getByTestId('submission-card-menu-edit'));
+
+    await userEvent.click(screen.getByText('Далее'));
+    await userEvent.click(screen.getByText('Далее'));
+    await userEvent.click(screen.getByText('Далее'));
+    await userEvent.click(screen.getByText('Сохранить'));
+
+    await waitFor(() => expect(mockShowToast).toHaveBeenCalledWith('Заявка обновлена'));
+    expect(await screen.findByText('Мои заявки')).toHaveClass('active');
+  });
+});
