@@ -92,6 +92,24 @@ const editablePendingSubmission = (overrides = {}) => ({
   ...overrides,
 });
 
+const rejectedSubmission = (overrides = {}) => ({
+  id: 9,
+  title: 'Митап по бэкенду',
+  status: 'rejected',
+  event_type: ['Митап'],
+  track: ['Backend'],
+  participation_type: ['Слушатель'],
+  start_date: futureDate,
+  start_time: '18:00',
+  end_date: futureDate,
+  end_time: '19:00',
+  city: ['Онлайн'], // avoids also having to fill the conditionally-required address field
+  price: 0,
+  contact_person: 'Иван Иванов',
+  contact_telegram: '@ivanov',
+  ...overrides,
+});
+
 describe('Submissions page — Создать событие tab (wizard rework)', () => {
   it('resets to a fresh create form when the "Создать событие" tab is clicked', async () => {
     global.fetch.mockResolvedValue({ ok: true, json: async () => [editablePendingSubmission()] });
@@ -151,5 +169,34 @@ describe('Submissions page — Создать событие tab (wizard rework)
     // here would mean handleFormDone is redundantly refetching on top of the
     // useEffect — regression guard for that bug.
     await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(3));
+  });
+
+  it('clicking Отправить заново on a rejected card opens the form prefilled in CREATE mode and POSTs (not PATCHes) on submit', async () => {
+    global.fetch
+      .mockResolvedValueOnce({ ok: true, json: async () => [rejectedSubmission()] })
+      .mockResolvedValueOnce({ ok: true, json: async () => ({}) }); // POST on submit
+    renderSubmissions();
+    await userEvent.click(screen.getByText('Мои заявки'));
+    await screen.findByText('Митап по бэкенду');
+    await userEvent.click(screen.getByTestId('submission-card-menu-trigger'));
+    await userEvent.click(screen.getByTestId('submission-card-menu-resubmit'));
+
+    // Prefilled with the rejected submission's data...
+    expect(screen.getByDisplayValue('Митап по бэкенду')).toBeInTheDocument();
+
+    // ...but in CREATE mode, not edit mode: last-step button must read
+    // "Отправить на проверку", never "Сохранить".
+    await userEvent.click(screen.getByText('Далее'));
+    await userEvent.click(screen.getByText('Далее'));
+    await userEvent.click(screen.getByText('Далее'));
+    expect(screen.getByText('Отправить на проверку')).toBeInTheDocument();
+    expect(screen.queryByText('Сохранить')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByText('Отправить на проверку'));
+
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(2));
+    const [submitUrl, submitOptions] = global.fetch.mock.calls[1];
+    expect(submitUrl).toBe('https://ritmevents.ru/api/v1/submissions');
+    expect(submitOptions.method).toBe('POST');
   });
 });

@@ -125,16 +125,18 @@ export default function Submissions() {
         </button>
       </div>
 
-      {activeMainTab === 'create' && (
+      {/* Kept mounted (visibility toggled via CSS) rather than conditionally rendered,
+          so switching to "Мои заявки" and back doesn't wipe in-progress form state. */}
+      <div style={{ display: activeMainTab === 'create' ? 'block' : 'none' }}>
         <SubmissionForm
-          key={formTarget?.id || 'create'}
+          key={formTarget?.id ?? 'create'}
           mode={formMode}
           editingId={formMode === 'edit' ? formTarget?.id : null}
           initialValues={formTarget}
           token={token}
           onDone={handleFormDone}
         />
-      )}
+      </div>
 
       {activeMainTab === 'mySubmissions' && (
         <SubmissionsList
@@ -144,7 +146,7 @@ export default function Submissions() {
           token={token}
           userId={userId}
           onRefetch={fetchUserSubmissions}
-          onCreateNew={() => setActiveMainTab('create')}
+          onCreateNew={() => { setActiveMainTab('create'); resetToCreate(); }}
           onEdit={handleEdit}
           onResubmit={handleResubmit}
         />
