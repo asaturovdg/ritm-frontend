@@ -29,7 +29,9 @@ export default function QueueListSheet({ items, currentId, hasMore, onSelect, on
             onClick={() => onSelect(item.id)}
           >
             <span className="moderation-sheet__item-title">{item.title}</span>
-            <span className="moderation-sheet__item-quality">{item.quality_score}/5</span>
+            {item.quality_score != null && (
+              <span className="moderation-sheet__item-quality">{item.quality_score}/5</span>
+            )}
           </div>
         ))}
         {hasMore && <LoadMoreSentinel onLoadMore={onLoadMore} />}
