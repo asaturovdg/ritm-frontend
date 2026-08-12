@@ -4,6 +4,10 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import Moderation from '../Moderation.jsx';
 
+vi.mock('../SubmissionsQueue.jsx', () => ({
+  default: () => <div data-testid="submissions-queue-stub">Заглушка очереди заявок</div>,
+}));
+
 vi.mock('@telegram-apps/telegram-ui', () => ({
   Placeholder: ({ header, description, children }) => (
     <div data-testid="placeholder">
@@ -456,5 +460,18 @@ describe('Moderation page', () => {
     await userEvent.click(screen.getByText('Пропустить'));
 
     await waitFor(() => expect(screen.getByText('Не удалось загрузить')).toBeInTheDocument());
+  });
+
+  it('switches to the "Заявки на события" tab and renders SubmissionsQueue', async () => {
+    global.fetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ items: [queueItem()], total: 1, limit: 20, offset: 0 }),
+    });
+    renderModeration();
+    await screen.findByText('1 / 1');
+    await userEvent.click(screen.getByText('Заявки на события'));
+    expect(screen.getByTestId('submissions-queue-stub')).toBeInTheDocument();
+    expect(screen.queryByText('1 / 1')).not.toBeInTheDocument();
   });
 });
