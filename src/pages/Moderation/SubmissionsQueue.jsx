@@ -2,49 +2,13 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Placeholder } from '@telegram-apps/telegram-ui';
 import { useAuth } from '../../components/AuthContext.jsx';
 import { useToast } from '../../components/Toast/ToastContext.jsx';
-import ModerationCard from './ModerationCard.jsx';
+import SubmissionQueueCard from './SubmissionQueueCard.jsx';
 import QueueListSheet from './QueueListSheet.jsx';
-import FeedbackReview from './FeedbackReview.jsx';
-import SubmissionsQueue from './SubmissionsQueue.jsx';
-import './Moderation.css';
 
 const API_BASE = 'https://ritmevents.ru/api/v1';
 const PAGE_SIZE = 20;
 
-export default function Moderation() {
-  const [section, setSection] = useState('queue'); // 'queue' | 'submissions' | 'feedback'
-
-  return (
-    <div className="moderation-page">
-      <div className="moderation-tabs">
-        <button
-          type="button"
-          className={`moderation-tab ${section === 'queue' ? 'active' : ''}`}
-          onClick={() => setSection('queue')}
-        >
-          Заявки
-        </button>
-        <button
-          type="button"
-          className={`moderation-tab ${section === 'submissions' ? 'active' : ''}`}
-          onClick={() => setSection('submissions')}
-        >
-          Заявки на события
-        </button>
-        <button
-          type="button"
-          className={`moderation-tab ${section === 'feedback' ? 'active' : ''}`}
-          onClick={() => setSection('feedback')}
-        >
-          Обратная связь
-        </button>
-      </div>
-      {section === 'queue' ? <ModerationQueue /> : section === 'submissions' ? <SubmissionsQueue /> : <FeedbackReview />}
-    </div>
-  );
-}
-
-function ModerationQueue() {
+export default function SubmissionsQueue() {
   const { token, isAuthReady, setShowInputCode } = useAuth();
   const showToast = useToast();
 
@@ -68,7 +32,7 @@ function ModerationQueue() {
   }, [setShowInputCode]);
 
   const fetchPage = useCallback(async (pageOffset) => {
-    const res = await fetch(`${API_BASE}/events/moderation-queue?limit=${PAGE_SIZE}&offset=${pageOffset}`, {
+    const res = await fetch(`${API_BASE}/submissions/moderation-queue?limit=${PAGE_SIZE}&offset=${pageOffset}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (res.status === 401) {
@@ -107,10 +71,6 @@ function ModerationQueue() {
         if (!data) return;
         const newItems = Array.isArray(data.items) ? data.items : [];
         if (newItems.length === 0) {
-          // The server claims more items exist (total > items fetched so far) but this
-          // page came back empty. Retrying the same offset forever would spin silently,
-          // so treat this as an unrecoverable load failure and surface the existing
-          // retry UI instead of looping.
           setLoadError(true);
           return;
         }
@@ -124,10 +84,6 @@ function ModerationQueue() {
       .finally(() => setLoadingMore(false));
   }, [fetchPage, offset, items.length, total, loadingMore, showToast]);
 
-  // Auto-paginate the primary card-by-card flow: once the locally-loaded
-  // working set is running low (and more unmoderated items exist on the
-  // server), fetch the next page automatically instead of waiting for the
-  // admin to open the queue-list sheet.
   useEffect(() => {
     if (loading || loadingMore || loadError) return;
     if (items.length < total && items.length - currentIndex <= 2) {
@@ -135,13 +91,13 @@ function ModerationQueue() {
     }
   }, [items.length, currentIndex, total, loading, loadingMore, loadError, loadMore]);
 
-  const removeCurrentFromQueue = useCallback((eventId) => {
+  const removeCurrentFromQueue = useCallback((submissionId) => {
     setItems((prev) => {
       const selectedId = prev[currentIndexRef.current]?.id;
-      const next = prev.filter((item) => item.id !== eventId);
+      const next = prev.filter((item) => item.id !== submissionId);
       setTotal((t) => Math.max(0, t - 1));
       setCurrentIndex((idx) => {
-        if (selectedId !== undefined && selectedId !== eventId) {
+        if (selectedId !== undefined && selectedId !== submissionId) {
           const selectedIdx = next.findIndex((item) => item.id === selectedId);
           if (selectedIdx >= 0) return selectedIdx;
         }
@@ -151,33 +107,33 @@ function ModerationQueue() {
     });
   }, []);
 
-  const handleReject = useCallback(async (eventId) => {
+  const handleApprove = useCallback(async (submissionId) => {
     try {
-      const res = await fetch(`${API_BASE}/events/${eventId}/reject-suggestions`, {
+      const res = await fetch(`${API_BASE}/submissions/${submissionId}/approve`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 401) return handleInvalidToken();
       if (!res.ok) throw new Error('network');
-      removeCurrentFromQueue(eventId);
+      removeCurrentFromQueue(submissionId);
     } catch {
       showToast('Не удалось сохранить. Попробуйте ещё раз');
     }
   }, [token, handleInvalidToken, removeCurrentFromQueue, showToast]);
 
-  const handleApprove = useCallback(async (eventId, payload) => {
+  const handleReject = useCallback(async (submissionId, reason) => {
     try {
-      const res = await fetch(`${API_BASE}/events/${eventId}/approve-suggestions`, {
+      const res = await fetch(`${API_BASE}/submissions/${submissionId}/reject`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ suggestions: payload }),
+        body: JSON.stringify({ reason: reason || undefined }),
       });
       if (res.status === 401) return handleInvalidToken();
       if (!res.ok) throw new Error('network');
-      removeCurrentFromQueue(eventId);
+      removeCurrentFromQueue(submissionId);
     } catch {
       showToast('Не удалось сохранить. Попробуйте ещё раз');
     }
@@ -195,11 +151,6 @@ function ModerationQueue() {
   }
 
   if (items.length === 0) {
-    // loadError is only surfaced here, when there's genuinely nothing else to show
-    // locally. If items are still loaded (loadError set by a background loadMore
-    // failure while cards remain), the admin should keep reviewing what's already
-    // fetched rather than being knocked into an error screen — the auto-pagination
-    // effect is already gated on loadError so it won't keep retrying in the background.
     if (loadError) {
       return (
         <div className="moderation">
@@ -211,10 +162,6 @@ function ModerationQueue() {
         </div>
       );
     }
-
-    // More unmoderated items may still exist on the server (just not fetched
-    // locally yet) — the effect above will already be fetching them. Show a
-    // loading state rather than telling the admin the queue is done.
     if (total > 0) {
       return (
         <div className="moderation">
@@ -227,18 +174,18 @@ function ModerationQueue() {
     }
     return (
       <div className="moderation">
-        <Placeholder header="Очередь пуста" description="Все события проверены" />
+        <Placeholder header="Очередь пуста" description="Все заявки проверены" />
       </div>
     );
   }
 
-  const currentEvent = items[currentIndex];
+  const currentSubmission = items[currentIndex];
 
   return (
     <div className="moderation">
-      <ModerationCard
-        key={currentEvent.id}
-        event={currentEvent}
+      <SubmissionQueueCard
+        key={currentSubmission.id}
+        submission={currentSubmission}
         index={currentIndex}
         total={total}
         onOpenList={() => setSheetOpen(true)}
@@ -248,7 +195,7 @@ function ModerationQueue() {
       {sheetOpen && (
         <QueueListSheet
           items={items}
-          currentId={currentEvent.id}
+          currentId={currentSubmission.id}
           hasMore={items.length < total}
           onSelect={(id) => {
             const idx = items.findIndex((item) => item.id === id);

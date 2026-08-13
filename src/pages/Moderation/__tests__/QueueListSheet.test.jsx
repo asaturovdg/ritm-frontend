@@ -80,4 +80,16 @@ describe('QueueListSheet', () => {
     render(<QueueListSheet items={items} currentId={1} hasMore={false} onSelect={vi.fn()} onClose={vi.fn()} onLoadMore={vi.fn()} />);
     expect(screen.queryByTestId('moderation-sheet-load-more')).not.toBeInTheDocument();
   });
+
+  it('renders an item without a quality badge when quality_score is absent', () => {
+    const itemsWithoutScore = [
+      { id: 1, title: 'Митап по бэкенду' },
+      { id: 2, title: 'DevOps конференция', quality_score: 2 },
+    ];
+    render(<QueueListSheet items={itemsWithoutScore} currentId={1} hasMore={false} onSelect={vi.fn()} onClose={vi.fn()} onLoadMore={vi.fn()} />);
+    const noScoreItem = screen.getByText('Митап по бэкенду').closest('.moderation-sheet__item');
+    expect(noScoreItem.querySelector('.moderation-sheet__item-quality')).toBeNull();
+    const withScoreItem = screen.getByText('DevOps конференция').closest('.moderation-sheet__item');
+    expect(withScoreItem.querySelector('.moderation-sheet__item-quality')).toHaveTextContent('2/5');
+  });
 });

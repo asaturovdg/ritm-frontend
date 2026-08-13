@@ -1,0 +1,30 @@
+.cancel-submission-modal__footer {
+  display: flex;
+  gap: 8px;
+}
+
+.cancel-submission-modal__btn {
+  flex: 1;
+  padding: 6px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.cancel-submission-modal__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-submission-modal__btn--secondary {
+  background: var(--color-bg-elevated);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.cancel-submission-modal__btn--danger {
+  background: var(--color-danger);
+  color: #ffffff;
+}

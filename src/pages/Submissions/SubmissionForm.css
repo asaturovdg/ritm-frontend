@@ -1,0 +1,63 @@
+.submission-form {
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.submission-form__progress {
+  margin-bottom: 20px;
+}
+
+.submission-form__progress-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.submission-form__progress-segment {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border);
+}
+
+.submission-form__progress-segment.filled {
+  background: var(--color-accent);
+}
+
+.submission-form__progress-text {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.submission-form__nav {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.submission-form__nav-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.submission-form__nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submission-form__nav-btn--secondary {
+  background: var(--color-bg-elevated);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.submission-form__nav-btn--primary {
+  background: var(--color-accent);
+  color: #fff;
+}

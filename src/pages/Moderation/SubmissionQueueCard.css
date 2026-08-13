@@ -1,0 +1,84 @@
+.submission-queue-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.submission-queue-card__header {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.submission-queue-card__counter {
+  background: none;
+  border: none;
+  padding: 0;
+  font-weight: 600;
+  color: var(--color-accent);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.submission-queue-card__footer {
+  display: flex;
+  gap: 8px;
+  position: sticky;
+  bottom: 8px;
+}
+
+.submission-queue-card__btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  border: 1.5px solid var(--color-accent);
+  color: var(--color-accent);
+  background: var(--color-bg-elevated);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.submission-queue-card__btn--primary {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.submission-queue-card__btn--danger {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.submission-queue-card__reject-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.submission-queue-card__reject-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-soft);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 10;
+}
+
+.submission-queue-card__reject-textarea {
+  width: 100%;
+  min-height: 60px;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  box-sizing: border-box;
+  resize: vertical;
+}
