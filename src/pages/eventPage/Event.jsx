@@ -1,5 +1,5 @@
 import { useParams, useLocation, useNavigate, Link, useSearchParams } from "react-router-dom";
-import { Forward, Calendar, Clock, RussianRuble, MapPin, Users, Globe } from "lucide-react";
+import { CornerUpRight, Calendar, Clock, RussianRuble, MapPin, Users, Globe } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import blueCalendar from "../../assets/icons/calendarBlue.svg";
 import yandex from "../../assets/icons/Yandex.svg"
@@ -259,7 +259,7 @@ export default function Event({ embeddedId, isPreview = false, status, previewDa
             onClick={() => shareEvent(event.id, event.title, event.event_type)}
             aria-label="Поделиться"
           >
-            <Forward size={20} strokeWidth={1.8} />
+            <CornerUpRight size={20} strokeWidth={1.8} />
           </button>
         )}
       </div>
