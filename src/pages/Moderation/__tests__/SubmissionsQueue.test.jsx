@@ -105,7 +105,7 @@ describe('SubmissionsQueue', () => {
     expect(localStorage.getItem('user_id')).toBeNull();
   });
 
-  it('approves via POST with no body and removes the card from the queue', async () => {
+  it('approves via POST with no body and keeps the card, swapping in the publish action', async () => {
     global.fetch.mockImplementation((url, opts) => {
       const u = String(url);
       if (u.includes('moderation-queue')) {
@@ -130,8 +130,91 @@ describe('SubmissionsQueue', () => {
     renderQueue();
     expect(await screen.findByRole('heading', { name: 'Заявка А' })).toBeInTheDocument();
     await userEvent.click(screen.getByTestId('submission-queue-card__approve'));
+    expect(await screen.findByTestId('submission-queue-card__publish')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Заявка А' })).toBeInTheDocument();
+    expect(screen.queryByTestId('submission-queue-card__approve')).not.toBeInTheDocument();
+  });
+
+  it('publishes an approved submission and removes the card from the queue', async () => {
+    global.fetch.mockImplementation((url, opts) => {
+      const u = String(url);
+      if (u.includes('moderation-queue')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            items: [
+              submissionItem({ id: 1, title: 'Заявка А', status: 'approved' }),
+              submissionItem({ id: 2, title: 'Заявка Б' }),
+            ],
+            total: 2,
+            limit: 20,
+            offset: 0,
+          }),
+        });
+      }
+      if (u.includes('/submissions/1/publish')) {
+        expect(opts.method).toBe('POST');
+        expect(JSON.parse(opts.body)).toEqual({});
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => submissionItem({ id: 1, status: 'approved', published_event_id: 137 }),
+        });
+      }
+      return Promise.reject(new Error(`unexpected fetch: ${u}`));
+    });
+    renderQueue();
+    expect(await screen.findByRole('heading', { name: 'Заявка А' })).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('submission-queue-card__publish'));
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Заявка Б' })).toBeInTheDocument());
     expect(screen.queryByRole('heading', { name: 'Заявка А' })).not.toBeInTheDocument();
+  });
+
+  it('shows duplicate candidates on 409 and merges into the chosen event on retry', async () => {
+    let publishCalls = 0;
+    global.fetch.mockImplementation((url, opts) => {
+      const u = String(url);
+      if (u.includes('moderation-queue')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            items: [submissionItem({ id: 1, title: 'Заявка А', status: 'approved' })],
+            total: 1,
+            limit: 20,
+            offset: 0,
+          }),
+        });
+      }
+      if (u.includes('/submissions/1/publish')) {
+        publishCalls += 1;
+        if (publishCalls === 1) {
+          expect(JSON.parse(opts.body)).toEqual({});
+          return Promise.resolve({
+            ok: false,
+            status: 409,
+            json: async () => ({
+              detail: { candidates: [{ event_id: 90, title: 'Похожий митап', start_date: '2026-12-01', city: ['Москва'] }] },
+            }),
+          });
+        }
+        expect(JSON.parse(opts.body)).toEqual({ match_event_id: 90 });
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => submissionItem({ id: 1, status: 'approved', published_event_id: 90 }),
+        });
+      }
+      return Promise.reject(new Error(`unexpected fetch: ${u}`));
+    });
+    renderQueue();
+    expect(await screen.findByTestId('submission-queue-card__publish')).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('submission-queue-card__publish'));
+    expect(await screen.findByText('Похожий митап')).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('publish-duplicate-select'));
+    await waitFor(() => expect(publishCalls).toBe(2));
+    await waitFor(() => expect(screen.queryByText('Похожий митап')).not.toBeInTheDocument());
   });
 
   it('shows a toast and keeps the card when approve fails', async () => {

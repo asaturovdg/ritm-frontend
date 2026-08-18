@@ -107,6 +107,10 @@ export default function SubmissionsQueue() {
     });
   }, []);
 
+  const updateItemInPlace = useCallback((submissionId, patch) => {
+    setItems((prev) => prev.map((item) => (item.id === submissionId ? { ...item, ...patch } : item)));
+  }, []);
+
   const handleApprove = useCallback(async (submissionId) => {
     try {
       const res = await fetch(`${API_BASE}/submissions/${submissionId}/approve`, {
@@ -115,11 +119,40 @@ export default function SubmissionsQueue() {
       });
       if (res.status === 401) return handleInvalidToken();
       if (!res.ok) throw new Error('network');
-      removeCurrentFromQueue(submissionId);
+      updateItemInPlace(submissionId, { status: 'approved' });
     } catch {
       showToast('Не удалось сохранить. Попробуйте ещё раз');
     }
-  }, [token, handleInvalidToken, removeCurrentFromQueue, showToast]);
+  }, [token, handleInvalidToken, updateItemInPlace, showToast]);
+
+  const handlePublish = useCallback(async (submissionId, payload) => {
+    try {
+      const res = await fetch(`${API_BASE}/submissions/${submissionId}/publish`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload || {}),
+      });
+      if (res.status === 401) {
+        handleInvalidToken();
+        return { status: 'error' };
+      }
+      if (res.status === 409) {
+        const data = await res.json().catch(() => null);
+        return { status: 'conflict', candidates: data?.detail?.candidates || [] };
+      }
+      if (!res.ok) throw new Error('network');
+      const data = await res.json();
+      updateItemInPlace(submissionId, { published_event_id: data.published_event_id });
+      removeCurrentFromQueue(submissionId);
+      return { status: 'success' };
+    } catch {
+      showToast('Не удалось сохранить. Попробуйте ещё раз');
+      return { status: 'error' };
+    }
+  }, [token, handleInvalidToken, updateItemInPlace, removeCurrentFromQueue, showToast]);
 
   const handleReject = useCallback(async (submissionId, reason) => {
     try {
@@ -191,6 +224,7 @@ export default function SubmissionsQueue() {
         onOpenList={() => setSheetOpen(true)}
         onApprove={handleApprove}
         onReject={handleReject}
+        onPublish={handlePublish}
       />
       {sheetOpen && (
         <QueueListSheet
