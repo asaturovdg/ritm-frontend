@@ -2,6 +2,7 @@ import { useState } from 'react';
 import SubmissionDateTimePicker from './SubmissionDateTimePicker.jsx';
 import { FIELD_DEFS } from './submissionFormFields.js';
 import { formatDate, formatTime } from './submissionFormat.js';
+import { useCustomCities } from '../../hooks/useCustomCities.js';
 import './SubmissionFormField.css';
 
 const TELEGRAM_RE = /^@?[a-zA-Z0-9_]{5,32}$/;
@@ -13,6 +14,8 @@ export default function SubmissionFormField({ fieldId, formData, error, onFieldC
   const def = FIELD_DEFS[fieldId];
   const [tempTag, setTempTag] = useState('');
   const [openPicker, setOpenPicker] = useState(null); // 'start' | 'end' | null
+  const [cityInput, setCityInput] = useState('');
+  const { customCities, addCustomCity } = useCustomCities();
   // Buffered locally (not read back from formData) so keystrokes accumulate
   // correctly even when the parent doesn't re-render synchronously on every
   // onFieldChange call — otherwise React resets the controlled input's DOM
@@ -30,6 +33,13 @@ export default function SubmissionFormField({ fieldId, formData, error, onFieldC
 
   const removeTag = (idx) => {
     onFieldChange(fieldId, formData[fieldId].filter((_, i) => i !== idx));
+  };
+
+  const addCustomCityOption = () => {
+    const city = addCustomCity(cityInput);
+    setCityInput('');
+    if (!city) return;
+    onFieldChange('city', [...formData.city, city]);
   };
 
   return (
@@ -72,7 +82,7 @@ export default function SubmissionFormField({ fieldId, formData, error, onFieldC
 
       {def.type === 'multiselect' && (
         <div className="submission-form-field__chips">
-          {def.options.map((opt) => (
+          {[...def.options, ...(fieldId === 'city' ? customCities : [])].map((opt) => (
             <button
               type="button"
               key={opt}
@@ -85,6 +95,20 @@ export default function SubmissionFormField({ fieldId, formData, error, onFieldC
               {opt}
             </button>
           ))}
+        </div>
+      )}
+
+      {def.type === 'multiselect' && fieldId === 'city' && (
+        <div className="submission-form-field__tag-input-row">
+          <input
+            type="text"
+            className="submission-form-field__input"
+            placeholder="Другой город..."
+            value={cityInput}
+            onChange={(e) => setCityInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustomCityOption(); } }}
+          />
+          <button type="button" className="submission-form-field__add-tag" onClick={addCustomCityOption}>Добавить</button>
         </div>
       )}
 

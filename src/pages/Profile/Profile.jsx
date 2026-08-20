@@ -15,6 +15,7 @@ import { Calendar, Clock, RussianRuble, MapPin, Users, Settings, MessageSquareWa
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useSwipeNavigation } from "../../hooks/useSwipeNavigation.js";
 import { useAppTabs } from "../../hooks/useAppTabs.js";
+import { useCustomCities } from "../../hooks/useCustomCities.js";
 import { ProfileUserBadge } from "./ProfileUserBadge.jsx";
 import { ProfileSettingsModal } from "./ProfileSettingsModal.jsx";
 import UxFeedbackModal from "./UxFeedbackModal.jsx";
@@ -61,12 +62,7 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   const [digestDay, setDigestDay] = useState(null);
   const [weeklyDayError, setWeeklyDayError] = useState(false);
   const [cityInput, setCityInput] = useState('');
-  const [customCityOptions, setCustomCityOptions] = useState(() => {
-    try {
-      const stored = localStorage.getItem('user_custom_cities');
-      return stored ? JSON.parse(stored) : [];
-    } catch { return []; }
-  });
+  const { customCities: customCityOptions, addCustomCity: addCustomCityOption, removeCustomCity: removeCustomCityOption, mergeCustomCities } = useCustomCities();
 
   const location = useLocation();
 
@@ -80,12 +76,7 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   useEffect(() => {
     const serverCustom = filters.cities.filter(c => !CITIES.includes(c));
     if (serverCustom.length === 0) return;
-    setCustomCityOptions(prev => {
-      const merged = [...new Set([...prev, ...serverCustom])];
-      if (merged.length === prev.length) return prev;
-      localStorage.setItem('user_custom_cities', JSON.stringify(merged));
-      return merged;
-    });
+    mergeCustomCities(serverCustom);
   }, [filters.cities]);
 
   const [assistants, setAssistants] = useState([]);
@@ -241,26 +232,14 @@ const applyFilters = async () => {
   const allCities = [...CITIES, ...customCityOptions];
 
   const addCustomCity = () => {
-    const city = cityInput.trim()
-      .toLowerCase()
-      .replace(/(^|[\s-])([а-яёa-z]+)/g, (_, sep, word) =>
-        sep + (sep === '-' && word.length <= 2 ? word : word.charAt(0).toUpperCase() + word.slice(1))
-      );
-    if (!city || customCityOptions.includes(city) || CITIES.includes(city)) {
-      setCityInput('');
-      return;
-    }
-    const updated = [...customCityOptions, city];
-    setCustomCityOptions(updated);
-    localStorage.setItem('user_custom_cities', JSON.stringify(updated));
-    setFilters({ ...filters, cities: [...filters.cities, city] });
+    const city = addCustomCityOption(cityInput);
     setCityInput('');
+    if (!city) return;
+    setFilters({ ...filters, cities: [...filters.cities, city] });
   };
 
   const removeCustomCity = (city) => {
-    const updatedOptions = customCityOptions.filter(c => c !== city);
-    setCustomCityOptions(updatedOptions);
-    localStorage.setItem('user_custom_cities', JSON.stringify(updatedOptions));
+    removeCustomCityOption(city);
     setFilters({ ...filters, cities: filters.cities.filter(c => c !== city) });
   };
 
