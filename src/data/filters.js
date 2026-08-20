@@ -28,6 +28,8 @@ export const CATEGORIES = [
     "Мобильная разработка",
     "Тестирование",
     "DevOps",
+    "Системный анализ",
+    "Бизнес-анализ",
 ].sort((a, b) => a.localeCompare(b, "ru"));
 
 export const EVENT_TYPES = [
