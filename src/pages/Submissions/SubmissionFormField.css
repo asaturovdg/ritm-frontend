@@ -89,6 +89,7 @@
   display: flex;
   gap: 8px;
   align-items: flex-end;
+  margin-top: 8px;
 }
 
 .submission-form-field__tag-input-row .submission-form-field__input {
