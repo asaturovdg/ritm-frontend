@@ -314,3 +314,126 @@ textarea.moderation-card__input {
   color: var(--color-text-muted);
   text-align: center;
 }
+
+.link-queue {
+  padding: 12px 16px;
+}
+
+.link-queue__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.link-queue__input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--color-border-soft);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+.link-queue__submit {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.link-queue__submit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.link-queue__error {
+  width: 100%;
+  color: #c0392b;
+  font-size: 11px;
+  margin: 0;
+}
+
+.link-queue__subtabs {
+  display: flex;
+  flex-wrap: wrap;
+  background: var(--color-accent-soft);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 12px;
+  gap: 0;
+}
+
+.link-queue__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.link-queue__item {
+  border: 1px solid var(--color-border-soft);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: var(--color-bg-elevated);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.link-queue__url {
+  font-size: 13px;
+  color: var(--color-text);
+  word-break: break-all;
+}
+
+.link-queue__badge {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--color-accent-soft);
+  color: var(--color-text-secondary);
+}
+
+.link-queue__badge--pending {
+  background: #fff3cd;
+  color: #8a6d00;
+}
+
+.link-queue__badge--processing {
+  background: #d4e8ff;
+  color: #0b5cad;
+}
+
+.link-queue__badge--done {
+  background: #d4f7dc;
+  color: #1a7f37;
+}
+
+.link-queue__badge--failed {
+  background: #fbdada;
+  color: #c0392b;
+}
+
+.link-queue__result {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.link-queue__error-message {
+  font-size: 12px;
+  color: #c0392b;
+}
