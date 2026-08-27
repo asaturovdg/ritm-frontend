@@ -6,13 +6,14 @@ import ModerationCard from './ModerationCard.jsx';
 import QueueListSheet from './QueueListSheet.jsx';
 import FeedbackReview from './FeedbackReview.jsx';
 import SubmissionsQueue from './SubmissionsQueue.jsx';
+import LinkQueue from './LinkQueue.jsx';
 import './Moderation.css';
 
 const API_BASE = 'https://ritmevents.ru/api/v1';
 const PAGE_SIZE = 20;
 
 export default function Moderation() {
-  const [section, setSection] = useState('queue'); // 'queue' | 'submissions' | 'feedback'
+  const [section, setSection] = useState('queue'); // 'queue' | 'submissions' | 'links' | 'feedback'
 
   return (
     <div className="moderation-page">
@@ -33,13 +34,23 @@ export default function Moderation() {
         </button>
         <button
           type="button"
+          className={`moderation-tab ${section === 'links' ? 'active' : ''}`}
+          onClick={() => setSection('links')}
+        >
+          Ручная очередь
+        </button>
+        <button
+          type="button"
           className={`moderation-tab ${section === 'feedback' ? 'active' : ''}`}
           onClick={() => setSection('feedback')}
         >
           Обратная связь
         </button>
       </div>
-      {section === 'queue' ? <ModerationQueue /> : section === 'submissions' ? <SubmissionsQueue /> : <FeedbackReview />}
+      {section === 'queue' ? <ModerationQueue />
+        : section === 'submissions' ? <SubmissionsQueue />
+        : section === 'links' ? <LinkQueue />
+        : <FeedbackReview />}
     </div>
   );
 }
