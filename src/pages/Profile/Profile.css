@@ -527,6 +527,32 @@
   flex-wrap: wrap;
 }
 
+.digest-hour-picker {
+  margin-top: 10px;
+  padding: 12px;
+  background: var(--color-bg-muted-2);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.digest-hour-picker__label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin: 0 0 10px;
+}
+
+.digest-hour-picker__select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
 .profile_chip--custom {
   display: inline-flex;
   align-items: center;
