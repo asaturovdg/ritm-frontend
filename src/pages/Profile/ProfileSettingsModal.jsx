@@ -17,15 +17,19 @@ const PERIOD_OPTIONS = [
 
 const WEEKDAY_LABELS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
+const HOUR_OPTIONS = Array.from({ length: 24 }, (_, hour) => hour);
+
 export function ProfileSettingsModal({
   onClose,
   digestPeriod,
   digestDay,
+  digestHour,
   weeklyDayError,
   setDigestPeriod,
   setDigestDay,
+  setDigestHour,
   setWeeklyDayError,
-  saveDigestPeriod,
+  saveDigestSettings,
 }) {
   const { mode: themeMode, setMode: setThemeMode } = useTheme();
   const { skipPrompt, setSkipPrompt, isPending: isCalendarPromptPending } = useCalendarPromptPreference();
@@ -66,7 +70,7 @@ export function ProfileSettingsModal({
                   if (value !== 'weekly') {
                     setDigestDay(null);
                     setWeeklyDayError(false);
-                    saveDigestPeriod(value, null);
+                    saveDigestSettings(value, null);
                   }
                 }}
               >
@@ -86,7 +90,7 @@ export function ProfileSettingsModal({
                     onClick={() => {
                       setDigestDay(idx);
                       setWeeklyDayError(false);
-                      saveDigestPeriod('weekly', idx);
+                      saveDigestSettings('weekly', idx);
                     }}
                   >
                     {dayLabel}
@@ -96,6 +100,30 @@ export function ProfileSettingsModal({
               {weeklyDayError && (
                 <p className="digest-day-picker__error">Выберите день недели</p>
               )}
+            </div>
+          )}
+
+          {digestPeriod !== 'never' && (
+            <div className="digest-hour-picker">
+              <label className="digest-hour-picker__label" htmlFor="digest-hour-select">
+                Время рассылки
+              </label>
+              <select
+                id="digest-hour-select"
+                className="digest-hour-picker__select"
+                value={digestHour}
+                onChange={(e) => {
+                  const hour = Number(e.target.value);
+                  setDigestHour(hour);
+                  saveDigestSettings(digestPeriod, digestDay, hour);
+                }}
+              >
+                {HOUR_OPTIONS.map((hour) => (
+                  <option key={hour} value={hour}>
+                    {String(hour).padStart(2, '0')}:00
+                  </option>
+                ))}
+              </select>
             </div>
           )}
         </div>

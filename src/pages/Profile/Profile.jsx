@@ -19,6 +19,7 @@ import { useCustomCities } from "../../hooks/useCustomCities.js";
 import { ProfileUserBadge } from "./ProfileUserBadge.jsx";
 import { ProfileSettingsModal } from "./ProfileSettingsModal.jsx";
 import UxFeedbackModal from "./UxFeedbackModal.jsx";
+import { utcHourToLocal, localHourToUtc } from "../../utils/digestTime.js";
 
 import dateIcon from "../../assets/icons/DateRange.svg";
 import timeIcon from "../../assets/icons/time.svg";
@@ -60,6 +61,7 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   const [error, setError] = useState(null);
   const [digestPeriod, setDigestPeriod] = useState('daily');
   const [digestDay, setDigestDay] = useState(null);
+  const [digestHour, setDigestHour] = useState(utcHourToLocal(6));
   const [weeklyDayError, setWeeklyDayError] = useState(false);
   const [cityInput, setCityInput] = useState('');
   const { customCities: customCityOptions, addCustomCity: addCustomCityOption, removeCustomCity: removeCustomCityOption, mergeCustomCities } = useCustomCities();
@@ -165,6 +167,7 @@ const applyFilters = async () => {
     if (!userData) return;
     setDigestPeriod(userData.digest_period ?? 'daily');
     setDigestDay(userData.digest_day_of_week ?? null);
+    setDigestHour(utcHourToLocal(userData.digest_hour ?? 6));
     fetchAllExtraData(userData.id);
   }, [userData]);
 
@@ -188,7 +191,7 @@ const applyFilters = async () => {
 
 
 
-  const saveDigestPeriod = async (period, day) => {
+  const saveDigestSettings = async (period, day, localHour = digestHour) => {
     if (period === 'weekly' && day === null) {
       setWeeklyDayError(true);
       return;
@@ -201,7 +204,7 @@ const applyFilters = async () => {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ period, day_of_week: day })
+        body: JSON.stringify({ period, day_of_week: day, digest_hour: localHourToUtc(localHour) })
       });
       setShowPeriodSuccessModal(true);
       setTimeout(() => setShowPeriodSuccessModal(false), 1500);
@@ -575,11 +578,13 @@ const copyInviteLink = () => {
           onClose={() => setShowSettingsModal(false)}
           digestPeriod={digestPeriod}
           digestDay={digestDay}
+          digestHour={digestHour}
           weeklyDayError={weeklyDayError}
           setDigestPeriod={setDigestPeriod}
           setDigestDay={setDigestDay}
+          setDigestHour={setDigestHour}
           setWeeklyDayError={setWeeklyDayError}
-          saveDigestPeriod={saveDigestPeriod}
+          saveDigestSettings={saveDigestSettings}
         />
       )}
       {showUxFeedbackModal && (
