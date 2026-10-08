@@ -56,6 +56,22 @@ const getWeekRange = (offset = 0) => {
   };
 };
 
+const SEARCH_PERIODS = [
+  { id: 'all', label: 'Все даты' },
+  { id: 'week', label: 'Эта неделя' },
+  { id: 'month', label: 'Месяц' },
+];
+
+// null для 'all' — тогда date_from/date_to в поиск не передаются
+const getSearchPeriodRange = (period) => {
+  if (period !== 'week' && period !== 'month') return null;
+  const from = new Date();
+  const to = new Date(from);
+  to.setDate(from.getDate() + (period === 'week' ? 6 : 30));
+  const formatISO = (date) => date.toISOString().split('T')[0];
+  return { dateFrom: formatISO(from), dateTo: formatISO(to) };
+};
+
 export default function EventsDigest() {
   const {
     token,
@@ -95,6 +111,12 @@ export default function EventsDigest() {
     return sessionStorage.getItem('events_search_query') || '';
   });
 
+  const [searchPeriod, setSearchPeriod] = useState(() => {
+    if (location.state?.searchPeriod !== undefined) return location.state.searchPeriod;
+    return sessionStorage.getItem('events_search_period') || 'all';
+  });
+  const [outsideRangeCount, setOutsideRangeCount] = useState(null);
+
   const [sortByImportance, setSortByImportance] = useState(() => {
     return localStorage.getItem('events_sort_importance') === 'true';
   });
@@ -123,7 +145,8 @@ export default function EventsDigest() {
     sessionStorage.setItem('events_week_offset', currentWeekOffset);
     sessionStorage.setItem('events_page', currentPage);
     sessionStorage.setItem('events_search_query', searchQuery);
-  }, [currentWeekOffset, currentPage, searchQuery]);
+    sessionStorage.setItem('events_search_period', searchPeriod);
+  }, [currentWeekOffset, currentPage, searchQuery, searchPeriod]);
 
   // Персистим тумблер "Сначала важные" между заходами в приложение
   useEffect(() => {
@@ -262,16 +285,14 @@ export default function EventsDigest() {
     setEvents([]);
     setIsLoadingEvents(true);
     try {
-      const { startISO, endISO } = getWeekRange(currentWeekOffset);
-      const todayISO = new Date().toISOString().split('T')[0];
-      const dateFrom = currentWeekOffset === 0 && todayISO > startISO ? todayISO : startISO;
+      const range = getSearchPeriodRange(searchPeriod);
 
+      // Бэкенд отдаёт до 100 id сразу, пагинация — на клиенте по списку id
       const body = {
         query,
-        limit: ITEMS_PER_PAGE,
-        offset: page * ITEMS_PER_PAGE,
-        date_from: dateFrom,
-        date_to: endISO
+        limit: 100,
+        offset: 0,
+        ...(range && { date_from: range.dateFrom, date_to: range.dateTo })
       };
 
       const res = await fetch('https://ritmevents.ru/api/v1/search', {
@@ -289,6 +310,7 @@ export default function EventsDigest() {
       if (res.ok) {
         const data = await res.json();
         const ids = data.event_ids || [];
+        setOutsideRangeCount(typeof data.total_outside_range === 'number' ? data.total_outside_range : null);
 
         setTotalEvents(ids.length);
         setTotalPages(Math.ceil(ids.length / ITEMS_PER_PAGE));
@@ -302,6 +324,7 @@ export default function EventsDigest() {
         setEvents([]);
         setTotalEvents(0);
         setTotalPages(0);
+        setOutsideRangeCount(null);
       }
     } catch (e) {
       console.error('Ошибка в runSearch:', e);
@@ -309,7 +332,7 @@ export default function EventsDigest() {
     } finally {
       if (searchId === searchIdRef.current) setIsLoadingEvents(false);
     }
-  }, [token, fetchAndSetEventsByIds, currentWeekOffset]);
+  }, [token, fetchAndSetEventsByIds, searchPeriod]);
 
   useEffect(() => {
     if (!isAuthReady) return;
@@ -337,12 +360,18 @@ export default function EventsDigest() {
     hasFilters,
     runSearch,
     fetchEvents,
-    currentWeekOffset
+    currentWeekOffset,
+    searchPeriod
   ]);
   
   const handleSearchChange = (e) => {
     const val = e.target.value;
     setSearchQuery(val);
+    setCurrentPage(0);
+  };
+
+  const selectSearchPeriod = (period) => {
+    setSearchPeriod(period);
     setCurrentPage(0);
   };
 
@@ -474,7 +503,37 @@ export default function EventsDigest() {
         </label>
       )}
 
-      {(hasFilters || isSearchMode) && !isLoadingEvents && (
+      {isSearchMode && (
+        <div className="search-period">
+          <div className="search-period__chips" role="group" aria-label="Период поиска">
+            {SEARCH_PERIODS.map(p => (
+              <button
+                key={p.id}
+                className={`search-period__chip${searchPeriod === p.id ? ' search-period__chip--active' : ''}`}
+                aria-pressed={searchPeriod === p.id}
+                onClick={() => selectSearchPeriod(p.id)}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          {!isLoadingEvents && searchPeriod !== 'all' && events.length > 0 && outsideRangeCount > 0 && (
+            <p className="search-period__hint">
+              Есть ещё события в другие даты ({outsideRangeCount}).{' '}
+              <button className="search-period__reset" onClick={() => selectSearchPeriod('all')}>
+                Искать по всем датам
+              </button>
+            </p>
+          )}
+          {!isLoadingEvents && totalEvents > 0 && (
+            <p className="events__found-subtitle">
+              {totalEvents} {pluralEvents(totalEvents)}
+            </p>
+          )}
+        </div>
+      )}
+
+      {hasFilters && !isSearchMode && !isLoadingEvents && (
         <div className="week-nav-section">
           <div className="week-navigation">
             {currentWeekOffset >= 2 && (
@@ -559,6 +618,7 @@ export default function EventsDigest() {
                     weekOffset: currentWeekOffset,
                     page: currentPage,
                     searchQuery: searchQuery,
+                    searchPeriod: searchPeriod,
                   },
                 });
               }}
@@ -642,8 +702,17 @@ export default function EventsDigest() {
         ) : (
           <Placeholder
             className="placeholder"
-            header="Нет мероприятий"
-            description="Попробуйте изменить поисковый запрос или фильтры"
+            header={isSearchMode && searchPeriod !== 'all' ? 'Ничего за выбранный период' : 'Нет мероприятий'}
+            description={
+              isSearchMode && searchPeriod !== 'all' && outsideRangeCount > 0
+                ? `Есть ещё события в другие даты (${outsideRangeCount})`
+                : 'Попробуйте изменить поисковый запрос или фильтры'
+            }
+            action={isSearchMode && searchPeriod !== 'all' ? (
+              <Button mode="filled" size="m" onClick={() => selectSearchPeriod('all')}>
+                Искать по всем датам
+              </Button>
+            ) : undefined}
           />
         )}
       </div>
