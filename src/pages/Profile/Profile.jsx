@@ -11,14 +11,13 @@ import { useSavedEvents } from "../../components/SavedEventsContext.jsx";
 import { useNotInterested } from "../../components/NotInterestedContext.jsx";
 import { CITIES, CATEGORIES, EVENT_TYPES, PARTICIPATION_TYPES } from "../../data/filters.js";
 import { CALENDAR_ALLOWLIST, NOT_INTERESTED_ALLOWLIST, hasFeature } from "../../data/featureFlags.js";
-import { Calendar, Clock, RussianRuble, MapPin, Users, Settings, MessageSquareWarning } from "lucide-react";
+import { Calendar, Clock, RussianRuble, MapPin, Users, Settings } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useSwipeNavigation } from "../../hooks/useSwipeNavigation.js";
 import { useAppTabs } from "../../hooks/useAppTabs.js";
 import { useCustomCities } from "../../hooks/useCustomCities.js";
 import { ProfileUserBadge } from "./ProfileUserBadge.jsx";
 import { ProfileSettingsModal } from "./ProfileSettingsModal.jsx";
-import UxFeedbackModal from "./UxFeedbackModal.jsx";
 import { utcHourToLocal, localHourToUtc } from "../../utils/digestTime.js";
 
 import dateIcon from "../../assets/icons/DateRange.svg";
@@ -52,7 +51,6 @@ const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   // Остальные состояния
   const [showModal, setShowModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [showUxFeedbackModal, setShowUxFeedbackModal] = useState(false);
   const [activeTab, setActiveTab] = useState('myFilters');
   const [subtabDirection, setSubtabDirection] = useState(1);
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date());
@@ -556,14 +554,6 @@ const copyInviteLink = () => {
           <button
             type="button"
             className="profile-settings-btn"
-            aria-label="Сообщить о проблеме"
-            onClick={() => setShowUxFeedbackModal(true)}
-          >
-            <MessageSquareWarning size={20} strokeWidth={1.5} />
-          </button>
-          <button
-            type="button"
-            className="profile-settings-btn"
             aria-label="Настройки"
             onClick={() => setShowSettingsModal(true)}
           >
@@ -586,9 +576,6 @@ const copyInviteLink = () => {
           setWeeklyDayError={setWeeklyDayError}
           saveDigestSettings={saveDigestSettings}
         />
-      )}
-      {showUxFeedbackModal && (
-        <UxFeedbackModal onClose={() => setShowUxFeedbackModal(false)} />
       )}
       <div className="profileTabs">
         {tabs.map((tab) => (

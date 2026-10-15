@@ -9,6 +9,7 @@ import Event from '../pages/eventPage/Event';
 import { Profile } from '../pages/Profile/Profile';
 import Submissions from '../pages/Submissions/Submissions';
 import Moderation from '../pages/Moderation/Moderation.jsx';
+import FloatingMenu from '../components/FloatingMenu/FloatingMenu.jsx';
 import { TransitionContext } from '../components/TransitionContext';
 
 import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
@@ -157,6 +158,7 @@ export default function App() {
 
   const activeTab = getActiveTab();
   const isEventPage = location.pathname.startsWith('/events/');
+  const showFloatingMenu = isAuthReady && (location.pathname === '/' || location.pathname === '/profile');
   const bindSwipe = useSwipeNavigation({
     currentIndex: TAB_PATHS.indexOf(location.pathname),
     itemCount: TAB_PATHS.length,
@@ -216,6 +218,7 @@ export default function App() {
                   </Routes>
                 </motion.div>
               </AnimatePresence>
+              {showFloatingMenu && <FloatingMenu />}
             </div>
 
             <AnimatePresence>

@@ -32,6 +32,11 @@ describe('UxFeedbackModal', () => {
     expect(submitBtn).not.toBeDisabled();
   });
 
+  it('preselects the category passed via initialCategory', () => {
+    render(<UxFeedbackModal onClose={vi.fn()} initialCategory="bug" />);
+    expect(screen.getByText('Баг')).toHaveClass('profile_chip-active');
+  });
+
   it('submits category and message, shows a toast, and closes', async () => {
     global.fetch.mockResolvedValue({ ok: true });
     const onClose = vi.fn();

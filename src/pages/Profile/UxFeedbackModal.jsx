@@ -8,10 +8,10 @@ const CATEGORIES = [
   { value: 'other', label: 'Другое' },
 ];
 
-export default function UxFeedbackModal({ onClose }) {
+export default function UxFeedbackModal({ onClose, initialCategory = null }) {
   const { token } = useAuth();
   const showToast = useToast();
-  const [category, setCategory] = useState(null);
+  const [category, setCategory] = useState(initialCategory);
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
