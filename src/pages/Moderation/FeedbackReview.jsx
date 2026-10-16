@@ -6,6 +6,13 @@ const API_BASE = 'https://ritmevents.ru/api/v1';
 const PAGE_SIZE = 20;
 
 const CATEGORY_LABELS = { bug: 'Баг', idea: 'Идея', other: 'Другое' };
+const TAB_LABELS = {
+  events: 'Дайджест',
+  profile: 'Профиль',
+  submissions: 'Заявка',
+  featured: 'Подборки',
+  moderation: 'Модерация',
+};
 
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -85,6 +92,11 @@ export default function FeedbackReview() {
                   <span className="feedback-review__category">
                     {CATEGORY_LABELS[item.category] ?? item.category}
                   </span>
+                  {item.tab && (
+                    <span className="feedback-review__tab">
+                      {TAB_LABELS[item.tab] ?? item.tab}
+                    </span>
+                  )}
                   <p className="feedback-review__text">{item.message}</p>
                 </>
               )}
