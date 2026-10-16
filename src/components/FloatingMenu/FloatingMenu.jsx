@@ -11,7 +11,7 @@ const MENU_ITEMS = [
   { id: 'feedback', label: 'Обратная связь', Icon: MessageCircle, category: null },
 ];
 
-export default function FloatingMenu() {
+export default function FloatingMenu({ tab }) {
   const prefersReduced = useReducedMotion();
   const [isOpen, setIsOpen] = useState(false);
   const [modal, setModal] = useState(null);
@@ -96,7 +96,7 @@ export default function FloatingMenu() {
       </div>
 
       {modal && (
-        <UxFeedbackModal initialCategory={modal.category} onClose={() => setModal(null)} />
+        <UxFeedbackModal initialCategory={modal.category} tab={tab} onClose={() => setModal(null)} />
       )}
     </>
   );

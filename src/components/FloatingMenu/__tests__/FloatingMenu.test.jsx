@@ -60,4 +60,20 @@ describe('FloatingMenu', () => {
     expect(screen.getByText('Баг')).not.toHaveClass('profile_chip-active');
     expect(screen.getByText('Идея')).not.toHaveClass('profile_chip-active');
   });
+
+  it('passes the current tab to the report request', async () => {
+    global.fetch = vi.fn().mockResolvedValue({ ok: true });
+    render(<FloatingMenu tab="submissions" />);
+    fireEvent.click(screen.getByLabelText('Обратная связь и идеи'));
+    fireEvent.click(screen.getByText('Сообщить о проблеме'));
+    fireEvent.change(screen.getByPlaceholderText('Опиши, что случилось или что предлагаешь'), {
+      target: { value: 'Не грузится форма' },
+    });
+    fireEvent.click(screen.getByText('Отправить'));
+
+    await waitFor(() => {
+      const body = JSON.parse(global.fetch.mock.calls[0][1].body);
+      expect(body.tab).toBe('submissions');
+    });
+  });
 });

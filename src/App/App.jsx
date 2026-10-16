@@ -158,7 +158,7 @@ export default function App() {
 
   const activeTab = getActiveTab();
   const isEventPage = location.pathname.startsWith('/events/');
-  const showFloatingMenu = isAuthReady && (location.pathname === '/' || location.pathname === '/profile');
+  const showFloatingMenu = isAuthReady && TAB_PATHS.includes(location.pathname);
   const bindSwipe = useSwipeNavigation({
     currentIndex: TAB_PATHS.indexOf(location.pathname),
     itemCount: TAB_PATHS.length,
@@ -218,7 +218,7 @@ export default function App() {
                   </Routes>
                 </motion.div>
               </AnimatePresence>
-              {showFloatingMenu && <FloatingMenu />}
+              {showFloatingMenu && <FloatingMenu tab={activeTab} />}
             </div>
 
             <AnimatePresence>

@@ -8,7 +8,7 @@ const CATEGORIES = [
   { value: 'other', label: 'Другое' },
 ];
 
-export default function UxFeedbackModal({ onClose, initialCategory = null }) {
+export default function UxFeedbackModal({ onClose, initialCategory = null, tab }) {
   const { token } = useAuth();
   const showToast = useToast();
   const [category, setCategory] = useState(initialCategory);
@@ -27,7 +27,7 @@ export default function UxFeedbackModal({ onClose, initialCategory = null }) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ category, message: message.trim() }),
+        body: JSON.stringify({ category, message: message.trim(), ...(tab && { tab }) }),
       });
       if (!response.ok) throw new Error('report submit failed');
       showToast('Спасибо, мы получили сообщение!');
