@@ -288,6 +288,12 @@ textarea.moderation-card__input {
   color: var(--color-accent);
 }
 
+.feedback-review__tab {
+  margin-left: 8px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
 .feedback-review__text {
   margin: 4px 0 0;
   font-size: 13px;

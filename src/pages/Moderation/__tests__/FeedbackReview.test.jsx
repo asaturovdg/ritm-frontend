@@ -99,4 +99,26 @@ describe('FeedbackReview', () => {
 
     expect(await screen.findByText('Всего: 1')).toBeInTheDocument();
   });
+
+  it('shows the originating tab on a report when the backend provides it', async () => {
+    global.fetch
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ items: [], total: 0 }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          items: [
+            { id: 3, category: 'idea', message: 'Больше подборок', tab: 'featured', created_at: '2026-08-03T00:00:00Z' },
+            { id: 4, category: 'bug', message: 'Старый репорт', tab: null, created_at: '2026-08-01T00:00:00Z' },
+          ],
+          total: 2,
+        }),
+      });
+
+    render(<FeedbackReview />);
+    await waitFor(() => expect(global.fetch).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByText('Обращения'));
+
+    expect(await screen.findByText('Подборки')).toBeInTheDocument();
+    expect(screen.getAllByText(/Дайджест|Подборки|Заявка|Профиль|Модерация/)).toHaveLength(1);
+  });
 });

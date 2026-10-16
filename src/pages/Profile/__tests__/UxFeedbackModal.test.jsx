@@ -32,6 +32,27 @@ describe('UxFeedbackModal', () => {
     expect(submitBtn).not.toBeDisabled();
   });
 
+  it('includes the originating tab in the report when provided', async () => {
+    global.fetch.mockResolvedValue({ ok: true });
+    render(<UxFeedbackModal onClose={vi.fn()} tab="featured" />);
+
+    fireEvent.click(screen.getByText('Идея'));
+    fireEvent.change(screen.getByPlaceholderText('Опиши, что случилось или что предлагаешь'), {
+      target: { value: 'Больше подборок' },
+    });
+    fireEvent.click(screen.getByText('Отправить'));
+
+    await waitFor(() => {
+      const body = JSON.parse(global.fetch.mock.calls[0][1].body);
+      expect(body).toEqual({ category: 'idea', message: 'Больше подборок', tab: 'featured' });
+    });
+  });
+
+  it('preselects the category passed via initialCategory', () => {
+    render(<UxFeedbackModal onClose={vi.fn()} initialCategory="bug" />);
+    expect(screen.getByText('Баг')).toHaveClass('profile_chip-active');
+  });
+
   it('submits category and message, shows a toast, and closes', async () => {
     global.fetch.mockResolvedValue({ ok: true });
     const onClose = vi.fn();
