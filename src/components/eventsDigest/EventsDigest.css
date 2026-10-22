@@ -351,32 +351,34 @@
 }
 
 .week-nav-btn {
-  background: var(--color-accent-gradient);
-  border: none;
+  background: transparent;
+  border: 1px solid var(--color-accent);
   padding: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-on-accent);
+  color: var(--color-accent);
   cursor: pointer;
   flex-shrink: 0;
-  transition: opacity 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-/* .week-nav-btn:hover:not(:disabled) {
-  background: #adffc6;
-} */
+.week-nav-btn:active:not(:disabled) {
+  background: var(--color-accent-gradient);
+  border-color: transparent;
+  color: var(--color-on-accent);
+}
 
 .week-nav-btn:disabled {
-  opacity: 0.3;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
 .week-range {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--color-text);
   background: var(--color-bg-muted);
