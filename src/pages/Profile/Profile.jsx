@@ -25,6 +25,7 @@ import timeIcon from "../../assets/icons/time.svg";
 import priceIcon from "../../assets/icons/currency.svg";
 import placeIcon from "../../assets/icons/Place.svg";
 import partType from "../../assets/icons/partType.svg"
+import { recordEventView } from "../../utils/eventView.js";
 
 export function Profile() {
   const { token, userData, isCheckingAuth, userId } = useAuth();
@@ -889,14 +890,7 @@ const copyInviteLink = () => {
                             className="digest__link"
                             state={{ token, userId: userData?.id, from: 'profile-events' }}
                             onClick={() => {
-                              fetch(`https://ritmevents.ru/api/v1/events/${eventId}/view`, {
-                                method: 'POST',
-                                headers: {
-                                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                                  'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({ source: 'profile' }),
-                              });
+                              recordEventView(eventId, token, { source: 'profile' });
                             }}
                           >
                             <button className="btn digest__knowMore">Подробнее</button>
@@ -1016,14 +1010,7 @@ const copyInviteLink = () => {
                             className="digest__link"
                             state={{ token, userId: userData?.id, from: 'profile-events' }}
                             onClick={() => {
-                              fetch(`https://ritmevents.ru/api/v1/events/${event.id}/view`, {
-                                method: 'POST',
-                                headers: {
-                                  ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                                  'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({ source: 'profile' }),
-                              });
+                              recordEventView(event.id, token, { source: 'profile' });
                             }}
                           >
                             <button className="btn digest__knowMore">Подробнее</button>
