@@ -733,6 +733,7 @@ export default function EventsDigest() {
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 0}
           >
+            <ChevronLeft size={14} />
             Назад
           </button>
           <span className="pagination-info">
@@ -744,6 +745,7 @@ export default function EventsDigest() {
             disabled={currentPage === totalPages - 1}
           >
             Далее
+            <ChevronRight size={14} />
           </button>
         </div>
       )}
