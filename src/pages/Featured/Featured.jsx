@@ -5,6 +5,7 @@ import { Calendar, Clock, MapPin, RussianRuble, Hand, MoreVertical } from 'lucid
 import { useAuth } from '../../components/AuthContext.jsx';
 import { useCollections } from '../../components/CollectionsContext.jsx';
 import ColorSwatchPicker from '../../components/ColorSwatchPicker/ColorSwatchPicker.jsx';
+import { recordEventView } from '../../utils/eventView.js';
 import './Featured.css';
 
 const formatDate = (d) => d ? d.split('-').reverse().join('.') : '';
@@ -350,14 +351,7 @@ function MyCollectionsPanel() {
   const [deleteBusy, setDeleteBusy] = useState(false);
 
   const handleOwnCardClick = (id) => {
-    fetch(`https://ritmevents.ru/api/v1/events/${id}/view`, {
-      method: 'POST',
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ source: 'profile' }),
-    });
+    recordEventView(id, token, { source: 'profile' });
     navigate(`/events/${id}`);
   };
 
@@ -587,14 +581,7 @@ export default function Featured() {
   };
 
   const handleCardClick = (id, block) => {
-    fetch(`https://ritmevents.ru/api/v1/events/${id}/view`, {
-      method: 'POST',
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ source: 'featured', ...(block ? { block } : {}) }),
-    });
+    recordEventView(id, token, { source: 'featured', block });
     navigate(`/events/${id}`);
   };
 

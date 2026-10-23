@@ -240,8 +240,6 @@
   color: var(--color-accent);
   text-align: center;
   margin: 4px 0 8px;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
 }
 
 /* иконки фильтра */
@@ -262,29 +260,33 @@
 }
 
 .pagination-btn {
-  padding: 10px 20px;
-  background: var(--color-accent-gradient);
-  color: var(--color-on-accent);
-  border: none;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 14px;
+  background: transparent;
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.2s, color 0.2s;
 }
 
-/* .pagination-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  background: linear-gradient(135deg, #0882ff, #62ecff);
-} */
+.pagination-btn:active:not(:disabled) {
+  background: var(--color-accent-gradient);
+  border-color: transparent;
+  color: var(--color-on-accent);
+}
 
 .pagination-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
 .pagination-info {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--color-text);
   font-weight: 500;
 }
@@ -312,74 +314,30 @@
   width: 24px;
 }
 
-.sort-importance-row {
+.events-chips {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 9px 12px;
+  gap: 8px;
   margin: 0 16px 10px;
+}
+
+.events-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent);
   cursor: pointer;
 }
 
-.sort-importance-row__label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--color-accent);
-}
-
-.sort-importance-switch {
-  position: relative;
-  width: 38px;
-  height: 22px;
-  border-radius: 999px;
-  background: var(--color-border);
-  flex-shrink: 0;
-  transition: background 0.2s ease;
-}
-
-.sort-importance-switch.is-on {
+.events-chip--active {
   background: var(--color-accent-gradient);
-}
-
-.sort-importance-switch::after {
-  content: "";
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s ease;
-}
-
-.sort-importance-switch.is-on::after {
-  transform: translateX(16px);
-}
-
-.sort-importance-switch:has(input:focus-visible) {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-.sort-importance-switch input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+  border-color: transparent;
+  color: var(--color-on-accent);
 }
 
 .week-navigation {
@@ -391,32 +349,34 @@
 }
 
 .week-nav-btn {
-  background: var(--color-accent-gradient);
-  border: none;
+  background: transparent;
+  border: 1px solid var(--color-accent);
   padding: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-on-accent);
+  color: var(--color-accent);
   cursor: pointer;
   flex-shrink: 0;
-  transition: opacity 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-/* .week-nav-btn:hover:not(:disabled) {
-  background: #adffc6;
-} */
+.week-nav-btn:active:not(:disabled) {
+  background: var(--color-accent-gradient);
+  border-color: transparent;
+  color: var(--color-on-accent);
+}
 
 .week-nav-btn:disabled {
-  opacity: 0.3;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
 .week-range {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--color-text);
   background: var(--color-bg-muted);
@@ -472,7 +432,7 @@
 .search-period__chip--active {
   background: var(--color-accent-gradient);
   border-color: transparent;
-  color: var(--color-text-on-accent, #000);
+  color: var(--color-on-accent);
 }
 
 .search-period__hint {

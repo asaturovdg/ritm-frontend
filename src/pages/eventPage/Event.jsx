@@ -12,6 +12,7 @@ import { usePlatform } from "../../platform/usePlatform.js";
 import BookmarkButton from "../../components/BookmarkButton/BookmarkButton.jsx";
 import NotInterestedButton from "../../components/NotInterestedButton/NotInterestedButton.jsx";
 import CollectionsButton from "../../components/CollectionsButton/CollectionsButton.jsx";
+import { recordEventView } from "../../utils/eventView.js";
 import { CALENDAR_ALLOWLIST, NOT_INTERESTED_ALLOWLIST, hasFeature } from "../../data/featureFlags.js";
 
 export default function Event({ embeddedId, isPreview = false, status, previewData = null, rejectionReason = null }) {
@@ -137,6 +138,7 @@ export default function Event({ embeddedId, isPreview = false, status, previewDa
         if (response.ok) {
           const data = await response.json();
           setEvent(data);
+          recordEventView(eventId, token);
           if (activeTab === 'speakers' && !data.speakers?.length) setActiveTab('description');
           if (activeTab === 'organizers' && !data.organizers?.length) setActiveTab('description');
         } else if (response.status === 403 || response.status === 401) {

@@ -187,38 +187,68 @@ describe('EventsDigest — sort by importance toggle', () => {
     return new URL(calls.at(-1)[0]);
   };
 
-  it('defaults to sort=date and switch is off', async () => {
+  const importantChip = () => screen.getByRole('button', { name: /Важные/ });
+  const unseenChip = () => screen.getByRole('button', { name: /Новые/ });
+
+  it('defaults to sort=date, chips are off and seen is not sent', async () => {
     renderDigest();
 
-    await screen.findByText('Сначала важные');
-    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'false');
+    await screen.findByRole('button', { name: /Важные/ });
+    expect(importantChip()).toHaveAttribute('aria-pressed', 'false');
+    expect(unseenChip()).toHaveAttribute('aria-pressed', 'false');
     expect(lastFetchedUrl().searchParams.get('sort')).toBe('date');
+    expect(lastFetchedUrl().searchParams.has('seen')).toBe(false);
   });
 
   it('switches to sort=importance and resets page to 1 on toggle', async () => {
     renderDigest();
-    await screen.findByText('Сначала важные');
+    await screen.findByRole('button', { name: /Важные/ });
 
-    fireEvent.click(screen.getByRole('switch'));
+    fireEvent.click(importantChip());
 
     await vi.waitFor(() => expect(lastFetchedUrl().searchParams.get('sort')).toBe('importance'));
-    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true');
+    expect(importantChip()).toHaveAttribute('aria-pressed', 'true');
     expect(lastFetchedUrl().searchParams.get('offset')).toBe('0');
     expect(localStorage.getItem('events_sort_importance')).toBe('true');
   });
 
   it('restores sort=date after toggling importance off again', async () => {
     renderDigest();
-    await screen.findByText('Сначала важные');
+    await screen.findByRole('button', { name: /Важные/ });
 
-    const toggle = screen.getByRole('switch');
-    fireEvent.click(toggle);
+    fireEvent.click(importantChip());
     await vi.waitFor(() => expect(lastFetchedUrl().searchParams.get('sort')).toBe('importance'));
 
-    fireEvent.click(toggle);
+    fireEvent.click(importantChip());
     await vi.waitFor(() => expect(lastFetchedUrl().searchParams.get('sort')).toBe('date'));
 
-    expect(toggle).toHaveAttribute('aria-checked', 'false');
+    expect(importantChip()).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('sends seen=unseen when the "Новые" chip is on and persists it', async () => {
+    renderDigest();
+    await screen.findByRole('button', { name: /Новые/ });
+
+    fireEvent.click(unseenChip());
+
+    await vi.waitFor(() => expect(lastFetchedUrl().searchParams.get('seen')).toBe('unseen'));
+    expect(unseenChip()).toHaveAttribute('aria-pressed', 'true');
+    expect(lastFetchedUrl().searchParams.get('offset')).toBe('0');
+    expect(localStorage.getItem('events_unseen_only')).toBe('true');
+  });
+
+  it('combines both chips', async () => {
+    renderDigest();
+    await screen.findByRole('button', { name: /Новые/ });
+
+    fireEvent.click(importantChip());
+    fireEvent.click(unseenChip());
+
+    await vi.waitFor(() => {
+      const params = lastFetchedUrl().searchParams;
+      expect(params.get('sort')).toBe('importance');
+      expect(params.get('seen')).toBe('unseen');
+    });
   });
 });
 

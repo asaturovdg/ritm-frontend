@@ -12,8 +12,9 @@ import CollectionsButton from '../CollectionsButton/CollectionsButton.jsx';
 import PulseCheckBanner from '../PulseCheck/PulseCheckBanner.jsx';
 import { useNotInterested } from '../NotInterestedContext.jsx';
 import { CALENDAR_ALLOWLIST, NOT_INTERESTED_ALLOWLIST, hasFeature } from '../../data/featureFlags.js';
+import { recordEventView } from '../../utils/eventView.js';
 
-import { Calendar, Clock, RussianRuble, MapPin, Users, Globe, ChevronLeft, ChevronRight, ChevronsLeft, Star } from "lucide-react";
+import { Calendar, Clock, RussianRuble, MapPin, Users, Globe, ChevronLeft, ChevronRight, ChevronsLeft, Star, Sparkles } from "lucide-react";
 
 
 const ITEMS_PER_PAGE = 20;
@@ -121,6 +122,10 @@ export default function EventsDigest() {
     return localStorage.getItem('events_sort_importance') === 'true';
   });
 
+  const [unseenOnly, setUnseenOnly] = useState(() => {
+    return localStorage.getItem('events_unseen_only') === 'true';
+  });
+
   const [weekRange, setWeekRange] = useState({ start: '', end: '' });
   const [events, setEvents] = useState([]);
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
@@ -152,6 +157,10 @@ export default function EventsDigest() {
   useEffect(() => {
     localStorage.setItem('events_sort_importance', sortByImportance);
   }, [sortByImportance]);
+
+  useEffect(() => {
+    localStorage.setItem('events_unseen_only', unseenOnly);
+  }, [unseenOnly]);
 
   const handleInvalidToken = useCallback(() => {
     localStorage.removeItem('access_token');
@@ -185,6 +194,7 @@ export default function EventsDigest() {
       url.searchParams.append('limit', ITEMS_PER_PAGE);
       url.searchParams.append('offset', page * ITEMS_PER_PAGE);
       url.searchParams.append('sort', sortByImportance ? 'importance' : 'date');
+      if (unseenOnly) url.searchParams.append('seen', 'unseen');
 
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
       const res = await fetch(url.toString(), { headers });
@@ -206,7 +216,7 @@ export default function EventsDigest() {
     } finally {
       setIsLoadingEvents(false);
     }
-  }, [filters, token, hasFilters, isAuthReady, handleInvalidToken, currentPage, currentWeekOffset, sortByImportance]);
+  }, [filters, token, hasFilters, isAuthReady, handleInvalidToken, currentPage, currentWeekOffset, sortByImportance, unseenOnly]);
 
   const fetchAndSetEventsByIds = useCallback(async (ids, page, searchId) => {
     if (!ids || ids.length === 0 || !token) {
@@ -261,6 +271,11 @@ export default function EventsDigest() {
 
   const toggleSortByImportance = () => {
     setSortByImportance(prev => !prev);
+    setCurrentPage(0);
+  };
+
+  const toggleUnseenOnly = () => {
+    setUnseenOnly(prev => !prev);
     setCurrentPage(0);
   };
 
@@ -484,23 +499,24 @@ export default function EventsDigest() {
       </div>
 
       {hasFilters && !isSearchMode && (
-        <label className="sort-importance-row">
-          <span className="sort-importance-row__label">
-            <Star size={14} />
-            Сначала важные
-          </span>
-          <span
-            className={`sort-importance-switch${sortByImportance ? ' is-on' : ''}`}
-            role="switch"
-            aria-checked={sortByImportance}
+        <div className="events-chips" role="group" aria-label="Фильтры ленты">
+          <button
+            className={`events-chip${sortByImportance ? ' events-chip--active' : ''}`}
+            aria-pressed={sortByImportance}
+            onClick={toggleSortByImportance}
           >
-            <input
-              type="checkbox"
-              checked={sortByImportance}
-              onChange={toggleSortByImportance}
-            />
-          </span>
-        </label>
+            <Star size={13} />
+            Важные
+          </button>
+          <button
+            className={`events-chip${unseenOnly ? ' events-chip--active' : ''}`}
+            aria-pressed={unseenOnly}
+            onClick={toggleUnseenOnly}
+          >
+            <Sparkles size={13} />
+            Новые
+          </button>
+        </div>
       )}
 
       {isSearchMode && (
@@ -603,14 +619,7 @@ export default function EventsDigest() {
               tabIndex={0}
               className="digest__item"
               onClick={() => {
-                fetch(`https://ritmevents.ru/api/v1/events/${event.id}/view`, {
-                  method: 'POST',
-                  headers: {
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({ source: isSearchMode ? 'search' : 'list' }),
-                });
+                recordEventView(event.id, token, { source: isSearchMode ? 'search' : 'list' });
                 navigate(`/events/${event.id}`, {
                   state: {
                     token,
@@ -724,6 +733,7 @@ export default function EventsDigest() {
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 0}
           >
+            <ChevronLeft size={14} />
             Назад
           </button>
           <span className="pagination-info">
@@ -735,6 +745,7 @@ export default function EventsDigest() {
             disabled={currentPage === totalPages - 1}
           >
             Далее
+            <ChevronRight size={14} />
           </button>
         </div>
       )}
