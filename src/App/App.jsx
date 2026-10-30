@@ -16,18 +16,21 @@ import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
 import { useAuth } from '../components/AuthContext.jsx';
 import { useAppTabs } from '../hooks/useAppTabs';
 import { waitForPlatformSdk } from '../platform/waitForSdk.js';
+import { claimStoredReferral, parseEventStartParam, parseRefStartParam, storeReferralCode } from '../utils/referral.js';
 import './App.css';
 
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const prefersReduced = useReducedMotion();
-  const { isAuthReady } = useAuth();
+  const { isAuthReady, token } = useAuth();
   const { TABS, TAB_PATHS, hasFeatured } = useAppTabs();
 
   const prevPathRef = useRef(location.pathname);
   const transitionConfigRef = useRef({ direction: 0, type: 'tab' });
   const lastStartParamRef = useRef(null);
+  const tokenRef = useRef(token);
+  tokenRef.current = token;
 
   const curr = location.pathname;
   const prev = prevPathRef.current;
@@ -68,7 +71,15 @@ export default function App() {
       if (startParam.startsWith('invite_')) {
         navigate(`/invite/assistant/${startParam.replace('invite_', '')}`, { replace: true });
       } else if (startParam.startsWith('event_')) {
-        navigate(`/events/${startParam.replace('event_', '')}`, { replace: true });
+        const parsed = parseEventStartParam(startParam);
+        if (parsed) {
+          storeReferralCode(parsed.code);
+          claimStoredReferral(tokenRef.current);
+          navigate(`/events/${parsed.eventId}`, { replace: true });
+        }
+      } else if (startParam.startsWith('ref_')) {
+        storeReferralCode(parseRefStartParam(startParam));
+        claimStoredReferral(tokenRef.current);
       } else if (startParam.startsWith('cal_')) {
         const [, provider, eventId] = startParam.split('_');
         navigate(`/events/${eventId}?cal=${provider}`, { replace: true });
@@ -118,6 +129,22 @@ export default function App() {
       navigate(`/invite/assistant/${redirectPath.split('/').pop()}`, { replace: true });
     }
   }, [navigate]);
+
+  // Web referral links: ?ref=<code> on any page. Kept in storage until the user is authorized.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('ref');
+    if (!code) return;
+
+    storeReferralCode(code);
+    params.delete('ref');
+    const query = params.toString();
+    window.history.replaceState({}, '', `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`);
+  }, []);
+
+  useEffect(() => {
+    if (isAuthReady && token) claimStoredReferral(token);
+  }, [isAuthReady, token]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
