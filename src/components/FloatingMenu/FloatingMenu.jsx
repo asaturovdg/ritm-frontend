@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { MessageCircle, MessageSquareWarning, X } from 'lucide-react';
+import { MessageCircle, MessageSquareWarning, Share2, X } from 'lucide-react';
 
+import { usePlatform } from '../../platform/usePlatform.js';
 import UxFeedbackModal from '../../pages/Profile/UxFeedbackModal.jsx';
 import './FloatingMenu.css';
 
@@ -9,12 +10,17 @@ import './FloatingMenu.css';
 const MENU_ITEMS = [
   { id: 'report', label: 'Сообщить о проблеме', Icon: MessageSquareWarning, category: 'bug' },
   { id: 'feedback', label: 'Обратная связь', Icon: MessageCircle, category: null },
+  { id: 'share', label: 'Поделиться приложением', Icon: Share2 },
 ];
 
 export default function FloatingMenu({ tab }) {
   const prefersReduced = useReducedMotion();
   const [isOpen, setIsOpen] = useState(false);
   const [modal, setModal] = useState(null);
+  const { shareApp, canShareApp } = usePlatform();
+
+  // Sharing needs the user's referral code; hide the item until the backend provides it.
+  const menuItems = MENU_ITEMS.filter((item) => item.id !== 'share' || canShareApp);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -27,6 +33,10 @@ export default function FloatingMenu({ tab }) {
 
   const handleSelect = (item) => {
     setIsOpen(false);
+    if (item.id === 'share') {
+      shareApp().catch(() => {});
+      return;
+    }
     setModal({ category: item.category });
   };
 
@@ -55,7 +65,7 @@ export default function FloatingMenu({ tab }) {
         <AnimatePresence>
           {isOpen && (
             <ul className="floating-menu__list">
-              {MENU_ITEMS.map((item, index) => (
+              {menuItems.map((item, index) => (
                 <motion.li
                   key={item.id}
                   className="floating-menu__row"
