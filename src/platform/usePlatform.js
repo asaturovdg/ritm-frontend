@@ -101,14 +101,14 @@ export const shareAppForPlatform = async (platform, showToast, referralCode) => 
   if (platform === 'telegram' || platform === 'max') {
     const host = platform === 'telegram' ? 't.me' : 'max.ru';
     const appUrl = `https://${host}/${BOT}?startapp=${buildAppStartParam(referralCode)}`;
-    await navigator.clipboard.writeText(`${APP_SHARE_TEXT}\n\n${appUrl}`);
+    await navigator.clipboard.writeText(appUrl);
     showToast?.('Ссылка скопирована');
   } else {
     const appUrl = `${window.location.origin}/?ref=${referralCode}`;
     if (navigator.share) {
       await navigator.share({ url: appUrl, text: APP_SHARE_TEXT });
     } else {
-      await navigator.clipboard.writeText(`${APP_SHARE_TEXT}\n\n${appUrl}`);
+      await navigator.clipboard.writeText(appUrl);
       showToast?.('Ссылка скопирована');
     }
   }

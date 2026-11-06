@@ -10,6 +10,7 @@ import { Profile } from '../pages/Profile/Profile';
 import Submissions from '../pages/Submissions/Submissions';
 import Moderation from '../pages/Moderation/Moderation.jsx';
 import FloatingMenu from '../components/FloatingMenu/FloatingMenu.jsx';
+import Login from '../components/Login/Login.jsx';
 import { TransitionContext } from '../components/TransitionContext';
 
 import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
@@ -23,12 +24,14 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const prefersReduced = useReducedMotion();
-  const { isAuthReady, token } = useAuth();
+  const { isAuthReady, isCheckingAuth, showInputCode, token } = useAuth();
   const { TABS, TAB_PATHS, hasFeatured } = useAppTabs();
 
   const prevPathRef = useRef(location.pathname);
   const transitionConfigRef = useRef({ direction: 0, type: 'tab' });
   const lastStartParamRef = useRef(null);
+  const initialLocationRef = useRef(location);
+  const initialNavigationDoneRef = useRef(false);
   const tokenRef = useRef(token);
   tokenRef.current = token;
 
@@ -111,7 +114,7 @@ export default function App() {
 
     if (location.pathname.includes('/events/')) {
       tg.BackButton.show();
-      const handleBack = () => navigate('/');
+      const handleBack = () => navigate(location.state?.from === 'featured' ? '/featured' : '/');
       tg.onEvent('backButtonClicked', handleBack);
       return () => {
         tg.offEvent('backButtonClicked', handleBack);
@@ -160,6 +163,16 @@ export default function App() {
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
+
+  // Only redirect the initial home page; later visits to / open the digest.
+  useEffect(() => {
+    if (initialNavigationDoneRef.current) return;
+    initialNavigationDoneRef.current = true;
+    const initialLocation = initialLocationRef.current;
+    const params = new URLSearchParams(initialLocation.search);
+    if (initialLocation.pathname !== '/' || params.get('redirect') || !hasFeatured) return;
+    navigate({ pathname: '/featured', search: window.location.search, hash: window.location.hash }, { replace: true });
+  }, [hasFeatured, navigate]);
 
   const getActiveTab = () => {
     if (location.pathname === '/featured') return 'featured';
@@ -233,7 +246,7 @@ export default function App() {
                   exit="exit"
                   transition={activeTransition}
                 >
-                  <Routes location={location}>
+                  {showInputCode && !isCheckingAuth ? <Login /> : <Routes location={location}>
                     <Route path='/featured' element={hasFeatured ? <Featured /> : <Navigate to="/" replace />} />
                     <Route path='/' element={<EventsDigest />} />
                     <Route path='/events/:id' element={<Event />} />
@@ -242,14 +255,14 @@ export default function App() {
                     <Route path='/moderation' element={<Moderation />} />
                     <Route path='/invite/assistant/:token' element={<InviteAccept />} />
                     <Route path='*' element={<Navigate to="/" replace />} />
-                  </Routes>
+                  </Routes>}
                 </motion.div>
               </AnimatePresence>
-              {showFloatingMenu && <FloatingMenu tab={activeTab} />}
+              {!showInputCode && showFloatingMenu && <FloatingMenu tab={activeTab} />}
             </div>
 
             <AnimatePresence>
-              {!isEventPage && isAuthReady && (
+              {!showInputCode && !isEventPage && isAuthReady && (
                 <motion.nav
                   className="bottom-nav"
                   initial={{ y: '100%' }}

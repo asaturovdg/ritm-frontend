@@ -352,7 +352,7 @@ function MyCollectionsPanel() {
 
   const handleOwnCardClick = (id) => {
     recordEventView(id, token, { source: 'profile' });
-    navigate(`/events/${id}`);
+    navigate(`/events/${id}`, { state: { from: 'featured' } });
   };
 
   const handleCreate = async () => {
@@ -582,7 +582,7 @@ export default function Featured() {
 
   const handleCardClick = (id, block) => {
     recordEventView(id, token, { source: 'featured', block });
-    navigate(`/events/${id}`);
+    navigate(`/events/${id}`, { state: { from: 'featured' } });
   };
 
   let hintAssigned = false;

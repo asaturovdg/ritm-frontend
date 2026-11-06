@@ -239,8 +239,8 @@ export function AuthProvider({ children }) {
     initAuth();
   }, [authorize, fetchUserData, tryRefresh]);
 
-  const refreshUserData = useCallback(() => {
-    const accessToken = token || localStorage.getItem('access_token');
+  const refreshUserData = useCallback((overrideToken) => {
+    const accessToken = overrideToken || token || localStorage.getItem('access_token');
     if (accessToken) return fetchUserData(accessToken);
     return Promise.resolve(null);
   }, [token, fetchUserData]);
