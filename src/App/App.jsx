@@ -29,6 +29,8 @@ export default function App() {
   const prevPathRef = useRef(location.pathname);
   const transitionConfigRef = useRef({ direction: 0, type: 'tab' });
   const lastStartParamRef = useRef(null);
+  const initialLocationRef = useRef(location);
+  const initialNavigationDoneRef = useRef(false);
   const tokenRef = useRef(token);
   tokenRef.current = token;
 
@@ -111,7 +113,7 @@ export default function App() {
 
     if (location.pathname.includes('/events/')) {
       tg.BackButton.show();
-      const handleBack = () => navigate('/');
+      const handleBack = () => navigate(location.state?.from === 'featured' ? '/featured' : '/');
       tg.onEvent('backButtonClicked', handleBack);
       return () => {
         tg.offEvent('backButtonClicked', handleBack);
@@ -160,6 +162,16 @@ export default function App() {
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
+
+  // Only redirect the initial home page; later visits to / open the digest.
+  useEffect(() => {
+    if (initialNavigationDoneRef.current) return;
+    initialNavigationDoneRef.current = true;
+    const initialLocation = initialLocationRef.current;
+    const params = new URLSearchParams(initialLocation.search);
+    if (initialLocation.pathname !== '/' || params.get('redirect') || !hasFeatured) return;
+    navigate({ pathname: '/featured', search: window.location.search, hash: window.location.hash }, { replace: true });
+  }, [hasFeatured, navigate]);
 
   const getActiveTab = () => {
     if (location.pathname === '/featured') return 'featured';

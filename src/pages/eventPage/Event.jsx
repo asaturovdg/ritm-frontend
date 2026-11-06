@@ -67,6 +67,10 @@ export default function Event({ embeddedId, isPreview = false, status, previewDa
   }, [isCheckingAuth]);
 
   const handleBack = () => {
+    if (location.state?.from === 'featured') {
+      navigate('/featured');
+      return;
+    }
     const hasReturnState = returnState.weekOffset !== undefined || returnState.page !== undefined || returnState.searchQuery !== undefined;
     navigate('/', { state: hasReturnState ? returnState : undefined });
   };
