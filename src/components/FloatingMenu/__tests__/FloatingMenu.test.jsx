@@ -2,8 +2,9 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import FloatingMenu from '../FloatingMenu.jsx';
 
+const authState = vi.hoisted(() => ({ userData: null }));
 vi.mock('../../AuthContext.jsx', () => ({
-  useAuth: () => ({ token: 'test-token' }),
+  useAuth: () => ({ token: 'test-token', platform: 'telegram', userData: authState.userData }),
 }));
 vi.mock('../../Toast/ToastContext.jsx', () => ({
   useToast: () => vi.fn(),
@@ -75,5 +76,32 @@ describe('FloatingMenu', () => {
       const body = JSON.parse(global.fetch.mock.calls[0][1].body);
       expect(body.tab).toBe('submissions');
     });
+  });
+
+  it('hides the share item until the user has a referral code', () => {
+    authState.userData = null;
+    render(<FloatingMenu />);
+    fireEvent.click(screen.getByLabelText('Обратная связь и идеи'));
+    expect(screen.queryByText('Поделиться приложением')).not.toBeInTheDocument();
+  });
+
+  it('shares the app with the referral link and closes the menu', async () => {
+    authState.userData = { referral_code: 'abc123' };
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText: vi.fn().mockResolvedValue(undefined) },
+      writable: true,
+      configurable: true,
+    });
+    render(<FloatingMenu />);
+    fireEvent.click(screen.getByLabelText('Обратная связь и идеи'));
+    fireEvent.click(screen.getByText('Поделиться приложением'));
+
+    await waitFor(() =>
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        expect.stringContaining('startapp=ref_abc123')
+      )
+    );
+    await waitFor(() => expect(screen.queryByText('Поделиться приложением')).not.toBeInTheDocument());
+    authState.userData = null;
   });
 });

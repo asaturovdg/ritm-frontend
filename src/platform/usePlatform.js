@@ -1,5 +1,6 @@
 import { useAuth } from '../components/AuthContext.jsx';
 import { useToast } from '../components/Toast/ToastContext.jsx';
+import { buildAppStartParam, buildEventStartParam, isValidReferralCode } from '../utils/referral.js';
 
 const BOT = 'ritmevents_bot';
 
@@ -68,19 +69,20 @@ const tryNativeTelegramShare = async (id, token) => {
   }
 };
 
-export const shareEventForPlatform = async (id, title, eventType, platform, showToast, token) => {
+export const shareEventForPlatform = async (id, title, eventType, platform, showToast, token, referralCode) => {
   if (platform === 'telegram') {
     if (await tryNativeTelegramShare(id, token)) return;
 
-    const eventUrl = `https://t.me/${BOT}?startapp=event_${id}`;
+    const eventUrl = `https://t.me/${BOT}?startapp=${buildEventStartParam(id, referralCode)}`;
     await navigator.clipboard.writeText(buildShareLines(title, eventUrl));
     showToast?.('Ссылка скопирована');
   } else if (platform === 'max') {
-    const eventUrl = `https://max.ru/${BOT}?startapp=event_${id}`;
+    const eventUrl = `https://max.ru/${BOT}?startapp=${buildEventStartParam(id, referralCode)}`;
     await navigator.clipboard.writeText(buildShareLines(title, eventUrl));
     showToast?.('Ссылка скопирована');
   } else {
-    const eventUrl = `${window.location.origin}/events/${id}`;
+    const refQuery = isValidReferralCode(referralCode) ? `?ref=${referralCode}` : '';
+    const eventUrl = `${window.location.origin}/events/${id}${refQuery}`;
     const text = buildShareLines(title, eventUrl);
     if (navigator.share) {
       await navigator.share({ url: eventUrl, title: text });
@@ -91,15 +93,39 @@ export const shareEventForPlatform = async (id, title, eventType, platform, show
   }
 };
 
+const APP_SHARE_TEXT = 'Смотри, какой дайджест IT-событий нашёл — рИТм!';
+
+export const shareAppForPlatform = async (platform, showToast, referralCode) => {
+  if (!isValidReferralCode(referralCode)) return;
+
+  if (platform === 'telegram' || platform === 'max') {
+    const host = platform === 'telegram' ? 't.me' : 'max.ru';
+    const appUrl = `https://${host}/${BOT}?startapp=${buildAppStartParam(referralCode)}`;
+    await navigator.clipboard.writeText(`${APP_SHARE_TEXT}\n\n${appUrl}`);
+    showToast?.('Ссылка скопирована');
+  } else {
+    const appUrl = `${window.location.origin}/?ref=${referralCode}`;
+    if (navigator.share) {
+      await navigator.share({ url: appUrl, text: APP_SHARE_TEXT });
+    } else {
+      await navigator.clipboard.writeText(`${APP_SHARE_TEXT}\n\n${appUrl}`);
+      showToast?.('Ссылка скопирована');
+    }
+  }
+};
+
 export function usePlatform() {
-  const { platform, token } = useAuth();
+  const { platform, token, userData } = useAuth();
+  const referralCode = userData?.referral_code;
   const showToast = useToast();
   return {
     platform,
     openLink: (url) => openLinkForPlatform(url, platform),
     showAlert: (msg) => showAlertForPlatform(msg, platform),
     expandApp: () => expandAppForPlatform(platform),
-    shareEvent: (id, title, eventType) => shareEventForPlatform(id, title, eventType, platform, showToast, token),
+    shareEvent: (id, title, eventType) => shareEventForPlatform(id, title, eventType, platform, showToast, token, referralCode),
+    shareApp: () => shareAppForPlatform(platform, showToast, referralCode),
+    canShareApp: isValidReferralCode(referralCode),
     buildCalendarReturnUrl: (provider, eventId) => buildCalendarReturnUrl(provider, eventId, platform),
     buildCalendarErrorReturnUrl: (provider, eventId) => buildCalendarErrorReturnUrl(provider, eventId, platform),
   };
