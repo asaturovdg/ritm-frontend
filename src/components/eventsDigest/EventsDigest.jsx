@@ -5,7 +5,6 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../AuthContext.jsx";
 import { useUserFilters } from "../useUserFilters.jsx";
 import { usePlatform } from "../../platform/usePlatform.js"
-import TelegramLoginWidget from '../TelegramLoginWidget/TelegramLoginWidget.jsx';
 import BookmarkButton from '../BookmarkButton/BookmarkButton.jsx';
 import NotInterestedButton from '../NotInterestedButton/NotInterestedButton.jsx';
 import CollectionsButton from '../CollectionsButton/CollectionsButton.jsx';
@@ -79,11 +78,7 @@ export default function EventsDigest() {
     userId,
     isAuthReady,
     isCheckingAuth,
-    showInputCode,
     setShowInputCode,
-    setToken,
-    setIsAuthReady,
-    refreshUserData,
   } = useAuth();
   const { openLink, expandApp } = usePlatform();
   const { filters } = useUserFilters();
@@ -129,9 +124,6 @@ export default function EventsDigest() {
   const [weekRange, setWeekRange] = useState({ start: '', end: '' });
   const [events, setEvents] = useState([]);
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
-  const [code, setCode] = useState('');
-  const [loginError, setLoginError] = useState('');
-  const [widgetReady, setWidgetReady] = useState(false);
   const [totalEvents, setTotalEvents] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const searchIdRef = useRef(0);
@@ -395,29 +387,6 @@ export default function EventsDigest() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleLogin = async () => {
-    if (!code.trim()) return;
-    setLoginError('');
-    try {
-      const res = await fetch('https://ritmevents.ru/api/v1/auth/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('refresh_token', data.refresh_token);
-        setShowInputCode(false);
-        window.location.reload();
-      } else {
-        setLoginError('Неверный или истёкший код. Попробуйте ещё раз.');
-      }
-    } catch {
-      setLoginError('Ошибка соединения. Попробуйте позже.');
-    }
-  };
-
   const handleOpenLink = (e, url) => {
     e.preventDefault();
     openLink(url);
@@ -430,55 +399,6 @@ export default function EventsDigest() {
         <div className="loading-container">
           <div className="spinner"></div>
           <p>Загрузка...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Отображение ввода кода (только в dev-режиме)
-  if (showInputCode) {
-    const isDevMode = import.meta.env.VITE_DEV_MODE !== 'false';
-    return (
-      <div className="events">
-        <div className="login-container">
-          <h2>Вход</h2>
-
-          <TelegramLoginWidget
-            onSuccess={({ access_token, refresh_token }) => {
-              localStorage.setItem('access_token', access_token);
-              localStorage.setItem('refresh_token', refresh_token);
-              setToken(access_token);
-              refreshUserData().then((user) => {
-                if (user) {
-                  setIsAuthReady(true);
-                  setShowInputCode(false);
-                }
-              });
-            }}
-            onError={(msg) => setLoginError(msg)}
-            onStatusChange={(s) => setWidgetReady(s === 'ready')}
-          />
-
-          {isDevMode && widgetReady && <p className="login-divider">— или —</p>}
-
-          {isDevMode && (
-            <>
-              <p>Получите код, написав <b>/login</b> боту <b>@ritmevents_bot</b>, и введите его ниже</p>
-              <input
-                type="text"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="Введите код"
-                maxLength={6}
-                className="login-input"
-              />
-              <Button mode="filled" stretched size="m" onClick={handleLogin}>
-                Войти
-              </Button>
-            </>
-          )}
-
-          {loginError && <p className="login-error">{loginError}</p>}
         </div>
       </div>
     );
