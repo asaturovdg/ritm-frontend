@@ -1,7 +1,7 @@
-import { hasFeature } from '../data/featureFlags.js';
+import { hasFeature, SOCIAL_PROFILES_ADMINS_ENABLED } from '../data/featureFlags.js';
 
-export function canAccessCommunity(allowlist, auth) {
-  return Boolean(auth.token && auth.isAuthReady && !auth.showInputCode && auth.userId && auth.userData?.is_active !== false && hasFeature(allowlist, auth.userId));
+export function canAccessCommunity(allowlist, auth, adminsEnabled = SOCIAL_PROFILES_ADMINS_ENABLED) {
+  return Boolean(auth.token && auth.isAuthReady && !auth.showInputCode && auth.userId && auth.userData?.is_active !== false && (hasFeature(allowlist, auth.userId) || (adminsEnabled && auth.userData?.is_admin === true)));
 }
 
 export function safeMemberReturn(path) {

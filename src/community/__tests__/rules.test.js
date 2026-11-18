@@ -28,3 +28,12 @@ describe('доступ и правила сообщества', () => {
 it('известное завершение без начала позволяет рассказ, но не компанию', () => {
   expect(eventWindow({ end_date: '2026-11-18', end_time: '15:00:00' }, Date.parse('2026-11-18T12:00:00Z'))).toMatchObject({ upcoming: false, ended: true });
 });
+
+it('даёт доступ действующему администратору независимо от ID в тестовой группе', () => {
+  const admin = { token: 't', userId: 99, isAuthReady: true, userData: { is_admin: true, is_active: true } };
+  expect(canAccessCommunity(new Set(), admin)).toBe(true);
+  expect(canAccessCommunity(new Set(), admin, false)).toBe(false);
+  expect(canAccessCommunity(new Set(), { ...admin, token: null })).toBe(false);
+  expect(canAccessCommunity(new Set(), { ...admin, userData: { is_admin: true, is_active: false } })).toBe(false);
+  expect(canAccessCommunity(new Set(), { ...admin, userData: { is_admin: 'true' } })).toBe(false);
+});

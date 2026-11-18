@@ -1,17 +1,22 @@
 # Сообщество: раскат и проверка
 
-Функция выключена по умолчанию. В `src/data/featureFlags.js`:
+Функция доступна текущим администраторам по `is_admin=true`; для остальных закрыта. В `src/data/featureFlags.js`:
 
 ```js
-// Только эти user_id из API /users/me:
+// Дополнительные тестировщики: user_id из API /users/me:
 export const SOCIAL_PROFILES_ALLOWLIST = new Set([123, 456]);
+// Доступ всем действующим администраторам (как в админской панели):
+export const SOCIAL_PROFILES_ADMINS_ENABLED = true;
 // Всем после совместного E2E:
 // export const SOCIAL_PROFILES_ALLOWLIST = ALL_USERS;
 ```
 
-Пустой `new Set()` скрывает точки входа, закрывает прямые маршруты и отключает
-запросы сообщества. Администратор для модерации должен одновременно входить в
-allowlist и иметь `is_admin=true`. Клиентский флаг не заменяет права backend.
+Для полного отключения выставить `SOCIAL_PROFILES_ADMINS_ENABLED = false` и
+пустой `SOCIAL_PROFILES_ALLOWLIST`. Это закрывает точки входа, прямые маршруты и
+запросы сообщества. Включённый флаг админов даёт доступ по актуальному `is_admin`
+из `/users/me`, без копирования списка ID. Для модерации дополнительно всегда
+нужен `is_admin=true`; allowlist сам по себе этих прав не даёт. Клиентский флаг
+не заменяет права backend.
 
 Маршруты: `/members/me/edit`, `/members/:userId?source=companions`. Вход в свой
 профиль — из текущего профиля настроек; в модерации — вкладка «Сообщество».

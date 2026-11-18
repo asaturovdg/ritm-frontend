@@ -6,7 +6,7 @@ import MemberProfile from '../MemberProfile.jsx';
 
 const state = vi.hoisted(() => ({ auth: {}, allowlist: new Set([17]) }));
 vi.mock('../../components/AuthContext.jsx', () => ({ useAuth: () => state.auth }));
-vi.mock('../../data/featureFlags.js', () => ({ SOCIAL_PROFILES_ALLOWLIST: state.allowlist, hasFeature: (allow, id) => allow.has(Number(id)) }));
+vi.mock('../../data/featureFlags.js', () => ({ SOCIAL_PROFILES_ALLOWLIST: state.allowlist, SOCIAL_PROFILES_ADMINS_ENABLED: true, hasFeature: (allow, id) => allow.has(Number(id)) }));
 vi.mock('../../platform/usePlatform.js', () => ({ usePlatform: () => ({ openLink: vi.fn() }) }));
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 const auth = (extra = {}) => ({ token: 'token', userId: 17, isAuthReady: true, showInputCode: false, userData: { id: 17, is_admin: false, is_active: true }, setToken: vi.fn(), setUserId: vi.fn(), setIsAuthReady: vi.fn(), setShowInputCode: vi.fn(), ...extra });
@@ -35,4 +35,12 @@ it('запускается до загрузки user_id и токена, без
   const fetcher = vi.fn(); vi.stubGlobal('fetch', fetcher);
   expect(() => render(tree())).not.toThrow();
   expect(fetcher).not.toHaveBeenCalled();
+});
+
+
+it('открывает профиль администратору вне списка ID тестировщиков', async () => {
+  state.auth = auth({ userId: 18, userData: { id: 18, is_admin: true, is_active: true } });
+  vi.stubGlobal('fetch', vi.fn(async url => ({ ok: true, status: 200, json: async () => url.endsWith('/member-profiles/99') ? { user_id: 99, name: 'Автор', contact_url: 'https://t.me/author', contact_label: 'Контакт автора' } : { items: [], total: 0 } })));
+  render(tree());
+  expect(await screen.findByRole('link', { name: 'Контакт автора' })).toHaveAttribute('href', 'https://t.me/author');
 });
