@@ -23,6 +23,11 @@
   padding-bottom: 80px;
 }
 
+/* Profile subtabs scroll internally; keep the floating-button clearance there. */
+.page-wrapper--profile {
+  padding-bottom: 0;
+}
+
 /* ── Bottom Nav ── */
 .bottom-nav {
   position: relative;

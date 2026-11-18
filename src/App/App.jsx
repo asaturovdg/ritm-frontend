@@ -238,7 +238,7 @@ export default function App() {
               <AnimatePresence initial={false} custom={transitionConfig}>
                 <motion.div
                   key={location.key}
-                  className="page-wrapper"
+                  className={`page-wrapper${curr === '/profile' ? ' page-wrapper--profile' : ''}`}
                   custom={transitionConfig}
                   variants={pageVariants}
                   initial="initial"
