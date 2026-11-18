@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { waitForPlatformSdk } from '../platform/waitForSdk.js';
 
 const PLATFORMS = {
@@ -95,6 +95,7 @@ export function AuthProvider({ children }) {
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [showInputCode, setShowInputCode] = useState(false);
+  const recoveryRef = useRef(null);
   const [authError, setAuthError] = useState(null);
   const [userData, setUserData] = useState(null);
 
@@ -239,6 +240,46 @@ export function AuthProvider({ children }) {
     initAuth();
   }, [authorize, fetchUserData, tryRefresh]);
 
+  // Восстановление после 401 без повтора исходного действия публикации.
+  // Сразу закрываем доступ к приватным данным; refresh сохраняем до попытки.
+  const reauthenticate = useCallback(() => {
+    if (recoveryRef.current) return recoveryRef.current;
+    setIsAuthReady(false);
+    setIsCheckingAuth(true);
+    setShowInputCode(false);
+    setToken(null);
+    setUserId(null);
+    setUserData(null);
+    setAuthError(null);
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user_id');
+    const recover = async () => {
+      try {
+        const refreshed = await tryRefresh();
+        if (refreshed && await fetchUserData(refreshed)) {
+          setToken(refreshed);
+          setIsAuthReady(true);
+          return;
+        }
+        const currentPlatform = platform || detectPlatform();
+        if (currentPlatform !== PLATFORMS.WEB) {
+          const result = await authorize(currentPlatform);
+          if (!result.success) setAuthError(result.error);
+        } else {
+          setShowInputCode(true);
+        }
+      } catch (error) {
+        setAuthError(error.message);
+        if ((platform || detectPlatform()) === PLATFORMS.WEB) setShowInputCode(true);
+      } finally {
+        setIsCheckingAuth(false);
+        recoveryRef.current = null;
+      }
+    };
+    recoveryRef.current = recover();
+    return recoveryRef.current;
+  }, [tryRefresh, fetchUserData, platform, authorize]);
+
   const refreshUserData = useCallback((overrideToken) => {
     const accessToken = overrideToken || token || localStorage.getItem('access_token');
     if (accessToken) return fetchUserData(accessToken);
@@ -262,6 +303,7 @@ export function AuthProvider({ children }) {
       setUserId,
       authorize,
       refreshUserData,
+      reauthenticate,
     }}>
       {children}
     </AuthContext.Provider>

@@ -1,3 +1,5 @@
+import { useCommunity } from '../../community/context.js';
+import '../../community/Community.css';
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import ReactCalendar from "react-calendar";
@@ -28,6 +30,7 @@ import partType from "../../assets/icons/partType.svg"
 import { recordEventView } from "../../utils/eventView.js";
 
 export function Profile() {
+  const { enabled: hasCommunity } = useCommunity();
   const { token, userData, isCheckingAuth, userId } = useAuth();
   const { connectCalendar, waitForCalendarConnection } = useCalendar();
   const { openLink } = usePlatform();
@@ -549,6 +552,7 @@ const copyInviteLink = () => {
 
   return (
     <div className="profile-container" {...bindSubtabSwipe()}>
+      <>{hasCommunity && <button type="button" className="community-entry" onClick={() => navigate('/members/me/edit')}>Профиль участника →</button>}</>
       <div className="profile-header">
         <h1 className="profile-header__title">Профиль</h1>
         <div className="profile-header__actions">

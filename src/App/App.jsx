@@ -19,8 +19,16 @@ import { useAppTabs } from '../hooks/useAppTabs';
 import { waitForPlatformSdk } from '../platform/waitForSdk.js';
 import { claimStoredReferral, parseEventStartParam, parseRefStartParam, storeReferralCode } from '../utils/referral.js';
 import './App.css';
+import CommunityProvider from '../community/CommunityProvider.jsx';
+import MemberProfile from '../community/MemberProfile.jsx';
+import ProfileEditor from '../community/ProfileEditor.jsx';
+import { useMemberReturn } from '../community/useMemberReturn.js';
 
 export default function App() {
+  return <CommunityProvider><AppContent /></CommunityProvider>;
+}
+
+function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
   const prefersReduced = useReducedMotion();
@@ -34,6 +42,8 @@ export default function App() {
   const initialNavigationDoneRef = useRef(false);
   const tokenRef = useRef(token);
   tokenRef.current = token;
+
+  const preserveMemberReturn = useMemberReturn({ isAuthReady, token, showInputCode });
 
   const curr = location.pathname;
   const prev = prevPathRef.current;
@@ -170,9 +180,9 @@ export default function App() {
     initialNavigationDoneRef.current = true;
     const initialLocation = initialLocationRef.current;
     const params = new URLSearchParams(initialLocation.search);
-    if (initialLocation.pathname !== '/' || params.get('redirect') || !hasFeatured) return;
+    if (initialLocation.pathname !== '/' || params.get('redirect') || !hasFeatured || preserveMemberReturn) return;
     navigate({ pathname: '/featured', search: window.location.search, hash: window.location.hash }, { replace: true });
-  }, [hasFeatured, navigate]);
+  }, [hasFeatured, navigate, preserveMemberReturn]);
 
   const getActiveTab = () => {
     if (location.pathname === '/featured') return 'featured';
@@ -251,6 +261,8 @@ export default function App() {
                     <Route path='/' element={<EventsDigest />} />
                     <Route path='/events/:id' element={<Event />} />
                     <Route path='/profile' element={<Profile />} />
+                    <Route path='/members/me/edit' element={<ProfileEditor />} />
+                    <Route path='/members/:userId' element={<MemberProfile />} />
                     <Route path='/submissions' element={<Submissions />} />
                     <Route path='/moderation' element={<Moderation />} />
                     <Route path='/invite/assistant/:token' element={<InviteAccept />} />
