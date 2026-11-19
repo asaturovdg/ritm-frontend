@@ -1,3 +1,5 @@
+import { useCommunity } from '../../community/context.js';
+import CommunityModeration from '../../community/CommunityModeration.jsx';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Placeholder } from '@telegram-apps/telegram-ui';
 import { useAuth } from '../../components/AuthContext.jsx';
@@ -13,11 +15,13 @@ const API_BASE = 'https://ritmevents.ru/api/v1';
 const PAGE_SIZE = 20;
 
 export default function Moderation() {
+  const { enabled: hasCommunity, isAdmin } = useCommunity();
   const [section, setSection] = useState('queue'); // 'queue' | 'submissions' | 'links' | 'feedback'
 
   return (
     <div className="moderation-page">
       <div className="moderation-tabs">
+        {hasCommunity && isAdmin && <button type="button" className={`moderation-tab ${section === 'community' ? 'active' : ''}`} onClick={() => setSection('community')}>Сообщество</button>}
         <button
           type="button"
           className={`moderation-tab ${section === 'queue' ? 'active' : ''}`}
@@ -47,7 +51,7 @@ export default function Moderation() {
           Обратная связь
         </button>
       </div>
-      {section === 'queue' ? <ModerationQueue />
+      {section === 'community' ? <CommunityModeration /> : section === 'queue' ? <ModerationQueue />
         : section === 'submissions' ? <SubmissionsQueue />
         : section === 'links' ? <LinkQueue />
         : <FeedbackReview />}

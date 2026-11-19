@@ -1,0 +1,29 @@
+.community { color: var(--color-text); max-width: 760px; margin: 0 auto; padding: 20px 16px 100px; line-height: 1.5; overflow-wrap: anywhere; }
+.community-event { padding: 16px 0; }
+.community a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 3px; }
+.community h1 { font-size: 26px; }
+.community h2 { font-size: 22px; }
+.community h3 { font-size: 18px; margin: 8px 0; }
+.community h4 { margin: 12px 0 6px; }
+.community-card { background: var(--color-bg-elevated); border: 1px solid var(--color-border); border-radius: 16px; padding: 16px; margin: 16px 0; }
+.community button { font: inherit; color: var(--color-accent); background: var(--color-accent-soft); border: 1px solid transparent; border-radius: 10px; padding: 10px 12px; min-height: 44px; cursor: pointer; }
+.community button:disabled { opacity: .5; cursor: default; }
+.community :is(button, input, select, textarea, a):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.community-form { display: grid; gap: 12px; margin: 12px 0; }
+.community-form fieldset { display: grid; gap: 14px; border: 0; margin: 0; padding: 0; min-width: 0; }
+.community label { display: grid; gap: 6px; }
+.community :is(input:not([type=checkbox]), select, textarea) { width: 100%; box-sizing: border-box; font: inherit; color: var(--color-text); background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: 10px; padding: 10px 12px; min-height: 44px; }
+.community textarea { min-height: 100px; resize: vertical; }
+.community .community-check { display: flex; align-items: flex-start; gap: 10px; }
+.community-check input { width: 20px; height: 20px; flex-shrink: 0; }
+.community-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+.community-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.community-hint { font-size: 13px; color: var(--color-text-secondary); }
+.community-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+.community [role=alert] { color: var(--color-danger); }
+.community-people { display: grid; gap: 10px; padding-left: 20px; }
+.community-admin { border-top: 1px solid var(--color-border); padding-top: 12px; margin-top: 12px; }
+.community dd { margin: 0 0 12px; }
+.community dt { font-size: 13px; color: var(--color-text-secondary); }
+.community summary { cursor: pointer; padding: 10px 0; }
+.community-entry { display: block; padding: 14px 16px; margin: 12px 0; border-radius: 12px; background: var(--color-accent-soft); color: var(--color-accent); }

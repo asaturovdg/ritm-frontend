@@ -1,3 +1,4 @@
+import EventCommunity from '../../community/EventCommunity.jsx';
 import { useParams, useLocation, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { CornerUpRight, Calendar, Clock, RussianRuble, MapPin, Users, Globe } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
@@ -411,6 +412,7 @@ export default function Event({ embeddedId, isPreview = false, status, previewDa
           </div>
         )}
 
+        {!isPreview && <EventCommunity event={event} />}
         <div className="event__extraInfo">
           <div className="event__tabs">
             {[
