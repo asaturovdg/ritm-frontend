@@ -18,7 +18,7 @@ function LoadedEditor({ kind, eventId, request, canWrite = true, onChanged }) {
   const { data: owner, loading, error, reload } = useResource(load, { refreshOnFocus: false });
   const [message, setMessage] = useState('');
   if (loading) return <p role="status">Загрузка своей формы…</p>;
-  if (error) return <div role="alert">{error.message} <button onClick={reload}>Повторить</button></div>;
+  if (error) return <div role="alert">{kind === 'profile' && error.status === 404 ? 'Профили участников пока недоступны. Попробуйте позже.' : error.message} <button onClick={reload}>Повторить</button></div>;
   return <section className="community-card">
     <div className="community-actions"><h3>{kind === 'profile' ? 'Мой профиль участника' : kind === 'experience' ? 'Мой рассказ' : 'Моя рекомендация'}</h3><button onClick={reload}>Обновить статус</button></div>
     {owner && <><p><strong>{STATE_LABELS[owner.state] || 'Без отправленной версии'}</strong></p><p>{owner.visible ? 'Одобренная публикация доступна читателям.' : 'Публикация скрыта от читателей.'}</p>{owner.reason && <p role="note">Причина: {owner.reason}</p>}</>}

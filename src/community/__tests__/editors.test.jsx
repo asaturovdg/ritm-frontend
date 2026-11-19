@@ -49,3 +49,23 @@ describe('несохранённая форма', () => {
     await waitFor(() => expect(screen.getByLabelText('Текст рекомендации')).toHaveValue('Ещё не сохранено'));
   });
 });
+
+describe('доступность редактора профиля', () => {
+  function mountProfile(request) {
+    render(<MemoryRouter><CommunityContext.Provider value={{ enabled: true, request, userId: 17 }}><ContentEditor kind="profile" /></CommunityContext.Provider></MemoryRouter>);
+  }
+  it('показывает форму первого профиля при пустом списке собственных записей', async () => {
+    mountProfile(async () => ({ items: [], total: 0 }));
+    expect(await screen.findByLabelText('Имя')).toHaveValue('');
+    expect(screen.getByRole('button', { name: 'Сохранить черновик' })).toBeEnabled();
+  });
+  it('объясняет недоступность API при 404, не выдавая её за отсутствие черновика', async () => {
+    const request = vi.fn(async () => { throw Object.assign(new Error('Not found'), { status: 404 }); });
+    mountProfile(request);
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Профили участников пока недоступны. Попробуйте позже.');
+    expect(alert).not.toHaveTextContent('Not found');
+    expect(screen.queryByLabelText('Имя')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Повторить' })).toBeEnabled();
+  });
+});
