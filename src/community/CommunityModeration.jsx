@@ -30,7 +30,7 @@ function Queue() {
   </section>;
 }
 function RevisionCard({ item, onDone }) {
-  const { request, userId } = useCommunity();
+  const { request } = useCommunity();
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -52,8 +52,7 @@ function RevisionCard({ item, onDone }) {
     <details><summary>Подсказка автопроверки</summary><pre className="community-text">{JSON.stringify(item.lexical_result, null, 2)}</pre></details>
     <Comparison item={item} />
     <label className="community-form">Причина возврата<textarea value={reason} maxLength={2000} onChange={e => setReason(e.target.value)} /></label>
-    {Number(userId) === Number(item.user_id) && <p>Собственную запись проверять нельзя.</p>}
-    <div className="community-actions"><button disabled={busy || Number(userId) === Number(item.user_id)} onClick={() => decide('approve')}>Одобрить</button><button disabled={busy || !reason.trim() || Number(userId) === Number(item.user_id)} onClick={() => decide('request_changes')}>Вернуть на правку</button></div>
+    <div className="community-actions"><button disabled={busy} onClick={() => decide('approve')}>Одобрить</button><button disabled={busy || !reason.trim()} onClick={() => decide('request_changes')}>Вернуть на правку</button></div>
     <Unpublish kind={item.kind} id={item.id} onDone={() => onDone('Публикация снята.')} />
     {error && <p role="alert">{error}</p>}
   </article>;
