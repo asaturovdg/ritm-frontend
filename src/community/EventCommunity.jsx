@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCommunity } from './context.js';
 import { useResource } from './useResource.js';
+import { Avatar, Pagination } from './CommunityUI.jsx';
+import { Users, RefreshCw } from 'lucide-react';
 import { eventWindow } from './rules.js';
 import ContentEditor from './ContentEditor.jsx';
 import PublicationList from './PublicationList.jsx';
@@ -34,9 +36,9 @@ function LoadedEventCommunity({ event }) {
     {!profile.loading && !profile.data && !profile.error && <p>Для своих публикаций нужен одобренный <Link to="/members/me/edit">профиль участника</Link>.</p>}
     <Companions key={`companions:${version}`} event={event} upcoming={window.upcoming} profile={profile.data} />
     <PublicationList key={`recommendations:${version}`} path={`/events/${event.id}/recommendations`} kind="recommendation" source="event" />
-    <ContentEditor kind="recommendation" eventId={event.id} canWrite={Boolean(profile.data) && window.upcoming} onChanged={changed} />
+    <ContentEditor collapsible kind="recommendation" eventId={event.id} canWrite={Boolean(profile.data) && window.upcoming} onChanged={changed} />
     <PublicationList key={`experiences:${version}`} path={`/events/${event.id}/experiences`} kind="experience" source="event" />
-    <ContentEditor kind="experience" eventId={event.id} canWrite={Boolean(profile.data) && window.ended} onChanged={changed} />
+    <ContentEditor collapsible kind="experience" eventId={event.id} canWrite={Boolean(profile.data) && window.ended} onChanged={changed} />
   </section>;
 }
 function Companions({ event, upcoming, profile }) {
@@ -61,14 +63,13 @@ function Companions({ event, upcoming, profile }) {
     } catch (e) { if (e.name !== 'AbortError') setError(e.message); }
     finally { lock.current = false; setBusy(false); reload(); }
   };
-  return <section className="community-card"><h3>Ищу компанию</h3><p>Связь — по опубликованному контакту. Это отдельное действие: «Пойду» и календарь не меняются.</p>
+  return <section className="community-card community-companions"><div className="community-section-heading"><h3><Users size={18} aria-hidden="true" />Ищу компанию</h3><button type="button" className="community-icon-button" disabled={loading || busy} onClick={reload} aria-label="Обновить участников"><RefreshCw size={15} /></button></div><p className="community-hint">Найдите коллег для общего похода. Отметка «Пойду» и календарь не меняются.</p>
     {!upcoming && <p>Поиск доступен только до начала события с известной датой.</p>}
     {!profile?.contact_url && <p>Для включения нужны опубликованные <Link to="/members/me/edit">профиль и контакт</Link>.</p>}
-    <label className="community-check"><input type="checkbox" checked={Boolean(upcoming && data?.state.enabled)} disabled={loading || busy || Boolean(loadError) || !data || (!data?.state.enabled && (!upcoming || !profile?.contact_url))} onChange={toggle} />Ищу компанию</label>
+    <label className="community-check community-company-toggle"><input type="checkbox" checked={Boolean(upcoming && data?.state.enabled)} disabled={loading || busy || Boolean(loadError) || !data || (!data?.state.enabled && (!upcoming || !profile?.contact_url))} onChange={toggle} />Ищу компанию</label>
     {loading && <p role="status">Обновляем поиск компании…</p>}{(loadError || error) && <p role="alert">{loadError?.message || error}</p>}
     {loadError && data && <p>Показано последнее подтверждённое состояние. Обновите данные перед изменением.</p>}
-    <button type="button" disabled={loading || busy} onClick={reload}>Обновить участников</button>
-    {data && <><p>Участников: {data.list.total}</p><ul className="community-people">{data.list.items.map(member => <li key={member.user_id}><Link to={`/members/${member.user_id}?source=companions`}>{member.name}</Link></li>)}</ul>
-      <div className="community-actions"><button disabled={!offset || busy} onClick={() => setOffset(v => Math.max(0, v - 20))}>Назад</button><button disabled={busy || offset + data.list.items.length >= data.list.total} onClick={() => setOffset(v => v + 20)}>Далее</button></div></>}
+    {data && <><p className="community-hint">Участников: {data.list.total}</p><ul className="community-people">{data.list.items.map(member => <li key={member.user_id}><Link className="community-author" to={`/members/${member.user_id}?source=companions`}><Avatar name={member.name} photoUrl={member.photo_url} small /><span>{member.name}</span></Link></li>)}</ul>
+      <Pagination offset={offset} total={data.list.total} count={data.list.items.length} onPage={setOffset} disabled={busy} /></>}
   </section>;
 }

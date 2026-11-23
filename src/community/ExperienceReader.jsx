@@ -5,7 +5,7 @@ import { startExperienceReading } from './analytics.js';
 export default function ExperienceReader({ publication, source }) {
   const { request, userId } = useCommunity();
   const [open, setOpen] = useState(false);
-  return <div><button type="button" aria-expanded={open} onClick={() => setOpen(value => !value)}>{open ? 'Свернуть рассказ' : 'Читать рассказ'}</button>{open && <ReadingText publication={publication} source={source} request={request} track={Number(userId) !== Number(publication.user_id)} />}</div>;
+  return <div className="community-experience"><button className="community-button--ghost" type="button" aria-expanded={open} onClick={() => setOpen(value => !value)}>{open ? 'Свернуть рассказ' : 'Читать рассказ'}</button>{open && <ReadingText publication={publication} source={source} request={request} track={Number(userId) !== Number(publication.user_id)} />}</div>;
 }
 function ReadingText({ publication, source, request, track }) {
   const element = useRef(null);

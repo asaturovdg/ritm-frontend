@@ -4,6 +4,9 @@ import { useCommunity } from './context.js';
 import { useResource } from './useResource.js';
 import { KIND_LABELS } from './rules.js';
 import Unpublish from './Unpublish.jsx';
+import { Avatar, Pagination } from './CommunityUI.jsx';
+import { describeContact } from './contact.js';
+import { RefreshCw, ShieldCheck, ChevronDown } from 'lucide-react';
 import './Community.css';
 
 export default function CommunityModeration() {
@@ -19,12 +22,11 @@ function Queue() {
   const load = useCallback(() => request(`/member-content/moderation-queue?limit=20&offset=${offset}`), [request, offset]);
   const { data, loading, error, reload } = useResource(load, { refreshOnFocus: false });
   const changed = message => { setNotice(message); if (offset) setOffset(0); else reload(); };
-  return <section className="community"><h2>Публикации участников</h2><p>Проверяйте вручную. Результат автопроверки — только подсказка.</p>
-    <button onClick={reload}>Обновить очередь</button>{notice && <p role="status">{notice}</p>}
+  return <section className="community"><div className="community-section-heading"><h2>Публикации участников</h2><button className="community-icon-button" aria-label="Обновить очередь" onClick={reload}><RefreshCw size={16} /></button></div><p className="community-hint">Ручная проверка профилей, рекомендаций и рассказов.</p>{notice && <p role="status">{notice}</p>}
     {loading ? <p role="status">Загрузка очереди…</p> : error ? <p role="alert">{error.message}</p> : <>
-      <p>Ожидают проверки: {data.total}</p>{!data.items.length && <p>Очередь пуста.</p>}
+      <p className="community-review-date">Ожидают проверки: {data.total}</p>{!data.items.length && <p>Очередь пуста.</p>}
       {data.items.map(item => <RevisionCard key={`${item.kind}:${item.revision_id}:${item.generation}`} item={item} onDone={changed} />)}
-      <div className="community-actions"><button disabled={!offset} onClick={() => setOffset(v => Math.max(0, v - 20))}>Назад</button><button disabled={offset + data.items.length >= data.total} onClick={() => setOffset(v => v + 20)}>Далее</button></div>
+      <Pagination offset={offset} total={data.total} count={data.items.length} onPage={setOffset} />
     </>}
     <AdminRemoval onDone={() => changed('Публикация снята.')} />
   </section>;
@@ -44,26 +46,43 @@ function RevisionCard({ item, onDone }) {
     } catch (e) { if (e.status === 409) onDone('Версия изменилась. Очередь обновлена; решение не повторялось.'); else if (e.name !== 'AbortError') setError(e.message); }
     finally { lock.current = false; setBusy(false); }
   };
-  return <article className="community-card"><h3>{KIND_LABELS[item.kind]} · запись №{item.id}</h3>
-    <p>Автор: user_id {item.user_id}. Версия №{item.revision_id}, generation {item.generation}</p>
-    <p>Отправлена: {new Date(item.submitted_at).toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })} МСК</p>
-    {item.event_id && <Link to={`/events/${item.event_id}`}>Событие №{item.event_id}</Link>}
-    <h4>Отправленная версия</h4><Payload payload={item.payload} />
-    <details><summary>Подсказка автопроверки</summary><pre className="community-text">{JSON.stringify(item.lexical_result, null, 2)}</pre></details>
+  return <article className="community-card community-review-card">
+    <div className="community-review-head"><span className="community-status">{KIND_LABELS[item.kind]}</span><span className="community-hint">На проверке</span></div>
+    <p className="community-review-date">{new Date(item.submitted_at).toLocaleString('ru-RU', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Moscow' })} МСК</p>
+    {item.event_id && <Link className="community-event-link" to={`/events/${item.event_id}`}>К мероприятию №{item.event_id}</Link>}
+    {item.kind !== 'profile' && <ReviewAuthor userId={item.user_id} />}
+    <Payload payload={item.payload} />
+    <details className="community-review-details"><summary><span className="community-summary-label"><ShieldCheck size={15} aria-hidden="true" />Подсказка автопроверки</span><ChevronDown size={15} aria-hidden="true" /></summary><p className="community-hint">Решение остаётся за вами.</p><pre>{JSON.stringify(item.lexical_result, null, 2)}</pre></details>
     <Comparison item={item} />
-    <label className="community-form">Причина возврата<textarea value={reason} maxLength={2000} onChange={e => setReason(e.target.value)} /></label>
-    <div className="community-actions"><button disabled={busy} onClick={() => decide('approve')}>Одобрить</button><button disabled={busy || !reason.trim()} onClick={() => decide('request_changes')}>Вернуть на правку</button></div>
+    <label className="community-review-feedback">Причина возврата<textarea value={reason} maxLength={2000} placeholder="Что автору нужно исправить?" onChange={e => setReason(e.target.value)} /></label>
+    <div className="community-save-actions"><button className="community-button--primary" disabled={busy} onClick={() => decide('approve')}>Одобрить</button><button className="community-button--secondary" disabled={busy || !reason.trim()} onClick={() => decide('request_changes')}>Вернуть на правку</button></div>
+    <details className="community-review-details"><summary>Служебная информация<ChevronDown size={15} aria-hidden="true" /></summary><p className="community-hint">Автор: user_id {item.user_id}. Запись №{item.id}, версия №{item.revision_id}, generation {item.generation}.</p></details>
     <Unpublish kind={item.kind} id={item.id} onDone={() => onDone('Публикация снята.')} />
     {error && <p role="alert">{error}</p>}
   </article>;
 }
 function Payload({ payload }) {
-  const labels = { name: 'Имя', about: 'О себе', company: 'Компания', position: 'Должность', interests: 'Интересы', contact_url: 'Контакт', contact_label: 'Подпись контакта', text: 'Текст', participated: 'Заявление об участии' };
-  return <dl>{Object.entries(labels).filter(([key]) => payload?.[key] !== undefined && payload[key] !== null).map(([key, label]) => <div key={key}><dt>{label}</dt><dd className="community-text">{typeof payload[key] === 'boolean' ? (payload[key] ? 'Да' : 'Нет') : payload[key]}</dd></div>)}{payload?.photo_url && <div><dt>Фото</dt><dd><img className="community-avatar" src={payload.photo_url} alt="Фото проверяемой версии" referrerPolicy="no-referrer" /></dd></div>}</dl>;
+  if (!payload) return null;
+  return <div className="community-review-payload">
+    {payload.name && <div className="community-identity"><Avatar name={payload.name} photoUrl={payload.photo_url} /><div><h3>{payload.name}</h3>{payload.position && <p>{payload.position}</p>}{payload.company && <p>{payload.company}</p>}</div></div>}
+    {payload.about && <p className="community-text">{payload.about}</p>}
+    {payload.interests && <div className="community-interest-chips">{payload.interests.split(',').map((interest, index) => interest.trim() && <span key={index}>{interest.trim()}</span>)}</div>}
+    {payload.contact_url && <div className="community-contact-preview"><span><strong>{payload.contact_label || describeContact(payload.contact_url).action}</strong><small>{describeContact(payload.contact_url).display}</small></span></div>}
+    {'text' in payload && <p className="community-text">{payload.text || 'Рекомендую это мероприятие'}</p>}
+    {payload.participated !== undefined && <p className="community-hint">{payload.participated ? 'Автор сообщил об участии.' : 'Участие не подтверждено автором.'}</p>}
+  </div>;
+}
+
+function ReviewAuthor({ userId }) {
+  const { request } = useCommunity();
+  const load = useCallback(() => request(`/member-profiles/${userId}`), [request, userId]);
+  const { data } = useResource(load);
+  const name = data?.name || `Участник №${userId}`;
+  return <div className="community-author"><Avatar name={name} photoUrl={data?.photo_url} small /><span>{name}</span></div>;
 }
 function Comparison({ item }) {
   const [open, setOpen] = useState(false);
-  return <div><button onClick={() => setOpen(v => !v)}>{open ? 'Скрыть сравнение' : 'Сравнить с опубликованным снимком'}</button>{open && <PublishedSnapshot item={item} />}</div>;
+  return <div className="community-review-comparison"><button className="community-button--ghost" onClick={() => setOpen(v => !v)}>{open ? 'Скрыть сравнение' : 'Сравнить с опубликованным снимком'}</button>{open && <PublishedSnapshot item={item} />}</div>;
 }
 function PublishedSnapshot({ item }) {
   const { request } = useCommunity();
@@ -88,5 +107,5 @@ function PublishedSnapshot({ item }) {
 function AdminRemoval({ onDone }) {
   const [kind, setKind] = useState('profile');
   const [id, setId] = useState('');
-  return <details><summary>Снять опубликованную запись по её ID</summary><p>Используйте ID записи из очереди модерации. ID пользователя и ID версии сюда не подходят.</p><label>Тип записи<select value={kind} onChange={e => setKind(e.target.value)}>{Object.entries(KIND_LABELS).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label><label>ID записи<input type="number" min="1" step="1" value={id} onChange={e => setId(e.target.value)} /></label>{/^[1-9]\d*$/.test(id) && <Unpublish key={`${kind}:${id}`} kind={kind} id={Number(id)} onDone={onDone} />}</details>;
+  return <details className="community-review-details"><summary>Снять опубликованную запись по её ID</summary><p>Используйте ID записи из очереди модерации. ID пользователя и ID версии сюда не подходят.</p><label>Тип записи<select value={kind} onChange={e => setKind(e.target.value)}>{Object.entries(KIND_LABELS).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label><label>ID записи<input type="number" min="1" step="1" value={id} onChange={e => setId(e.target.value)} /></label>{/^[1-9]\d*$/.test(id) && <Unpublish key={`${kind}:${id}`} kind={kind} id={Number(id)} onDone={onDone} />}</details>;
 }

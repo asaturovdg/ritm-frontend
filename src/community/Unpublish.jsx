@@ -8,11 +8,11 @@ export default function Unpublish({ kind, id, onDone }) {
   const [error, setError] = useState('');
   const lock = useRef(false);
   if (!isAdmin) return null;
-  return <div className="community-admin"><button type="button" onClick={() => setOpen(value => !value)}>Снять публикацию (администратор)</button>{open && <form className="community-form" onSubmit={async e => {
+  return <div className="community-admin"><button type="button" aria-expanded={open} onClick={() => setOpen(value => !value)}>Снять публикацию (администратор)</button>{open && <form className="community-form" onSubmit={async e => {
     e.preventDefault(); if (lock.current || !reason.trim()) return;
     lock.current = true; setBusy(true); setError('');
     try { await request(`/member-content/${kind}/${id}/unpublish`, { method: 'POST', body: { reason: reason.trim() } }); onDone(); }
     catch (error) { if (error.name !== 'AbortError') setError(error.message); }
     finally { lock.current = false; setBusy(false); }
-  }}><label>Причина снятия<textarea required maxLength={2000} value={reason} onChange={e => setReason(e.target.value)} /></label><button disabled={busy || !reason.trim()}>Подтвердить снятие</button>{error && <p role="alert">{error}</p>}</form>}</div>;
+  }}><label>Причина снятия<textarea required maxLength={2000} value={reason} onChange={e => setReason(e.target.value)} /></label><button className="community-button--danger" disabled={busy || !reason.trim()}>Подтвердить снятие</button>{error && <p role="alert">{error}</p>}</form>}</div>;
 }
